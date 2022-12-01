@@ -43,6 +43,7 @@
   "bugs": {
     "url": "https://github.com/tryVital/vital-react-native/issues"
   },
+  "author": "Vital",
   "homepage": "https://tryvital.io",
   "publishConfig": {
     "registry": "https://registry.npmjs.org/"
