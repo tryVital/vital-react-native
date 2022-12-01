@@ -14,9 +14,17 @@ const VitalCoreReactNative = NativeModules.VitalCoreReactNative
         get() {
           throw new Error(LINKING_ERROR);
         },
-      }
+      } 
     );
 
-export function multiply(a: number, b: number): Promise<number> {
-  return VitalCoreReactNative.multiply(a, b);
+export class VitalClient {
+  constructor() {}
+
+  setUserId(userId: string): Promise<void> {
+    return VitalCoreReactNative.setUserId(userId);
+  }
+
+  configurate(apiKey: string, environment: string, region: string, enableLogs: boolean): Promise<void> {
+    return VitalCoreReactNative.configurate(apiKey, environment, region, enableLogs);
+  }
 }
