@@ -1,0 +1,116 @@
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.useContrastText = useContrastText;
+
+var _tinycolor = _interopRequireDefault(require("tinycolor2"));
+
+var _useToken = require("./useToken");
+
+var _hooks = require("../core/color-mode/hooks");
+
+var _NativeBaseContext = require("../core/NativeBaseContext");
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function useContrastText(bg, color) {
+  const [contrastThreshold, trueDarkText, trueLightText, trueBg, trueColor] = (0, _useToken.useToken)('colors', ['contrastThreshold', 'darkText', 'lightText', bg, color !== null && color !== void 0 ? color : '']);
+  const suppressColorAccessibilityWarning = (0, _NativeBaseContext.useNativeBaseConfig)('NativeBaseConfigProvider').config.suppressColorAccessibilityWarning;
+  const [accessibleColors] = (0, _hooks.useAccessibleColors)();
+
+  if ((0, _NativeBaseContext.useNativeBaseConfig)('NativeBaseConfigProvider').disableContrastText) {
+    return trueColor;
+  }
+
+  if (typeof bg !== 'string') {
+    return;
+  }
+
+  const [bgThemeColorVariant, bgShade] = bg.split('.');
+  const textColor = !accessibleColors && bgThemeColorVariant && themeColorsThresholdShades[bgThemeColorVariant] ? getContrastThemeColor(bgThemeColorVariant, bgShade) : getAccessibleContrastColor(contrastThreshold, trueDarkText, trueLightText, trueBg, trueColor, bg, color, suppressColorAccessibilityWarning);
+  return textColor;
+}
+
+function getContrastThemeColor(bgThemeColorVariant, bgShade) {
+  const shadeThreshold = themeColorsThresholdShades[bgThemeColorVariant];
+
+  if (bgShade && shadeThreshold && (bgShade >= shadeThreshold && bgThemeColorVariant !== 'dark' || bgThemeColorVariant === 'dark' && bgShade < shadeThreshold)) {
+    return 'lightText';
+  }
+
+  return 'darkText';
+}
+
+function getAccessibleContrastColor(contrastThreshold, trueDarkText, trueLightText, trueBg, trueColor, bg, color, suppressColorAccessibilityWarning) {
+  if (typeof trueBg !== 'string') {
+    trueBg = bg;
+  }
+
+  let trueContrastColor;
+  let contrastColorToken;
+  const darkTextConstrast = getContrastRatio(trueBg, trueDarkText);
+  const lightTextConstrast = getContrastRatio(trueBg, trueLightText);
+
+  if (darkTextConstrast >= contrastThreshold || darkTextConstrast > lightTextConstrast) {
+    trueContrastColor = trueDarkText;
+    contrastColorToken = 'darkText';
+  } else {
+    trueContrastColor = trueLightText;
+    contrastColorToken = 'lightText';
+  }
+
+  if (process.env.NODE_ENV !== 'production') {
+    const contrast = getContrastRatio(trueBg, trueColor ? trueColor : trueContrastColor);
+
+    if (contrast < 3 && !suppressColorAccessibilityWarning) {
+      console.warn(["NativeBase: The contrast ratio of ".concat(contrast, ":1 for ").concat(color ? color : contrastColorToken, " on ").concat(bg), 'falls below the WCAG recommended absolute minimum contrast ratio of 3:1.', 'https://www.w3.org/TR/2008/REC-WCAG20-20081211/#visual-audio-contrast-contrast'].join('\n'));
+    }
+  }
+
+  return contrastColorToken;
+}
+
+function getContrastRatio(foreground, background) {
+  const lumA = (0, _tinycolor.default)(foreground).getLuminance();
+  const lumB = (0, _tinycolor.default)(background).getLuminance();
+  return (Math.max(lumA, lumB) + 0.05) / (Math.min(lumA, lumB) + 0.05);
+}
+
+const themeColorsThresholdShades = {
+  rose: 500,
+  pink: 500,
+  fuchsia: 800,
+  purple: 700,
+  violet: 600,
+  indigo: 500,
+  blue: 400,
+  lightBlue: 400,
+  cyan: 300,
+  teal: 300,
+  emerald: 300,
+  tertiary: 300,
+  green: 400,
+  lime: 600,
+  yellow: 800,
+  amber: 500,
+  orange: 500,
+  red: 500,
+  warmGray: 500,
+  trueGray: 500,
+  gray: 500,
+  coolGray: 500,
+  blueGray: 500,
+  dark: 500,
+  danger: 500,
+  error: 500,
+  success: 400,
+  warning: 500,
+  muted: 500,
+  primary: 500,
+  info: 400,
+  secondary: 500,
+  light: 500
+};
+//# sourceMappingURL=useContrastText.js.map

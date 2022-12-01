@@ -1,0 +1,1 @@
+{"version":3,"sources":["wrap.ts"],"names":["Wrap"],"mappings":";;;;;;AAAA;AACO,MAAMA,IAAI,GAAG,EAAb","sourcesContent":["// Wrap\nexport const Wrap = {};\n"]}

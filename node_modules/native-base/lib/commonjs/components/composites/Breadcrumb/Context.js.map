@@ -1,0 +1,1 @@
+{"version":3,"sources":["Context.ts"],"names":["BreadcrumbItemContext"],"mappings":";;;;;;;AAAA;;AACO,MAAMA,qBAAqB,gBAAG,0BAAc,EAAd,CAA9B","sourcesContent":["import { createContext } from 'react';\nexport const BreadcrumbItemContext = createContext({});\n"]}

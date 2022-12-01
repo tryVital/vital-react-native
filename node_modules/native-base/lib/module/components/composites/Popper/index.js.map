@@ -1,0 +1,1 @@
+{"version":3,"sources":["index.ts"],"names":["Popper"],"mappings":"AAAA,SAASA,MAAT,QAAuB,UAAvB","sourcesContent":["export { Popper } from './Popper';\n"]}

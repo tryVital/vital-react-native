@@ -1,0 +1,1 @@
+{"version":3,"sources":["Minus.tsx"],"names":["MinusIcon","viewBox","d"],"mappings":";;;;;;;AAAA;;AAEO,MAAMA,SAAS,GAAG,4BAAW;AAClCC,EAAAA,OAAO,EAAE,WADyB;AAElCC,EAAAA,CAAC,EAAE;AAF+B,CAAX,CAAlB","sourcesContent":["import { createIcon } from '../createIcon';\n\nexport const MinusIcon = createIcon({\n  viewBox: '0 0 24 24',\n  d: 'M22 10.5H2V13H22V10.5Z',\n});\n"]}

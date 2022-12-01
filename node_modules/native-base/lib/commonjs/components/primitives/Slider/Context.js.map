@@ -1,0 +1,1 @@
+{"version":3,"sources":["Context.ts"],"names":["SliderContext","React","createContext"],"mappings":";;;;;;;AAAA;;;;AAEO,MAAMA,aAAa,gBAAGC,eAAMC,aAAN,CAAyB,EAAzB,CAAtB","sourcesContent":["import React from 'react';\n\nexport const SliderContext = React.createContext<any>({});\n"]}

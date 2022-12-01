@@ -1,0 +1,1 @@
+{"version":3,"sources":["index.tsx"],"names":["default","Icon","createIcon"],"mappings":"AAAA,SAASA,OAAO,IAAIC,IAApB,QAAgC,QAAhC;AACA,SAASC,UAAT,QAA2B,cAA3B","sourcesContent":["export { default as Icon } from './Icon';\nexport { createIcon } from './createIcon';\nexport type { IIconProps } from './types';\n"]}

@@ -1,0 +1,1 @@
+{"version":3,"sources":["view.ts"],"names":["baseStyle","defaultProps"],"mappings":";;;;;;AAAA,MAAMA,SAAS,GAAG,EAAlB;AACA,MAAMC,YAAY,GAAG,EAArB;eACe;AACbD,EAAAA,SADa;AAEbC,EAAAA;AAFa,C","sourcesContent":["const baseStyle = {};\nconst defaultProps = {};\nexport default {\n  baseStyle,\n  defaultProps,\n};\n"]}

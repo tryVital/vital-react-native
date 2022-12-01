@@ -1,0 +1,1 @@
+{"version":3,"sources":["nbSvg.tsx"],"names":["Svg","G","Path","Polygon","Line","Circle","Rect"],"mappings":"AAAA,SAASA,GAAT,EAAcC,CAAd,EAAiBC,IAAjB,EAAuBC,OAAvB,EAAgCC,IAAhC,EAAsCC,MAAtC,EAA8CC,IAA9C,QAA0D,kBAA1D","sourcesContent":["export { Svg, G, Path, Polygon, Line, Circle, Rect } from 'react-native-svg';\n"]}

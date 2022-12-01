@@ -1,0 +1,1 @@
+{"version":3,"sources":["index.tsx"],"names":["VStack","Column"],"mappings":"AAAA,SAASA,MAAT,QAAuB,UAAvB;AACA,SAASA,MAAM,IAAIC,MAAnB","sourcesContent":["import { VStack } from '../Stack';\nexport { VStack as Column };\n"]}

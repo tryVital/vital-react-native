@@ -1,0 +1,1 @@
+{"version":3,"sources":["index.ts"],"names":["useResponsiveQuery","ResponsiveQueryProvider"],"mappings":"AAAA,SAASA,kBAAT,QAAmC,sBAAnC;AACA,SAASC,uBAAT,QAAwC,2BAAxC;AACA,cAAc,SAAd","sourcesContent":["export { useResponsiveQuery } from './useResponsiveQuery';\nexport { ResponsiveQueryProvider } from './ResponsiveQueryProvider';\nexport * from './types';\n"]}
