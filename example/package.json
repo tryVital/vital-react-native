@@ -16,17 +16,20 @@
     "@react-navigation/stack": "^6.0.16",
     "@tryvital/vital-node": "^2.1.1",
     "easy-peasy": "^5.2.0",
+    "native-base": "^3.4.23",
     "pod-install": "^0.1.38",
     "react": "18.1.0",
     "react-native": "0.70.6",
     "react-native-paper": "5.0.0-rc.10",
-    "react-native-safe-area-context": "^4.4.1",
+    "react-native-safe-area-context": "3.3.2",
     "react-native-screens": "^3.18.2",
+    "react-native-svg": "12.1.1",
     "react-native-url-polyfill": "^1.3.0",
     "react-native-vector-icons": "^9.2.0",
     "react-native-vital-core": "file:../packages/vital-core",
     "react-native-vital-devices": "file:../packages/vital-devices",
-    "react-native-vital-health": "file:../packages/vital-health"
+    "react-native-vital-health": "file:../packages/vital-health",
+    "react-native-webview": "^11.25.0"
   },
   "devDependencies": {
     "@babel/core": "^7.12.9",
