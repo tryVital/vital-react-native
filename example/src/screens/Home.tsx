@@ -2,8 +2,16 @@ import {ClientFacingUser} from '@tryvital/vital-node/client/models/user_models';
 import {FlatList, Linking, StyleSheet, Text, View} from 'react-native';
 import React, {useEffect, useState} from 'react';
 import {vitalClient} from '../App';
-import {HStack, IconButton, Box} from 'native-base';
+import {
+  HStack,
+  IconButton,
+  AlertDialog,
+  useDisclose,
+  Box,
+  Button,
+} from 'native-base';
 import Icon from 'react-native-vector-icons/Feather';
+import Dialog from 'react-native-dialog';
 
 const DeleteIcon = () => (
   <IconButton icon={<Icon name={'trash'} size={16} />} />
@@ -19,6 +27,9 @@ const LinkIcon = ({onPress, isLoading}) => (
 const HomeScreen = ({navigation}) => {
   const [getUsers, setUsers] = useState(Array<ClientFacingUser>());
   const [isLoading, setLoading] = useState(false);
+  const [isOpen, setIsOpen] = useState(false);
+  const [clientUserId, setClientUserId] = useState('');
+  const textInput = React.useRef(null);
 
   useEffect(() => {
     vitalClient.User.getAll()
@@ -28,17 +39,21 @@ const HomeScreen = ({navigation}) => {
       .catch(err => {
         console.log(err);
       });
-      navigation.setOptions({
-        headerRight: () => (
-          <IconButton
-            p={0}
-            variant="ghost"
-            onPress={() => console.log('IM WORKING')}
-            icon={<Icon size={20} name="plus-circle" color="rgb(64,64,64)" />}
-          />
-        ),
-      });
+    navigation.setOptions({
+      headerRight: () => (
+        <IconButton
+          p={0}
+          variant="ghost"
+          onPress={() => setIsOpen(true)}
+          icon={<Icon size={20} name="plus-circle" color="rgb(64,64,64)" />}
+        />
+      ),
+    });
   }, [navigation]);
+  const handleCreateUser = () => {
+    console.log(textInput?.current.value);
+    setIsOpen(false);
+  };
 
   const handlePressOnConnectDevice = async (user_id: string) => {
     setLoading(true);
@@ -76,6 +91,17 @@ const HomeScreen = ({navigation}) => {
           </HStack>
         )}
       />
+      <View>
+        <Dialog.Container visible={isOpen}>
+          <Dialog.Title>Create User</Dialog.Title>
+          <Dialog.Description>
+            Enter Client User ID below to create a new user.
+          </Dialog.Description>
+          <Dialog.Input textInputRef={textInput}></Dialog.Input>
+          <Dialog.Button label="Cancel" onPress={() => setIsOpen(false)} />
+          <Dialog.Button label="Create User" onPress={handleCreateUser} />
+        </Dialog.Container>
+      </View>
     </View>
   );
 };
