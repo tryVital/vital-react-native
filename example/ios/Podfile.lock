@@ -369,6 +369,14 @@ PODS:
     - React-logger (= 0.70.6)
     - React-perflogger (= 0.70.6)
   - SocketRocket (0.6.0)
+  - vital-core-react-native (0.1.0):
+    - React-Core
+    - VitalCore (~> 0.7.5)
+  - vital-devices-react-native (0.1.0):
+    - React-Core
+  - vital-health-react-native (0.1.0):
+    - React-Core
+  - VitalCore (0.7.5)
   - Yoga (1.14.0)
   - YogaKit (1.18.1):
     - Yoga (~> 1.14)
@@ -432,6 +440,9 @@ DEPENDENCIES:
   - React-RCTVibration (from `../node_modules/react-native/Libraries/Vibration`)
   - React-runtimeexecutor (from `../node_modules/react-native/ReactCommon/runtimeexecutor`)
   - ReactCommon/turbomodule/core (from `../node_modules/react-native/ReactCommon`)
+  - vital-core-react-native (from `../node_modules/react-native-vital-core`)
+  - vital-devices-react-native (from `../node_modules/react-native-vital-devices`)
+  - vital-health-react-native (from `../node_modules/react-native-vital-health`)
   - Yoga (from `../node_modules/react-native/ReactCommon/yoga`)
 
 SPEC REPOS:
@@ -450,6 +461,7 @@ SPEC REPOS:
     - libevent
     - OpenSSL-Universal
     - SocketRocket
+    - VitalCore
     - YogaKit
 
 EXTERNAL SOURCES:
@@ -519,6 +531,12 @@ EXTERNAL SOURCES:
     :path: "../node_modules/react-native/ReactCommon/runtimeexecutor"
   ReactCommon:
     :path: "../node_modules/react-native/ReactCommon"
+  vital-core-react-native:
+    :path: "../node_modules/react-native-vital-core"
+  vital-devices-react-native:
+    :path: "../node_modules/react-native-vital-devices"
+  vital-health-react-native:
+    :path: "../node_modules/react-native-vital-health"
   Yoga:
     :path: "../node_modules/react-native/ReactCommon/yoga"
 
@@ -570,9 +588,13 @@ SPEC CHECKSUMS:
   React-runtimeexecutor: 15437b576139df27635400de0599d9844f1ab817
   ReactCommon: 349be31adeecffc7986a0de875d7fb0dcf4e251c
   SocketRocket: fccef3f9c5cedea1353a9ef6ada904fde10d6608
+  vital-core-react-native: 009ccf5827f8bf8eec9d4b6da8f3ad78f470831d
+  vital-devices-react-native: 230fd90301d5911be8d286dd446a260f8d7b8dfe
+  vital-health-react-native: 6c54ad2b0a89d1b1756c44b5c3454b363d91f946
+  VitalCore: a9f1490db1e5490d3aa166c4fc67fdead78103bf
   Yoga: 99caf8d5ab45e9d637ee6e0174ec16fbbb01bcfc
   YogaKit: f782866e155069a2cca2517aafea43200b01fd5a
 
-PODFILE CHECKSUM: e9774a3132cc2072013fd07ec1ade8155544b823
+PODFILE CHECKSUM: e288e8da6fa4ced430327949d1330cdcbaad1b52
 
 COCOAPODS: 1.11.3
