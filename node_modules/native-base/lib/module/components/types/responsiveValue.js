@@ -1,2 +1,0 @@
-
-//# sourceMappingURL=responsiveValue.js.map

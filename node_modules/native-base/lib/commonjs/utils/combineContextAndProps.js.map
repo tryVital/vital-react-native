@@ -1,1 +1,0 @@
-{"version":3,"sources":["combineContextAndProps.ts"],"names":["combineContextAndProps","context","props"],"mappings":";;;;;;;AAAO,MAAMA,sBAAsB,GAAG,CAACC,OAAD,EAAeC,KAAf,KAA8B;AAClE,SAAO,EACL,GAAGD,OADE;AAEL,OAAGC;AAFE,GAAP;AAID,CALM","sourcesContent":["export const combineContextAndProps = (context: any, props: any) => {\n  return {\n    ...context,\n    ...props,\n  };\n};\n"]}

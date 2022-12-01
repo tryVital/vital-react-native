@@ -1,1 +1,0 @@
-{"version":3,"sources":["index.ts"],"names":[],"mappings":";;;;;;;;;;;;;;;;;;;;;;AAAA;;AACA;;AACA;;AAAA;AAAA;AAAA;AAAA;AAAA;AAAA;AAAA;AAAA;AAAA;AAAA;AAAA","sourcesContent":["export { useResponsiveQuery } from './useResponsiveQuery';\nexport { ResponsiveQueryProvider } from './ResponsiveQueryProvider';\nexport * from './types';\n"]}

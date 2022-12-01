@@ -1,1 +1,0 @@
-{"version":3,"sources":["mock.ts"],"names":[],"mappings":"AAAA","sourcesContent":["// jest.mock('react-native/Libraries/Animated/src/NativeAnimatedHelper');\n"]}

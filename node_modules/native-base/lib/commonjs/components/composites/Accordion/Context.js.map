@@ -1,1 +1,0 @@
-{"version":3,"sources":["Context.ts"],"names":["AccordionContext","AccordionItemContext"],"mappings":";;;;;;;AAAA;;AAEO,MAAMA,gBAAgB,gBAAG,0BAAc,EAAd,CAAzB;;AAEA,MAAMC,oBAAoB,gBAAG,0BAAc,EAAd,CAA7B","sourcesContent":["import { createContext } from 'react';\n\nexport const AccordionContext = createContext({});\n\nexport const AccordionItemContext = createContext({});\n"]}

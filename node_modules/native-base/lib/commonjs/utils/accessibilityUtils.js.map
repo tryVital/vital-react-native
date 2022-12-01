@@ -1,1 +1,0 @@
-{"version":3,"sources":["accessibilityUtils.ts"],"names":["ariaAttr","condition","undefined"],"mappings":";;;;;;;AAAO,MAAMA,QAAQ,GAAIC,SAAD,IACtBA,SAAS,GAAG,IAAH,GAAUC,SADd","sourcesContent":["export const ariaAttr = (condition: boolean | undefined) =>\n  condition ? true : undefined;\n"]}

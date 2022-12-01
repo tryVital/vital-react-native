@@ -1,1 +1,0 @@
-{"version":3,"sources":["Context.ts"],"names":["TabsContext"],"mappings":";;;;;;;AAAA;;AAEO,MAAMA,WAAW,gBAAG,0BAAc,EAAd,CAApB","sourcesContent":["import { createContext } from 'react';\n\nexport const TabsContext = createContext({});\n"]}

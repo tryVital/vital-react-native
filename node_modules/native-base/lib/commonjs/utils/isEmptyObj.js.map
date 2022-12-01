@@ -1,1 +1,0 @@
-{"version":3,"sources":["isEmptyObj.ts"],"names":["isEmptyObj","obj","_x"],"mappings":";;;;;;;AAAO,SAASA,UAAT,CAAoBC,GAApB,EAAiC;AACtC,OAAK,IAAIC,EAAT,IAAeD,GAAf,EAAoB;AAClB,WAAO,KAAP;AACD;;AACD,SAAO,IAAP;AACD","sourcesContent":["export function isEmptyObj(obj: Object) {\n  for (var _x in obj) {\n    return false;\n  }\n  return true;\n}\n"]}

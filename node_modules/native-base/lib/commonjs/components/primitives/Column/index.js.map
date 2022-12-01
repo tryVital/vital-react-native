@@ -1,1 +1,0 @@
-{"version":3,"sources":["index.tsx"],"names":[],"mappings":";;;;;;;;;;;;AAAA","sourcesContent":["import { VStack } from '../Stack';\nexport { VStack as Column };\n"]}

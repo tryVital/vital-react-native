@@ -1,1 +1,0 @@
-{"version":3,"sources":["Context.ts"],"names":["createContext","AlertContext"],"mappings":"AAAA,SAASA,aAAT,QAA8B,OAA9B;AACA,OAAO,MAAMC,YAAY,gBAAGD,aAAa,CAAC,EAAD,CAAlC","sourcesContent":["import { createContext } from 'react';\nexport const AlertContext = createContext({});\n"]}

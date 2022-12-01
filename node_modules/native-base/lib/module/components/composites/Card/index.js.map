@@ -1,1 +1,0 @@
-{"version":3,"sources":["index.tsx"],"names":["default","Card"],"mappings":"AAAA,SAASA,OAAO,IAAIC,IAApB,QAAgC,QAAhC;AAGA,eAAeA,IAAf","sourcesContent":["import { default as Card } from './Card';\nimport type { ICardProps } from './types';\n\nexport default Card;\nexport type { ICardProps };\n"]}

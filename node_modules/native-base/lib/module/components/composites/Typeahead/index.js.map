@@ -1,1 +1,0 @@
-{"version":3,"sources":["index.ts"],"names":["useTypeahead","Typeahead"],"mappings":"AAAA,SAASA,YAAT,QAA6B,gBAA7B;AACA,SAASC,SAAT,QAA0B,aAA1B","sourcesContent":["export { useTypeahead } from './useTypeahead';\nexport { Typeahead } from './Typeahead';\n"]}

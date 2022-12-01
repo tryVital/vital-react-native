@@ -1,1 +1,0 @@
-{"version":3,"sources":["index.tsx"],"names":["StatusBar"],"mappings":"AAAA,SAASA,SAAT,QAA0B,aAA1B","sourcesContent":["export { StatusBar } from './StatusBar';\n"]}

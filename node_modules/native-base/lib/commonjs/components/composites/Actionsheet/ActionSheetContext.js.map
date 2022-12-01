@@ -1,1 +1,0 @@
-{"version":3,"sources":["ActionSheetContext.ts"],"names":["ActionSheetContext","React","createContext","hideDragIndicator"],"mappings":";;;;;;;AAAA;;;;AAEO,MAAMA,kBAAkB,gBAAGC,eAAMC,aAAN,CAAoB;AACpDC,EAAAA,iBAAiB,EAAE;AADiC,CAApB,CAA3B","sourcesContent":["import React from 'react';\n\nexport const ActionSheetContext = React.createContext({\n  hideDragIndicator: false,\n});\n"]}

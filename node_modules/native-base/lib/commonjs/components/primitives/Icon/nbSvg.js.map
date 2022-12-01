@@ -1,1 +1,0 @@
-{"version":3,"sources":["nbSvg.tsx"],"names":[],"mappings":";;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;AAAA","sourcesContent":["export { Svg, G, Path, Polygon, Line, Circle, Rect } from 'react-native-svg';\n"]}

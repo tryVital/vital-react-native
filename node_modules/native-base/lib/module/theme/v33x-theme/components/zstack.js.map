@@ -1,1 +1,0 @@
-{"version":3,"sources":["zstack.ts"],"names":["baseStyle","defaultProps"],"mappings":"AAAA,MAAMA,SAAS,GAAG,EAAlB;AACA,MAAMC,YAAY,GAAG,EAArB;AACA,eAAe;AACbD,EAAAA,SADa;AAEbC,EAAAA;AAFa,CAAf","sourcesContent":["const baseStyle = {};\nconst defaultProps = {};\nexport default {\n  baseStyle,\n  defaultProps,\n};\n"]}

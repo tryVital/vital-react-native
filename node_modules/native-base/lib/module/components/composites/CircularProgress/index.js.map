@@ -1,1 +1,0 @@
-{"version":3,"sources":["index.tsx"],"names":["default","CircularProgress"],"mappings":"AAAA,SAASA,OAAO,IAAIC,gBAApB,QAA4C,oBAA5C;AACA,eAAeA,gBAAf","sourcesContent":["import { default as CircularProgress } from './CircularProgress';\nexport default CircularProgress;\n"]}

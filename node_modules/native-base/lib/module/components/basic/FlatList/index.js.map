@@ -1,1 +1,0 @@
-{"version":3,"sources":["index.tsx"],"names":["FlatList"],"mappings":"AAAA,SAASA,QAAT,QAAyB,YAAzB","sourcesContent":["export { FlatList } from './FlatList';\nexport type { IFlatListProps } from './types';\n"]}

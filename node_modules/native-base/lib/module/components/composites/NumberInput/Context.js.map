@@ -1,1 +1,0 @@
-{"version":3,"sources":["Context.ts"],"names":["createContext","NumberInputContext"],"mappings":"AAAA,SAASA,aAAT,QAA8B,OAA9B;AAEA,OAAO,MAAMC,kBAAkB,gBAAGD,aAAa,CAAC,EAAD,CAAxC","sourcesContent":["import { createContext } from 'react';\n\nexport const NumberInputContext = createContext({});\n"]}

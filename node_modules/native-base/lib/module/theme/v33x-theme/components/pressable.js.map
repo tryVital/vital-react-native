@@ -1,1 +1,0 @@
-{"version":3,"sources":["pressable.ts"],"names":["baseStyle","defaultProps"],"mappings":"AAAA,eAAe;AACbA,EAAAA,SAAS,EAAE,EADE;AAEbC,EAAAA,YAAY,EAAE;AAFD,CAAf","sourcesContent":["export default {\n  baseStyle: {},\n  defaultProps: {},\n};\n"]}

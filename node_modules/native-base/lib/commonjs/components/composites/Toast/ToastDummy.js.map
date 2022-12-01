@@ -1,1 +1,0 @@
-{"version":3,"sources":["ToastDummy.tsx"],"names":["Toast","props"],"mappings":";;;;;;;AAAA;AAGO,MAAMA,KAAK,GAAIC,KAAD,IAAwB;AAC3CA,EAAAA,KAAK,CADsC,CACpC;AACR,CAFM","sourcesContent":["// This component is just exported for the documentation purpose\nimport type { IToastProps } from './types';\n\nexport const Toast = (props: IToastProps) => {\n  props; // no-op\n};\n"]}
