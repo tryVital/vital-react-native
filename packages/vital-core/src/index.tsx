@@ -1,4 +1,6 @@
 import { NativeModules, Platform } from 'react-native';
+import { VitalClient as NodeVitalClient } from '@tryvital/vital-node';
+import type { ClientConfig } from '@tryvital/vital-node/dist/lib/models';
 
 const LINKING_ERROR =
   `The package 'react-native-vital-core' doesn't seem to be linked. Make sure: \n\n` +
@@ -6,7 +8,7 @@ const LINKING_ERROR =
   '- You rebuilt the app after installing the package\n' +
   '- You are not using Expo Go\n';
 
-const VitalCore = NativeModules.VitalCore
+export const VitalCore = NativeModules.VitalCore
   ? NativeModules.VitalCore
   : new Proxy(
       {},
@@ -17,6 +19,8 @@ const VitalCore = NativeModules.VitalCore
       }
     );
 
-export function vitalCoreMultiply(a: number, b: number): Promise<number> {
-  return VitalCore.multiply(a, b);
+export class VitalClient extends NodeVitalClient {
+  constructor(config: ClientConfig) {
+    super(config);
+  }
 }
