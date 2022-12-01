@@ -15,7 +15,6 @@
     "@react-navigation/native-stack": "^6.9.4",
     "@react-navigation/stack": "^6.0.16",
     "@tryvital/vital-node": "^2.1.1",
-    "easy-peasy": "^5.2.0",
     "native-base": "^3.4.23",
     "pod-install": "^0.1.38",
     "react": "18.1.0",

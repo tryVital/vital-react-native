@@ -1,20 +1,13 @@
 import {ClientFacingUser} from '@tryvital/vital-node/client/models/user_models';
-import {FlatList, Linking, StyleSheet, Text, View} from 'react-native';
+import {FlatList, StyleSheet, Text, TextInput, View} from 'react-native';
 import React, {useEffect, useState} from 'react';
 import {vitalClient} from '../App';
-import {
-  HStack,
-  IconButton,
-  AlertDialog,
-  useDisclose,
-  Box,
-  Button,
-} from 'native-base';
+import {HStack, IconButton, Box} from 'native-base';
 import Icon from 'react-native-vector-icons/Feather';
 import Dialog from 'react-native-dialog';
 
-const DeleteIcon = () => (
-  <IconButton icon={<Icon name={'trash'} size={16} />} />
+const DeleteIcon = ({onPress}) => (
+  <IconButton onPress={onPress} icon={<Icon name={'trash'} size={16} />} />
 );
 
 const LinkIcon = ({onPress, isLoading}) => (
@@ -28,8 +21,7 @@ const HomeScreen = ({navigation}) => {
   const [getUsers, setUsers] = useState(Array<ClientFacingUser>());
   const [isLoading, setLoading] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
-  const [clientUserId, setClientUserId] = useState('');
-  const textInput = React.useRef(null);
+  const textInput = React.useRef<TextInput>(null);
 
   useEffect(() => {
     vitalClient.User.getAll()
@@ -44,15 +36,30 @@ const HomeScreen = ({navigation}) => {
         <IconButton
           p={0}
           variant="ghost"
-          onPress={() => setIsOpen(true)}
+          onPress={() => {
+            setIsOpen(true);
+          }}
           icon={<Icon size={20} name="plus-circle" color="rgb(64,64,64)" />}
         />
       ),
     });
   }, [navigation]);
   const handleCreateUser = () => {
-    console.log(textInput?.current.value);
     setIsOpen(false);
+    const newUserClientId = textInput.current!.state as string;
+    setLoading(true);
+    vitalClient.User.create(newUserClientId)
+      .then(_ => {
+        return vitalClient.User.getAll();
+      })
+      .then(users => {
+        setUsers(users.users);
+        setLoading(false);
+      })
+      .catch(err => {
+        console.log(err);
+        setLoading(false);
+      });
   };
 
   const handlePressOnConnectDevice = async (user_id: string) => {
@@ -65,6 +72,22 @@ const HomeScreen = ({navigation}) => {
     });
     console.log(user_id);
     setLoading(false);
+  };
+
+  const handlePressDeleteUser = async (user_id: string) => {
+    setLoading(true);
+    vitalClient.User.delete(user_id)
+      .then(_ => {
+        return vitalClient.User.getAll();
+      })
+      .then(users => {
+        setUsers(users.users);
+        setLoading(false);
+      })
+      .catch(err => {
+        console.log(err);
+        setLoading(false);
+      });
   };
 
   return (
@@ -86,7 +109,7 @@ const HomeScreen = ({navigation}) => {
                 onPress={() => handlePressOnConnectDevice(item.user_id)}
                 isLoading={isLoading}
               />
-              <DeleteIcon />
+              <DeleteIcon onPress={() => handlePressDeleteUser(item.user_id)} />
             </HStack>
           </HStack>
         )}
@@ -97,7 +120,10 @@ const HomeScreen = ({navigation}) => {
           <Dialog.Description>
             Enter Client User ID below to create a new user.
           </Dialog.Description>
-          <Dialog.Input textInputRef={textInput}></Dialog.Input>
+          <Dialog.Input
+            textInputRef={textInput}
+            onChangeText={text => (textInput.current!.state = text)}
+          />
           <Dialog.Button label="Cancel" onPress={() => setIsOpen(false)} />
           <Dialog.Button label="Create User" onPress={handleCreateUser} />
         </Dialog.Container>

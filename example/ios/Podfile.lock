@@ -306,6 +306,7 @@ PODS:
     - React-Core
   - react-native-vital-core (0.1.0):
     - React-Core
+    - VitalCore (~> 0.7.5)
   - react-native-vital-devices (0.1.0):
     - React-Core
   - react-native-vital-health (0.1.0):
@@ -386,6 +387,7 @@ PODS:
   - RNVectorIcons (9.2.0):
     - React-Core
   - SocketRocket (0.6.0)
+  - VitalCore (0.7.5)
   - Yoga (1.14.0)
   - YogaKit (1.18.1):
     - Yoga (~> 1.14)
@@ -475,6 +477,7 @@ SPEC REPOS:
     - libevent
     - OpenSSL-Universal
     - SocketRocket
+    - VitalCore
     - YogaKit
 
 EXTERNAL SOURCES:
@@ -599,9 +602,9 @@ SPEC CHECKSUMS:
   React-jsinspector: 60769e5a0a6d4b32294a2456077f59d0266f9a8b
   React-logger: 1623c216abaa88974afce404dc8f479406bbc3a0
   react-native-safe-area-context: 584dc04881deb49474363f3be89e4ca0e854c057
-  react-native-vital-core: c7eacddb202a292ce0dc714e080f52ea579bb02a
-  react-native-vital-devices: 8542cb4c4d6abe0b5ae22796442c9d8eff6c5f06
-  react-native-vital-health: 0128485b05d88147a18f00a2205bf08af6b40dc2
+  react-native-vital-core: d5b7f3d533a24504fda2123a8e6ef3c87975044b
+  react-native-vital-devices: bff8485298c99d4174891c4619c1f478940ddd1e
+  react-native-vital-health: 96260ea422f2f5dd03261a49deedd307a019443f
   react-native-webview: a71da846ed2e9085440e1d6659c04e285528834b
   React-perflogger: 8c79399b0500a30ee8152d0f9f11beae7fc36595
   React-RCTActionSheet: 7316773acabb374642b926c19aef1c115df5c466
@@ -619,9 +622,10 @@ SPEC CHECKSUMS:
   RNSVG: 551acb6562324b1d52a4e0758f7ca0ec234e278f
   RNVectorIcons: fcc2f6cb32f5735b586e66d14103a74ce6ad61f8
   SocketRocket: fccef3f9c5cedea1353a9ef6ada904fde10d6608
+  VitalCore: a9f1490db1e5490d3aa166c4fc67fdead78103bf
   Yoga: 99caf8d5ab45e9d637ee6e0174ec16fbbb01bcfc
   YogaKit: f782866e155069a2cca2517aafea43200b01fd5a
 
-PODFILE CHECKSUM: e9774a3132cc2072013fd07ec1ade8155544b823
+PODFILE CHECKSUM: e288e8da6fa4ced430327949d1330cdcbaad1b52
 
 COCOAPODS: 1.11.3
