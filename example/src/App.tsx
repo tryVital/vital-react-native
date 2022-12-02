@@ -9,7 +9,6 @@
  */
 
 import React from 'react';
-import {StyleSheet} from 'react-native';
 
 import {VitalCore} from 'vital-core-react-native';
 import {VitalHealth, VitalResource} from 'vital-health-react-native';
@@ -22,33 +21,40 @@ import {ConnectSource} from './screens/ConnectScreen';
 import {IconButton} from 'native-base';
 import Icon from 'react-native-vector-icons/Feather';
 
-const Stack = createNativeStackNavigator();
 
-export const vitalClient = new VitalClient({
-  environment: 'sandbox',
-  api_key: 'sk_eu_S5LdXTS_CAtdFrkX9OYsiVq_jGHaIXtZyBPbBtPkzhA',
-  region: 'eu',
+export const VITAL_API_KEY = 'sk_us_WUg9-SYEgl7Un20ppSpLTYi5hru_GPXurFlY7lHUfwA';
+export const VITAL_ENVIRONMENT = 'sandbox';
+export const VITAL_REGION = 'us';
+
+// Configuring Vital client SDK for making API calls on client side
+// Recommended way is to do this on the backend but for the sake of an example
+// You can do it on the client side
+export const vitalNodeClient = new VitalClient({
+  environment: VITAL_ENVIRONMENT,
+  api_key: VITAL_API_KEY,
+  region: VITAL_REGION,
 });
 
-VitalCore.configure(
-  'sk_us_WUg9-SYEgl7Un20ppSpLTYi5hru_GPXurFlY7lHUfwA',
-  'sandbox',
-  'us',
-  true,
-).then(() => {
-  VitalCore.setUserId('db5f35cd-e328-41e4-b545-ec97386468e2').then(() => {
-    VitalHealth.configure(true, 30, true).then(() => {
-      console.log('VitalHealth configured');
-      VitalHealth.hasAskedForPermission(VitalResource.Steps)
-        .then(() => {
-          console.log('VitalHealth asked for resources');
-        })
-        .catch(error => {
-          console.log(error);
-        });
+// Configuring Vital healthkit core SDK you can do this at any point in your app
+// recommendation is to do it on the app start
+VitalCore.configure(VITAL_ENVIRONMENT, VITAL_API_KEY, VITAL_REGION, true).then(
+  () => {
+    VitalCore.setUserId('db5f35cd-e328-41e4-b545-ec97386468e2').then(() => {
+      VitalHealth.configure(true, 30, true).then(() => {
+        console.log('VitalHealth configured');
+        VitalHealth.hasAskedForPermission(VitalResource.Steps)
+          .then(() => {
+            console.log('VitalHealth asked for resources');
+          })
+          .catch(error => {
+            console.log(error);
+          });
+      });
     });
-  });
-});
+  },
+);
+
+const Stack = createNativeStackNavigator();
 
 const App = () => {
   return (
@@ -91,6 +97,5 @@ const App = () => {
     </NativeBaseProvider>
   );
 };
-
 
 export default App;

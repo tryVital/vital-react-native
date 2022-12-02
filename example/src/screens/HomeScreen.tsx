@@ -1,7 +1,7 @@
 import {ClientFacingUser} from '@tryvital/vital-node/client/models/user_models';
 import {FlatList, StyleSheet, Text, TextInput, View} from 'react-native';
 import React, {useEffect, useState} from 'react';
-import {vitalClient} from '../App';
+import {vitalNodeClient, VITAL_ENVIRONMENT, VITAL_REGION} from '../App';
 import {HStack, IconButton, Box} from 'native-base';
 import Icon from 'react-native-vector-icons/Feather';
 import Dialog from 'react-native-dialog';
@@ -17,6 +17,7 @@ const LinkIcon = ({onPress, isLoading}) => (
     disabled={isLoading}
   />
 );
+
 const HomeScreen = ({navigation}) => {
   const [getUsers, setUsers] = useState(Array<ClientFacingUser>());
   const [isLoading, setLoading] = useState(false);
@@ -24,10 +25,9 @@ const HomeScreen = ({navigation}) => {
   const textInput = React.useRef<TextInput>(null);
 
   useEffect(() => {
-    vitalClient.User.getAll()
+    vitalNodeClient.User.getAll()
       .then(users => {
         setUsers(users.users);
-        console.log({users});
       })
       .catch(err => {
         console.log({err});
@@ -45,14 +45,14 @@ const HomeScreen = ({navigation}) => {
       ),
     });
   }, [navigation]);
-  
+
   const handleCreateUser = () => {
     setIsOpen(false);
     const newUserClientId = textInput.current!.state as string;
     setLoading(true);
-    vitalClient.User.create(newUserClientId)
+    vitalNodeClient.User.create(newUserClientId)
       .then(_ => {
-        return vitalClient.User.getAll();
+        return vitalNodeClient.User.getAll();
       })
       .then(users => {
         setUsers(users.users);
@@ -66,11 +66,11 @@ const HomeScreen = ({navigation}) => {
 
   const handlePressOnConnectDevice = async (user_id: string) => {
     setLoading(true);
-    const token = await vitalClient.Link.create(user_id);
+    const token = await vitalNodeClient.Link.create(user_id);
     navigation.navigate('ConnectSource', {
       linkToken: token.link_token,
-      environment: 'sandbox',
-      region: 'eu',
+      environment: VITAL_ENVIRONMENT,
+      region: VITAL_REGION,
     });
     console.log(user_id);
     setLoading(false);
@@ -78,9 +78,9 @@ const HomeScreen = ({navigation}) => {
 
   const handlePressDeleteUser = async (user_id: string) => {
     setLoading(true);
-    vitalClient.User.delete(user_id)
+    vitalNodeClient.User.delete(user_id)
       .then(_ => {
-        return vitalClient.User.getAll();
+        return vitalNodeClient.User.getAll();
       })
       .then(users => {
         setUsers(users.users);
