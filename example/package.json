@@ -15,8 +15,19 @@
     ]
   },
   "dependencies": {
+    "@react-navigation/native": "^6.0.16",
+    "@react-navigation/native-stack": "^6.9.4",
+    "@tryvital/vital-node": "^2.1.1",
+    "native-base": "^3.4.23",
     "react": "18.1.0",
     "react-native": "0.70.6",
+    "react-native-dialog": "^9.3.0",
+    "react-native-safe-area-context": "3.3.2",
+    "react-native-screens": "^3.18.2",
+    "react-native-svg": "12.1.1",
+    "react-native-url-polyfill": "^1.3.0",
+    "react-native-vector-icons": "^9.2.0",
+    "react-native-webview": "^11.25.0",
     "vital-core-react-native": "file:../packages/vital-core-react-native",
     "vital-devices-react-native": "file:../packages/vital-devices-react-native",
     "vital-health-react-native": "file:../packages/vital-health-react-native"
