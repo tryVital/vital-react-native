@@ -8,135 +8,94 @@
  * @format
  */
 
-import React, {type PropsWithChildren} from 'react';
-import {
-  SafeAreaView,
-  ScrollView,
-  StatusBar,
-  StyleSheet,
-  Text,
-  useColorScheme,
-  View,
-} from 'react-native';
+import React from 'react';
 
-import {
-  Colors,
-  DebugInstructions,
-  Header,
-  LearnMoreLinks,
-  ReloadInstructions,
-} from 'react-native/Libraries/NewAppScreen';
 import {VitalCore} from 'vital-core-react-native';
 import {VitalHealth, VitalResource} from 'vital-health-react-native';
+import {NavigationContainer} from '@react-navigation/native';
+import {NativeBaseProvider} from 'native-base';
+import HomeScreen from './screens/HomeScreen';
+import {createNativeStackNavigator} from '@react-navigation/native-stack';
+import {VitalClient} from '@tryvital/vital-node';
+import {ConnectSource} from './screens/ConnectScreen';
+import {IconButton} from 'native-base';
+import Icon from 'react-native-vector-icons/Feather';
 
-VitalCore.configure(
-  'sk_us_WUg9-SYEgl7Un20ppSpLTYi5hru_GPXurFlY7lHUfwA',
-  'sandbox',
-  'us',
-  true,
-).then(() => {
-  VitalCore.setUserId('db5f35cd-e328-41e4-b545-ec97386468e2').then(() => {
-    VitalHealth.configure(true, 30, true).then(() => {
-      console.log('VitalHealth configured');
-      VitalHealth.hasAskedForPermission(VitalResource.Steps)
-        .then(() => {
-          console.log('VitalHealth asked for resources');
-        })
-        .catch(error => {
-          console.log(error);
-        });
-    });
-  });
+
+export const VITAL_API_KEY = 'sk_us_WUg9-SYEgl7Un20ppSpLTYi5hru_GPXurFlY7lHUfwA';
+export const VITAL_ENVIRONMENT = 'sandbox';
+export const VITAL_REGION = 'us';
+
+// Configuring Vital client SDK for making API calls on client side
+// Recommended way is to do this on the backend but for the sake of an example
+// You can do it on the client side
+export const vitalNodeClient = new VitalClient({
+  environment: VITAL_ENVIRONMENT,
+  api_key: VITAL_API_KEY,
+  region: VITAL_REGION,
 });
 
-const Section: React.FC<
-  PropsWithChildren<{
-    title: string;
-  }>
-> = ({children, title}) => {
-  const isDarkMode = useColorScheme() === 'dark';
-  return (
-    <View style={styles.sectionContainer}>
-      <Text
-        style={[
-          styles.sectionTitle,
-          {
-            color: isDarkMode ? Colors.white : Colors.black,
-          },
-        ]}>
-        {title}
-      </Text>
-      <Text
-        style={[
-          styles.sectionDescription,
-          {
-            color: isDarkMode ? Colors.light : Colors.dark,
-          },
-        ]}>
-        {children}
-      </Text>
-    </View>
-  );
-};
+// Configuring Vital healthkit core SDK you can do this at any point in your app
+// recommendation is to do it on the app start
+VitalCore.configure(VITAL_ENVIRONMENT, VITAL_API_KEY, VITAL_REGION, true).then(
+  () => {
+    VitalCore.setUserId('db5f35cd-e328-41e4-b545-ec97386468e2').then(() => {
+      VitalHealth.configure(true, 30, true).then(() => {
+        console.log('VitalHealth configured');
+        VitalHealth.hasAskedForPermission(VitalResource.Steps)
+          .then(() => {
+            console.log('VitalHealth asked for resources');
+          })
+          .catch(error => {
+            console.log(error);
+          });
+      });
+    });
+  },
+);
+
+const Stack = createNativeStackNavigator();
 
 const App = () => {
-  const isDarkMode = useColorScheme() === 'dark';
-
-  const backgroundStyle = {
-    backgroundColor: isDarkMode ? Colors.darker : Colors.lighter,
-  };
-
   return (
-    <SafeAreaView style={backgroundStyle}>
-      <StatusBar
-        barStyle={isDarkMode ? 'light-content' : 'dark-content'}
-        backgroundColor={backgroundStyle.backgroundColor}
-      />
-      <ScrollView
-        contentInsetAdjustmentBehavior="automatic"
-        style={backgroundStyle}>
-        <Header />
-        <View
-          style={{
-            backgroundColor: isDarkMode ? Colors.black : Colors.white,
-          }}>
-          <Section title="Step One">
-            Edit <Text style={styles.highlight}>App.tsx</Text> to change this
-            screen and then come back to see your edits.
-          </Section>
-          <Section title="See Your Changes2">
-            <ReloadInstructions />
-          </Section>
-          <Section title="Debug">
-            <DebugInstructions />
-          </Section>
-          <Section title="Learn More">
-            Read the docs to discover what to do next:
-          </Section>
-          <LearnMoreLinks />
-        </View>
-      </ScrollView>
-    </SafeAreaView>
+    <NativeBaseProvider>
+      <NavigationContainer>
+        <Stack.Navigator initialRouteName="Home">
+          <Stack.Group>
+            <Stack.Screen
+              name="Home"
+              component={HomeScreen}
+              options={() => ({
+                title: 'Users',
+                headerRight: () => (
+                  <IconButton
+                    p={0}
+                    variant="ghost"
+                    onPress={console.log}
+                    icon={
+                      <Icon
+                        size={20}
+                        name="plus-circle"
+                        color="rgb(64,64,64)"
+                      />
+                    }
+                  />
+                ),
+              })}
+            />
+          </Stack.Group>
+
+          <Stack.Group screenOptions={{presentation: 'modal'}}>
+            <Stack.Screen
+              name="ConnectSource"
+              component={ConnectSource}
+              options={{headerShown: false}}
+            />
+          </Stack.Group>
+        </Stack.Navigator>
+      </NavigationContainer>
+    </NativeBaseProvider>
   );
 };
-
-const styles = StyleSheet.create({
-  sectionContainer: {
-    marginTop: 32,
-    paddingHorizontal: 24,
-  },
-  sectionTitle: {
-    fontSize: 24,
-    fontWeight: '600',
-  },
-  sectionDescription: {
-    marginTop: 8,
-    fontSize: 18,
-    fontWeight: '400',
-  },
-  highlight: {
-    fontWeight: '700',
-  },
-});
 
 export default App;
