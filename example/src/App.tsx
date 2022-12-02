@@ -27,7 +27,7 @@ import {
   ReloadInstructions,
 } from 'react-native/Libraries/NewAppScreen';
 import {VitalCore} from 'vital-core-react-native';
-import {VitalHealth} from 'vital-health-react-native';
+import {VitalHealth, VitalResource} from 'vital-health-react-native';
 
 VitalCore.configure(
   'sk_us_WUg9-SYEgl7Un20ppSpLTYi5hru_GPXurFlY7lHUfwA',
@@ -38,7 +38,7 @@ VitalCore.configure(
   VitalCore.setUserId('db5f35cd-e328-41e4-b545-ec97386468e2').then(() => {
     VitalHealth.configure(true, 30, true).then(() => {
       console.log('VitalHealth configured');
-      VitalHealth.askForResources(['steps'])
+      VitalHealth.hasAskedForPermission(VitalResource.Steps)
         .then(() => {
           console.log('VitalHealth asked for resources');
         })

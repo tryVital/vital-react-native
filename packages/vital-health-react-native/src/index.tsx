@@ -22,15 +22,33 @@ export class VitalHealth {
       return VitalHealthReactNative.configure(backgroundDeliveryEnabled, numberOfDaysToBackFill, enableLogs);
   }
 
-  static askForResources(resources: string[]): Promise<void> {
+  static askForResources(resources: VitalResource[]): Promise<void> {
     return VitalHealthReactNative.askForResources(resources);
   }
 
-  static hasPermissionForResource(resource: string): Promise<boolean> {
-    return VitalHealthReactNative.hasPermissionForResource(resource);
+  static hasAskedForPermission(resource: VitalResource): Promise<boolean> {
+    return VitalHealthReactNative.hasAskedForPermission(resource);
+  }
+
+  static syncData(resources: VitalResource[]): Promise<void> {
+    return VitalHealthReactNative.syncData(resources);
   }
 
   static cleanUp(): Promise<void> {
     return VitalHealthReactNative.cleanUp();
   }
+}
+
+export enum VitalResource {
+  Profile = "profile",
+  Body = "body",
+  Workout = "workout",
+  Activity = "activity",
+  Sleep = "sleep",
+  Glucose = "glucose",
+  BloodPressure = "bloodPressure",
+  HeartRate = "heartRate",
+  Steps = "steps",
+  ActiveEnergyBurned = "activeEnergyBurned",
+  BasalEnergyBurned = "basalEnergyBurned",
 }

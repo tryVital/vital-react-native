@@ -50,19 +50,35 @@ class VitalHealthReactNative: NSObject {
     }
   }
 
+  @objc(syncData:resolver:rejecter:)
+  func syncData(
+    _ resources: [String],
+    resolve: RCTPromiseResolveBlock,
+    reject: RCTPromiseRejectBlock
+  ) {
+    do {
+      try VitalHealthKitClient.shared.syncData(for: resources.map { try mapResourceToVitalResource($0) })
+      resolve(())
+    } catch VitalError.UnsupportedResource(let errorMessage) {
+      reject("UnsupportedResource", errorMessage, nil)
+    } catch {
+      reject(nil, "Unknown error", nil)
+    }
+  }
+
   @objc(cleanUp:rejecter:)
-  func cleanUp(resolve: @escaping RCTPromiseResolveBlock, reject:RCTPromiseRejectBlock) {
+  func cleanUp(_ resolve: @escaping RCTPromiseResolveBlock, reject:RCTPromiseRejectBlock) {
     Task {
       await VitalHealthKitClient.shared.cleanUp()
       resolve(())
     }
   }
 
-  @objc(hasAskedForPermission:resolve:rejecter:)
+  @objc(hasAskedForPermission:resolver:rejecter:)
   func hasAskedForPermission(_ resource: String, resolve: RCTPromiseResolveBlock, reject: RCTPromiseRejectBlock) {
     do {
-      let resource = try mapResourceToVitalResource(resource)
-      let value: Bool = VitalHealthKitClient.shared.hasAskedForPermission(resource: resource)
+      let vitalResource = try mapResourceToVitalResource(resource)
+      let value: Bool = VitalHealthKitClient.shared.hasAskedForPermission(resource: vitalResource)
       resolve(value)
     } catch VitalError.UnsupportedResource(let errorMessage) {
         reject("UnsupportedResource", errorMessage, nil)
