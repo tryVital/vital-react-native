@@ -6853,6 +6853,12 @@ vary@~1.1.2:
 "vital-core-react-native@file:../packages/vital-core-react-native":
   version "0.1.0"
 
+"vital-devices-react-native@file:../packages/vital-devices-react-native":
+  version "0.1.0"
+
+"vital-health-react-native@file:../packages/vital-health-react-native":
+  version "0.1.0"
+
 vlq@^1.0.0:
   version "1.0.1"
   resolved "https://registry.yarnpkg.com/vlq/-/vlq-1.0.1.tgz#c003f6e7c0b4c1edd623fd6ee50bbc0d6a1de468"
