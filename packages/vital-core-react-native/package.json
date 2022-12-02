@@ -1,5 +1,5 @@
 {
-  "name": "vital-core-react-native",
+  "name": "@tryvital/vital-core-react-native",
   "version": "0.1.0",
   "description": "test",
   "main": "lib/commonjs/index",
@@ -68,7 +68,7 @@
     "prettier": "^2.0.5",
     "react": "18.1.0",
     "react-native": "0.70.6",
-    "react-native-builder-bob": "^0.20.1",
+    "react-native-builder-bob": "^0.20.2",
     "release-it": "^15.0.0",
     "typescript": "^4.5.2"
   },
