@@ -14,17 +14,29 @@ const VitalCoreReactNative = NativeModules.VitalCoreReactNative
         get() {
           throw new Error(LINKING_ERROR);
         },
-      } 
+      }
     );
 
-export class VitalClient {
-  constructor() {}
-
-  setUserId(userId: string): Promise<void> {
-    return VitalCoreReactNative.setUserId(userId);
-  }
-
-  configurate(apiKey: string, environment: string, region: string, enableLogs: boolean): Promise<void> {
-    return VitalCoreReactNative.configurate(apiKey, environment, region, enableLogs);
-  }
+export function setUserId(userId: string): Promise<void> {
+  console.log(VitalCoreReactNative);
+  console.log(userId);
+  return VitalCoreReactNative.setUpId(userId);
 }
+
+// export class VitalClient {
+//   constructor() {}
+//
+//   configurate(
+//     apiKey: string,
+//     environment: string,
+//     region: string,
+//     enableLogs: boolean
+//   ): Promise<void> {
+//     return VitalCoreReactNative.configurate(
+//       apiKey,
+//       environment,
+//       region,
+//       enableLogs
+//     );
+//   }
+// }

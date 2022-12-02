@@ -17,9 +17,7 @@
   "dependencies": {
     "react": "18.1.0",
     "react-native": "0.70.6",
-    "react-native-vital-core": "file:../packages/vital-core-react-native",
-    "react-native-vital-devices": "file:../packages/vital-devices-react-native",
-    "react-native-vital-health": "file:../packages/vital-health-react-native"
+    "vital-core-react-native": "file:../packages/vital-core-react-native"
   },
   "devDependencies": {
     "@babel/core": "^7.12.9",

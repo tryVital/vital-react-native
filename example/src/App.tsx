@@ -10,14 +10,13 @@
 
 import React, {type PropsWithChildren} from 'react';
 import {
-    Animated,
-    SafeAreaView,
-    ScrollView,
-    StatusBar,
-    StyleSheet,
-    Text,
-    useColorScheme,
-    View,
+  SafeAreaView,
+  ScrollView,
+  StatusBar,
+  StyleSheet,
+  Text,
+  useColorScheme,
+  View,
 } from 'react-native';
 
 import {
@@ -27,9 +26,11 @@ import {
   LearnMoreLinks,
   ReloadInstructions,
 } from 'react-native/Libraries/NewAppScreen';
-import {vitalCoreMultiply} from "react-native-vital-core";
+import {setUserId} from 'vital-core-react-native';
 
-vitalCoreMultiply(3, 7).then(r => console.log(r));
+setUserId('c3d4cfba-5222-46a7-92fd-1694edcdd8cd').then(() => {
+  console.log('setUserId');
+});
 
 const Section: React.FC<
   PropsWithChildren<{

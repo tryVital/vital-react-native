@@ -2,7 +2,7 @@
 
 @interface RCT_EXTERN_MODULE(VitalCoreReactNative, NSObject)
 
-RCT_EXTERN_METHOD(setUpId:(NSString *)
+RCT_EXTERN_METHOD(setUpId:(NSString *) userId
                   withResolver:(RCTPromiseResolveBlock)resolve
                   withRejecter:(RCTPromiseRejectBlock)reject)
 
