@@ -22,9 +22,10 @@ import {IconButton} from 'native-base';
 import Icon from 'react-native-vector-icons/Feather';
 
 
-export const VITAL_API_KEY = 'sk_us_WUg9-SYEgl7Un20ppSpLTYi5hru_GPXurFlY7lHUfwA';
+export const VITAL_API_KEY = 'YOUR API KEY HERE';
 export const VITAL_ENVIRONMENT = 'sandbox';
 export const VITAL_REGION = 'us';
+export const VITAL_USER_ID = "db5f35cd-e328-41e4-b545-ec97386468e2"
 
 // Configuring Vital client SDK for making API calls on client side
 // Recommended way is to do this on the backend but for the sake of an example
@@ -36,12 +37,11 @@ export const vitalNodeClient = new VitalClient({
 });
 
 // Configuring Vital healthkit core SDK you can do this at any point in your app
-// recommendation is to do it on the app start
+// You can then set the user_id and data will start pushing up to the servers.
 VitalCore.configure(VITAL_ENVIRONMENT, VITAL_API_KEY, VITAL_REGION, true).then(
   () => {
-    VitalCore.setUserId('db5f35cd-e328-41e4-b545-ec97386468e2').then(() => {
+    VitalCore.setUserId(VITAL_USER_ID).then(() => {
       VitalHealth.configure(true, 30, true).then(() => {
-        console.log('VitalHealth configured');
         VitalHealth.hasAskedForPermission(VitalResource.Steps)
           .then(() => {
             console.log('VitalHealth asked for resources');
