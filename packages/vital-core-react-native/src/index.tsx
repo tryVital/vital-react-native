@@ -17,10 +17,17 @@ const VitalCoreReactNative = NativeModules.VitalCoreReactNative
       }
     );
 
-export function setUserId(userId: string): Promise<void> {
-  return VitalCoreReactNative.setUserId(userId);
-}
 
-export function configurate(apiKey: string, environment: string, region: string, enableLogs: boolean): Promise<void> {
-  return VitalCoreReactNative.configurate(apiKey, environment, region, enableLogs);
+export class VitalCore {
+  static setUserId(userId: string): Promise<void> {
+    return VitalCoreReactNative.setUserId(userId);
+  }
+  
+  static configure(apiKey: string, environment: string, region: string, enableLogs: boolean): Promise<void> {
+    return VitalCoreReactNative.configure(apiKey, environment, region, enableLogs);
+  }
+
+  static cleanUp(): Promise<void> {
+    return VitalCoreReactNative.cleanUp();
+  }
 }

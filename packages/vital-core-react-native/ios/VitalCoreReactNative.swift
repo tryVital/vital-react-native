@@ -12,13 +12,12 @@ class VitalCoreReactNative: NSObject {
 
     Task {
       await VitalClient.setUserId(userId)
-      print("userId")
       resolve(())
     }
   }
 
-  @objc(configurate:environment:region:enableLogs:resolver:rejecter:)
-  func configurate(
+  @objc(configure:environment:region:enableLogs:resolver:rejecter:)
+  func configure(
     _ apiKey: String,
     environment: String,
     region: String,
@@ -44,7 +43,14 @@ class VitalCoreReactNative: NSObject {
 
     Task {
       await VitalClient.configure(apiKey: apiKey, environment: env, configuration: .init(logsEnable: enableLogs))
-      print("configurate")
+      resolve(())
+    }
+  }
+
+  @objc(cleanUp:rejecter:)
+  func cleanUp(resolve:@escaping RCTPromiseResolveBlock, reject:RCTPromiseRejectBlock) {
+    Task {
+      await VitalClient.shared.cleanUp()
       resolve(())
     }
   }

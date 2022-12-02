@@ -26,10 +26,27 @@ import {
   LearnMoreLinks,
   ReloadInstructions,
 } from 'react-native/Libraries/NewAppScreen';
-import {setUserId} from 'vital-core-react-native';
+import {VitalCore} from 'vital-core-react-native';
+import {VitalHealth} from 'vital-health-react-native';
 
-setUserId('c3d4cfba-5222-46a7-92fd-1694edcdd8cd').then(() => {
-  console.log('setUserId');
+VitalCore.configure(
+  'sk_us_WUg9-SYEgl7Un20ppSpLTYi5hru_GPXurFlY7lHUfwA',
+  'sandbox',
+  'us',
+  true,
+).then(() => {
+  VitalCore.setUserId('db5f35cd-e328-41e4-b545-ec97386468e2').then(() => {
+    VitalHealth.configure(true, 30, true).then(() => {
+      console.log('VitalHealth configured');
+      VitalHealth.askForResources(['steps'])
+        .then(() => {
+          console.log('VitalHealth asked for resources');
+        })
+        .catch(error => {
+          console.log(error);
+        });
+    });
+  });
 });
 
 const Section: React.FC<

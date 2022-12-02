@@ -51,5 +51,9 @@
 	</array>
 	<key>UIViewControllerBasedStatusBarAppearance</key>
 	<false/>
+	<key>NSHealthClinicalHealthRecordsShareUsageDescription</key>
+	<string>Vital demo requires access to health</string>
+	<key>NSHealthShareUsageDescription</key>
+	<string>We access your data to share it with your provider.</string>
 </dict>
 </plist>

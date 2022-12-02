@@ -17,6 +17,20 @@ const VitalHealthReactNative = NativeModules.VitalHealthReactNative
       }
     );
 
-export function multiply(a: number, b: number): Promise<number> {
-  return VitalHealthReactNative.multiply(a, b);
+export class VitalHealth {
+   static configure(backgroundDeliveryEnabled: boolean, numberOfDaysToBackFill: number, enableLogs: boolean): Promise<void> {
+      return VitalHealthReactNative.configure(backgroundDeliveryEnabled, numberOfDaysToBackFill, enableLogs);
+  }
+
+  static askForResources(resources: string[]): Promise<void> {
+    return VitalHealthReactNative.askForResources(resources);
+  }
+
+  static hasPermissionForResource(resource: string): Promise<boolean> {
+    return VitalHealthReactNative.hasPermissionForResource(resource);
+  }
+
+  static cleanUp(): Promise<void> {
+    return VitalHealthReactNative.cleanUp();
+  }
 }
