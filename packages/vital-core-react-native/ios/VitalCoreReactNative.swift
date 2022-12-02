@@ -3,10 +3,8 @@ import VitalCore
 @objc(VitalCoreReactNative)
 class VitalCoreReactNative: NSObject {
 
-  @objc(setUpId:withResolver:withRejecter:)
-  func setUpId(userId: String, resolve: RCTPromiseResolveBlock, reject:RCTPromiseRejectBlock) {
-    print("setUpId called")
-
+  @objc(setUserId:resolver:rejecter:)
+  func setUserId(_ userId: String, resolve: @escaping RCTPromiseResolveBlock, reject:RCTPromiseRejectBlock) {
     guard let userId = UUID.init(uuidString: userId) else {
       reject(nil, "userId must be an UUID", nil)
       return
@@ -14,13 +12,14 @@ class VitalCoreReactNative: NSObject {
 
     Task {
       await VitalClient.setUserId(userId)
+      print("userId")
       resolve(())
     }
   }
 
-  @objc(configurate:withEnvironment:withRegion:withEnableLogs:withResolver:withRejecter:)
+  @objc(configurate:environment:region:enableLogs:resolver:rejecter:)
   func configurate(
-    apiKey: String,
+    _ apiKey: String,
     environment: String,
     region: String,
     enableLogs: Bool,
@@ -45,6 +44,7 @@ class VitalCoreReactNative: NSObject {
 
     Task {
       await VitalClient.configure(apiKey: apiKey, environment: env, configuration: .init(logsEnable: enableLogs))
+      print("configurate")
       resolve(())
     }
   }
