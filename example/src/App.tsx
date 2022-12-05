@@ -11,7 +11,7 @@
 import React from 'react';
 
 import {VitalCore} from 'vital-core-react-native';
-import {VitalHealth, VitalResource} from 'vital-health-react-native';
+import {VitalHealth, VitalResource, status} from 'vital-health-react-native';
 import {NavigationContainer} from '@react-navigation/native';
 import {NativeBaseProvider} from 'native-base';
 import HomeScreen from './screens/HomeScreen';
@@ -21,11 +21,12 @@ import {ConnectSource} from './screens/ConnectScreen';
 import {IconButton} from 'native-base';
 import Icon from 'react-native-vector-icons/Feather';
 
+import {NativeEventEmitter} from 'react-native';
 
 export const VITAL_API_KEY = 'YOUR API KEY HERE';
 export const VITAL_ENVIRONMENT = 'sandbox';
 export const VITAL_REGION = 'us';
-export const VITAL_USER_ID = "db5f35cd-e328-41e4-b545-ec97386468e2"
+export const VITAL_USER_ID = 'db5f35cd-e328-41e4-b545-ec97386468e2';
 
 // Configuring Vital client SDK for making API calls on client side
 // Recommended way is to do this on the backend but for the sake of an example
@@ -53,6 +54,10 @@ VitalCore.configure(VITAL_ENVIRONMENT, VITAL_API_KEY, VITAL_REGION, true).then(
     });
   },
 );
+
+status.addListener('status', (data: any) => {
+  console.log('status');
+});
 
 const Stack = createNativeStackNavigator();
 

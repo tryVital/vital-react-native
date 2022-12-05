@@ -1,4 +1,4 @@
-import { NativeModules, Platform } from 'react-native';
+import { NativeModules, NativeEventEmitter, Platform } from 'react-native';
 
 const LINKING_ERROR =
   `The package 'vital-health-react-native' doesn't seem to be linked. Make sure: \n\n` +
@@ -17,9 +17,19 @@ const VitalHealthReactNative = NativeModules.VitalHealthReactNative
       }
     );
 
+const status = new NativeEventEmitter(VitalHealthReactNative);
+
+const onSessionConnect = (event) => {
+  console.log(event);
+}
+
+const subscription = status.addListener('status', onSessionConnect);
+
 export class VitalHealth {
-   static configure(backgroundDeliveryEnabled: boolean, numberOfDaysToBackFill: number, enableLogs: boolean): Promise<void> {
-      return VitalHealthReactNative.configure(backgroundDeliveryEnabled, numberOfDaysToBackFill, enableLogs);
+  // status = VitalHealthReactNative;
+
+  static configure(backgroundDeliveryEnabled: boolean, numberOfDaysToBackFill: number, enableLogs: boolean): Promise<void> {
+    return VitalHealthReactNative.configure(backgroundDeliveryEnabled, numberOfDaysToBackFill, enableLogs);
   }
 
   static askForResources(resources: VitalResource[]): Promise<void> {

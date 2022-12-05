@@ -1,8 +1,29 @@
 import VitalCore
 import VitalHealthKit
+import Combine
 
 @objc(VitalHealthReactNative)
-class VitalHealthReactNative: NSObject {
+class VitalHealthReactNative: RCTEventEmitter {
+
+  public static var status: RCTEventEmitter!
+  public var cancellable: AnyCancellable?
+
+  deinit {
+    cancellable?.cancel()
+  }
+
+  override init() {
+    super.init()
+    VitalHealthReactNative.status = self
+
+    cancellable = VitalHealthKitClient.shared.status.sink { status in
+      self.sendEvent(withName: "status", body: "lel")
+    }
+  }
+
+  override func supportedEvents() -> [String]! {
+    return ["status"]
+  }
 
   @objc(configure:numberOfDaysToBackFill:enableLogs:resolver:rejecter:)
   func configure(
