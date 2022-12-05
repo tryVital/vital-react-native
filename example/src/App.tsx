@@ -39,7 +39,7 @@ export const vitalNodeClient = new VitalClient({
 
 // Configuring Vital healthkit core SDK you can do this at any point in your app
 // You can then set the user_id and data will start pushing up to the servers.
-VitalCore.configure(VITAL_ENVIRONMENT, VITAL_API_KEY, VITAL_REGION, true).then(
+VitalCore.configure(VITAL_API_KEY, VITAL_ENVIRONMENT, VITAL_REGION, true).then(
   () => {
     VitalCore.setUserId(VITAL_USER_ID).then(() => {
       VitalHealth.configure(true, 30, true).then(() => {
@@ -55,10 +55,11 @@ VitalCore.configure(VITAL_ENVIRONMENT, VITAL_API_KEY, VITAL_REGION, true).then(
   },
 );
 
-console.log('status', status);
-status.addListener('status', (data: any) => {
-  console.log('status');
-});
+const onSessionConnect = event => {
+  console.log(event);
+};
+
+const subscription = VitalHealth.status.addListener('status', onSessionConnect);
 
 const Stack = createNativeStackNavigator();
 

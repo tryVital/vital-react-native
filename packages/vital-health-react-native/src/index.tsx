@@ -17,16 +17,10 @@ const VitalHealthReactNative = NativeModules.VitalHealthReactNative
       }
     );
 
-export const status = new NativeEventEmitter(VitalHealthReactNative);
-
-const onSessionConnect = (event) => {
-  console.log(event);
-};
-
-const subscription = status.addListener('status', onSessionConnect);
 
 export class VitalHealth {
-  // status = VitalHealthReactNative;
+
+  static status = new NativeEventEmitter(VitalHealthReactNative);
 
   static configure(backgroundDeliveryEnabled: boolean, numberOfDaysToBackFill: number, enableLogs: boolean): Promise<void> {
     return VitalHealthReactNative.configure(backgroundDeliveryEnabled, numberOfDaysToBackFill, enableLogs);
