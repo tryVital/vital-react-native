@@ -12,12 +12,47 @@ class VitalDevicesReactNativeModule(reactContext: ReactApplicationContext) :
     return NAME
   }
 
-  // Example method
-  // See https://reactnative.dev/docs/native-modules-android
   @ReactMethod
-  fun multiply(a: Double, b: Double, promise: Promise) {
-    promise.resolve(a * b)
+  private suspend fun startScanForDevice(id:String, name:String,brand:String, kind:String, promise: Promise) {
+    val deviceModel = DeviceModel(
+      id = id,
+      name = name,
+      brand = stringToBrand(brand),
+      kind = stringToKind(kind),
+    )
+
+    try {
+      vitalDeviceManager.search(deviceModel).flowOn(Dispatchers.IO).collect {
+        withContext(Dispatchers.Main) {
+          scannedDevices.add(it)
+          channel.invokeMethod(
+            "sendScan", JSONObject(
+              mapOf(
+                "id" to it.address, "name" to it.name, "deviceModel" to mapOf(
+                  "id" to it.deviceModel.id,
+                  "name" to it.deviceModel.name,
+                  "brand" to brandToString(it.deviceModel.brand),
+                  "kind" to kindToString(it.deviceModel.kind)
+                )
+              )
+            ).toString()
+          )
+        }
+      }
+    } catch (e: Exception) {
+      withContext(Dispatchers.Main) {
+        channel.invokeMethod(
+          "sendScan", JSONObject(
+            mapOf(
+              "code" to "UnknownError",
+              "message" to e.message,
+            )
+          ).toString()
+        )
+      }
+    }
   }
+
 
   companion object {
     const val NAME = "VitalDevicesReactNative"
