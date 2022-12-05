@@ -55,6 +55,7 @@ VitalCore.configure(VITAL_ENVIRONMENT, VITAL_API_KEY, VITAL_REGION, true).then(
   },
 );
 
+console.log('status', status);
 status.addListener('status', (data: any) => {
   console.log('status');
 });

@@ -17,11 +17,11 @@ const VitalHealthReactNative = NativeModules.VitalHealthReactNative
       }
     );
 
-const status = new NativeEventEmitter(VitalHealthReactNative);
+export const status = new NativeEventEmitter(VitalHealthReactNative);
 
 const onSessionConnect = (event) => {
   console.log(event);
-}
+};
 
 const subscription = status.addListener('status', onSessionConnect);
 
@@ -50,15 +50,15 @@ export class VitalHealth {
 }
 
 export enum VitalResource {
-  Profile = "profile",
-  Body = "body",
-  Workout = "workout",
-  Activity = "activity",
-  Sleep = "sleep",
-  Glucose = "glucose",
-  BloodPressure = "bloodPressure",
-  HeartRate = "heartRate",
-  Steps = "steps",
-  ActiveEnergyBurned = "activeEnergyBurned",
-  BasalEnergyBurned = "basalEnergyBurned",
+  Profile = 'profile',
+  Body = 'body',
+  Workout = 'workout',
+  Activity = 'activity',
+  Sleep = 'sleep',
+  Glucose = 'glucose',
+  BloodPressure = 'bloodPressure',
+  HeartRate = 'heartRate',
+  Steps = 'steps',
+  ActiveEnergyBurned = 'activeEnergyBurned',
+  BasalEnergyBurned = 'basalEnergyBurned',
 }
