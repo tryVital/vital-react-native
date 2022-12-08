@@ -1,13 +1,3 @@
-/**
- * Sample React Native App
- * https://github.com/facebook/react-native
- *
- * Generated with the TypeScript template
- * https://github.com/react-native-community/react-native-template-typescript
- *
- * @format
- */
-
 import React from 'react';
 
 import {VitalCore} from 'vital-core-react-native';
@@ -19,6 +9,8 @@ import {createNativeStackNavigator} from '@react-navigation/native-stack';
 import {VitalClient} from '@tryvital/vital-node';
 import {ConnectSource} from './screens/ConnectScreen';
 import Icon from 'react-native-vector-icons/Feather';
+import {scanForDevice} from 'vital-devices-react-native/lib';
+import {NativeEventEmitter, NativeModules} from 'react-native';
 
 export const VITAL_API_KEY = 'YOUR API KEY HERE';
 export const VITAL_ENVIRONMENT = 'sandbox';
@@ -36,21 +28,43 @@ export const vitalNodeClient = new VitalClient({
 
 // Configuring Vital healthkit core SDK you can do this at any point in your app
 // You can then set the user_id and data will start pushing up to the servers.
-VitalCore.configure(VITAL_ENVIRONMENT, VITAL_API_KEY, VITAL_REGION, true).then(
-  () => {
-    VitalCore.setUserId(VITAL_USER_ID).then(() => {
-      VitalHealth.configure(true, 30, true).then(() => {
-        VitalHealth.hasAskedForPermission(VitalResource.Steps)
-          .then(() => {
-            console.log('VitalHealth asked for resources');
-          })
-          .catch(error => {
-            console.log(error);
-          });
-      });
-    });
+// VitalCore.configure(VITAL_ENVIRONMENT, VITAL_API_KEY, VITAL_REGION, true).then(
+//   () => {
+//     VitalCore.setUserId(VITAL_USER_ID).then(() => {
+//       VitalHealth.configure(true, 30, true).then(() => {
+//         VitalHealth.hasAskedForPermission(VitalResource.Steps)
+//           .then(() => {
+//             console.log('VitalHealth asked for resources');
+//           })
+//           .catch(error => {
+//             console.log(error);
+//           });
+//       });
+//     });
+//   },
+// );
+
+new NativeEventEmitter(NativeModules.VitalDevicesReactNative).addListener(
+  'ScanEvent',
+  (event: any) => {
+    console.log('happy in example', event);
   },
 );
+
+console.log('vitalDevicesManager');
+scanForDevice(
+  {
+    id: '1',
+    name: 'Vital',
+    brand: 'omron',
+    kind: 'bloodPressure',
+  },
+  error => {
+    console.log('happy', error);
+  },
+);
+
+console.log('done');
 
 const Stack = createNativeStackNavigator();
 
