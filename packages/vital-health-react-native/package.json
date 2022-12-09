@@ -2,10 +2,8 @@
   "name": "@tryvital/vital-health-react-native",
   "version": "0.1.0",
   "description": "test",
-  "main": "lib/commonjs/index",
-  "module": "lib/module/index",
-  "types": "lib/typescript/index.d.ts",
-  "react-native": "src/index",
+  "main": "lib/index.js",
+  "types": "lib/index.d.ts",
   "source": "src/index",
   "files": [
     "src",
@@ -28,10 +26,9 @@
   ],
   "scripts": {
     "test": "jest",
-    "typescript": "tsc --noEmit",
+    "typescript": "tsc --declaration",
     "postinstall": "npm run typescript",
     "lint": "eslint \"**/*.{js,ts,tsx}\"",
-    "prepare": "bob build",
     "release": "release-it",
     "example": "yarn --cwd example",
     "bootstrap": "yarn example && yarn install && yarn example pods",
@@ -142,19 +139,5 @@
     "tabWidth": 2,
     "trailingComma": "es5",
     "useTabs": false
-  },
-  "react-native-builder-bob": {
-    "source": "src",
-    "output": "lib",
-    "targets": [
-      "commonjs",
-      "module",
-      [
-        "typescript",
-        {
-          "project": "tsconfig.build.json"
-        }
-      ]
-    ]
   }
 }

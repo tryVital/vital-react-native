@@ -2,11 +2,8 @@
   "name": "vital-devices-react-native",
   "version": "0.1.0",
   "description": "test",
-  "main": "lib/commonjs/index",
-  "module": "lib/module/index",
-  "types": "lib/typescript/index.d.ts",
-  "react-native": "src/index",
-  "source": "src/index",
+  "main": "lib/index.js",
+  "types": "lib/index.d.ts",
   "files": [
     "src",
     "lib",
@@ -28,10 +25,9 @@
   ],
   "scripts": {
     "test": "jest",
-    "typescript": "tsc",
+    "typescript": "tsc --declaration",
     "postinstall": "npm run typescript",
     "lint": "eslint \"**/*.{js,ts,tsx}\"",
-    "prepare": "bob build",
     "release": "release-it",
     "example": "yarn --cwd example",
     "bootstrap": "yarn example && yarn install && yarn example pods",
@@ -53,10 +49,6 @@
   },
   "dependencies": {
     "react-native-permissions": "^3.6.1"
-  },
-  "peerDependencies": {
-    "react": "*",
-    "react-native": "*"
   },
   "devDependencies": {
     "@arkweid/lefthook": "^0.7.7",
@@ -145,19 +137,5 @@
     "tabWidth": 2,
     "trailingComma": "es5",
     "useTabs": false
-  },
-  "react-native-builder-bob": {
-    "source": "src",
-    "output": "lib",
-    "targets": [
-      "commonjs",
-      "module",
-      [
-        "typescript",
-        {
-          "project": "tsconfig.build.json"
-        }
-      ]
-    ]
   }
 }

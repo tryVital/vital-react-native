@@ -136,8 +136,8 @@ dependencies {
   implementation "com.facebook.react:react-native:+"
   implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
   implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.4")
-  implementation 'com.github.tryVital.vital-android:VitalClient:v1.0.0-alpha.5'
-  implementation 'com.github.tryVital.vital-android:VitalDevices:v1.0.0-alpha.5'
+  implementation 'com.github.tryVital.vital-android:VitalClient:v1.0.0-alpha.7'
+  implementation 'com.github.tryVital.vital-android:VitalDevices:v1.0.0-alpha.7'
 // From node_modules
 }
 
