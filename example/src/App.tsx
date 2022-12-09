@@ -14,6 +14,7 @@ import {NativeEventEmitter} from 'react-native';
 import {VitalDevicesNativeModule} from 'vital-devices-react-native';
 import {VitalCore} from 'vital-core-react-native';
 import {VitalHealth, VitalResource} from 'vital-health-react-native';
+import {PERMISSIONS, requestMultiple} from 'react-native-permissions';
 
 export const VITAL_API_KEY = 'YOUR API KEY HERE';
 export const VITAL_ENVIRONMENT = 'sandbox';
@@ -79,10 +80,20 @@ eventEmitter.addListener(VitalDevicesEvents.bloodPressureReadEvent, event => {
   });
 });
 
-// This is an example of how to start scanning for an Omron M7 device.
 let omronM7 = VitalDevicesManager.supportedDevices[1];
-vitalDevicesManager.scanForDevice(omronM7).then(() => {
-  console.log('Scanning for device');
+requestMultiple([
+  PERMISSIONS.ANDROID.BLUETOOTH_SCAN,
+  PERMISSIONS.ANDROID.BLUETOOTH_CONNECT,
+]).then(statuses => {
+  if (
+    statuses[PERMISSIONS.ANDROID.BLUETOOTH_SCAN] === 'granted' &&
+    statuses[PERMISSIONS.ANDROID.BLUETOOTH_CONNECT] === 'granted'
+  ) {
+    // This is an example of how to start scanning for an Omron M7 device.
+    vitalDevicesManager.scanForDevice(omronM7).then(() => {
+      console.log('Scanning for device');
+    });
+  }
 });
 
 const Stack = createNativeStackNavigator();
