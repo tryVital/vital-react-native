@@ -52,7 +52,7 @@ export class VitalDevicesManager {
     return NativeModules.VitalDevicesReactNative.pair(scannedDeviceId);
   }
 
-  async readingBloodPressure(scannedDeviceId: string) {
+  async readBloodPressure(scannedDeviceId: string) {
     await this.checkPermission();
 
     return NativeModules.VitalDevicesReactNative.startReadingBloodPressure(
@@ -60,7 +60,7 @@ export class VitalDevicesManager {
     );
   }
 
-  async readingGlucoseMeter(scannedDeviceId: string) {
+  async readGlucoseMeter(scannedDeviceId: string) {
     await this.checkPermission();
 
     return NativeModules.VitalDevicesReactNative.startReadingGlucoseMeter(
