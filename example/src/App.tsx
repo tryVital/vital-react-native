@@ -11,7 +11,7 @@
 import React from 'react';
 
 import {VitalCore} from 'vital-core-react-native';
-import {VitalHealth, VitalResource, status} from 'vital-health-react-native';
+import {VitalHealth, VitalResource} from 'vital-health-react-native';
 import {NavigationContainer} from '@react-navigation/native';
 import {NativeBaseProvider} from 'native-base';
 import HomeScreen from './screens/HomeScreen';
