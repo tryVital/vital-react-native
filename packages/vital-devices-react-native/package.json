@@ -2,11 +2,8 @@
   "name": "vital-devices-react-native",
   "version": "0.1.0",
   "description": "test",
-  "main": "lib/commonjs/index",
-  "module": "lib/module/index",
-  "types": "lib/typescript/index.d.ts",
-  "react-native": "src/index",
-  "source": "src/index",
+  "main": "lib/index.js",
+  "types": "lib/index.d.ts",
   "files": [
     "src",
     "lib",
@@ -28,9 +25,9 @@
   ],
   "scripts": {
     "test": "jest",
-    "typescript": "tsc --noEmit",
+    "typescript": "tsc --declaration",
+    "postinstall": "npm run typescript",
     "lint": "eslint \"**/*.{js,ts,tsx}\"",
-    "prepare": "bob build",
     "release": "release-it",
     "example": "yarn --cwd example",
     "bootstrap": "yarn example && yarn install && yarn example pods",
@@ -49,6 +46,9 @@
   "homepage": "https://github.com/tryVital/vital-devices-react-native#readme",
   "publishConfig": {
     "registry": "https://registry.npmjs.org/"
+  },
+  "dependencies": {
+    "react-native-permissions": "^3.6.1"
   },
   "devDependencies": {
     "@arkweid/lefthook": "^0.7.7",
@@ -74,10 +74,6 @@
   },
   "resolutions": {
     "@types/react": "17.0.21"
-  },
-  "peerDependencies": {
-    "react": "*",
-    "react-native": "*"
   },
   "engines": {
     "node": ">= 16.0.0"
@@ -141,19 +137,5 @@
     "tabWidth": 2,
     "trailingComma": "es5",
     "useTabs": false
-  },
-  "react-native-builder-bob": {
-    "source": "src",
-    "output": "lib",
-    "targets": [
-      "commonjs",
-      "module",
-      [
-        "typescript",
-        {
-          "project": "tsconfig.build.json"
-        }
-      ]
-    ]
   }
 }

@@ -18,8 +18,16 @@ const VitalHealthReactNative = NativeModules.VitalHealthReactNative
     );
 
 export class VitalHealth {
-   static configure(backgroundDeliveryEnabled: boolean, numberOfDaysToBackFill: number, enableLogs: boolean): Promise<void> {
-      return VitalHealthReactNative.configure(backgroundDeliveryEnabled, numberOfDaysToBackFill, enableLogs);
+  static configure(
+    backgroundDeliveryEnabled: boolean,
+    numberOfDaysToBackFill: number,
+    enableLogs: boolean
+  ): Promise<void> {
+    return VitalHealthReactNative.configure(
+      backgroundDeliveryEnabled,
+      numberOfDaysToBackFill,
+      enableLogs
+    );
   }
 
   static askForResources(resources: VitalResource[]): Promise<void> {
@@ -40,15 +48,15 @@ export class VitalHealth {
 }
 
 export enum VitalResource {
-  Profile = "profile",
-  Body = "body",
-  Workout = "workout",
-  Activity = "activity",
-  Sleep = "sleep",
-  Glucose = "glucose",
-  BloodPressure = "bloodPressure",
-  HeartRate = "heartRate",
-  Steps = "steps",
-  ActiveEnergyBurned = "activeEnergyBurned",
-  BasalEnergyBurned = "basalEnergyBurned",
+  Profile = 'profile',
+  Body = 'body',
+  Workout = 'workout',
+  Activity = 'activity',
+  Sleep = 'sleep',
+  Glucose = 'glucose',
+  BloodPressure = 'bloodPressure',
+  HeartRate = 'heartRate',
+  Steps = 'steps',
+  ActiveEnergyBurned = 'activeEnergyBurned',
+  BasalEnergyBurned = 'basalEnergyBurned',
 }
