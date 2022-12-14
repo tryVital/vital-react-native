@@ -24,6 +24,17 @@ export class VitalHealth {
 
   static configure(backgroundDeliveryEnabled: boolean, numberOfDaysToBackFill: number, enableLogs: boolean): Promise<void> {
     return VitalHealthReactNative.configure(backgroundDeliveryEnabled, numberOfDaysToBackFill, enableLogs);
+
+  static configure(
+    backgroundDeliveryEnabled: boolean,
+    numberOfDaysToBackFill: number,
+    enableLogs: boolean
+  ): Promise<void> {
+    return VitalHealthReactNative.configure(
+      backgroundDeliveryEnabled,
+      numberOfDaysToBackFill,
+      enableLogs
+    );
   }
 
   static askForResources(resources: VitalResource[]): Promise<void> {

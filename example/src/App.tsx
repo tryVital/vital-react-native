@@ -1,27 +1,21 @@
-/**
- * Sample React Native App
- * https://github.com/facebook/react-native
- *
- * Generated with the TypeScript template
- * https://github.com/react-native-community/react-native-template-typescript
- *
- * @format
- */
-
 import React from 'react';
-
-import {VitalCore} from 'vital-core-react-native';
-import {VitalHealth, VitalResource} from 'vital-health-react-native';
 import {NavigationContainer} from '@react-navigation/native';
-import {NativeBaseProvider} from 'native-base';
+import {IconButton, NativeBaseProvider} from 'native-base';
 import HomeScreen from './screens/HomeScreen';
 import {createNativeStackNavigator} from '@react-navigation/native-stack';
 import {VitalClient} from '@tryvital/vital-node';
 import {ConnectSource} from './screens/ConnectScreen';
-import {IconButton} from 'native-base';
 import Icon from 'react-native-vector-icons/Feather';
 
+import {
+  VitalDevicesEvents,
+  VitalDevicesManager,
+} from 'vital-devices-react-native/lib';
 import {NativeEventEmitter} from 'react-native';
+import {VitalDevicesNativeModule} from 'vital-devices-react-native';
+import {VitalCore} from 'vital-core-react-native';
+import {VitalHealth, VitalResource} from 'vital-health-react-native';
+import {PERMISSIONS, requestMultiple} from 'react-native-permissions';
 
 export const VITAL_API_KEY = 'YOUR API KEY HERE';
 export const VITAL_ENVIRONMENT = 'sandbox';
@@ -55,11 +49,60 @@ VitalCore.configure(VITAL_API_KEY, VITAL_ENVIRONMENT, VITAL_REGION, true).then(
   },
 );
 
+
 const onSessionConnect = event => {
   console.log(event);
 };
 
 const subscription = VitalHealth.status.addListener('status', onSessionConnect);
+
+//To start getting events from the VitalDevicesManager you need to create an event emitter
+const eventEmitter = new NativeEventEmitter(VitalDevicesNativeModule);
+
+const vitalDevicesManager = new VitalDevicesManager();
+
+// This is an example of how to listen to scan event from the VitalDevicesManager.
+// To start scanning for devices you need to call the startScan method on the VitalDevicesManager.
+// The same device can be scanned multiple times.
+eventEmitter.addListener(VitalDevicesEvents.scanEvent, event => {
+  console.log(VitalDevicesEvents.scanEvent, event);
+  vitalDevicesManager.readingBloodPressure(event.id).then(() => {
+    console.log('Started reading for ', event.id);
+  });
+});
+
+// This is an example of how to listen to reading event from blood pressure device.
+// To start reading from a device you need to call the readingBloodPressure method on the VitalDevicesManager.
+eventEmitter.addListener(VitalDevicesEvents.bloodPressureReadEvent, event => {
+  console.log(VitalDevicesEvents.bloodPressureReadEvent, event);
+  event.samples.forEach(sample => {
+    console.log(sample.diastolic);
+    console.log(sample.systolic);
+    console.log(sample.pulse);
+  });
+
+  // After you are done reading from the device you need to call the scan method
+  // on the VitalDevicesManager to continuously receive reads.
+  vitalDevicesManager.scanForDevice(omronM7).then(() => {
+    console.log('repeat Scanning for device');
+  });
+});
+
+let omronM7 = VitalDevicesManager.supportedDevices[1];
+requestMultiple([
+  PERMISSIONS.ANDROID.BLUETOOTH_SCAN,
+  PERMISSIONS.ANDROID.BLUETOOTH_CONNECT,
+]).then(statuses => {
+  if (
+    statuses[PERMISSIONS.ANDROID.BLUETOOTH_SCAN] === 'granted' &&
+    statuses[PERMISSIONS.ANDROID.BLUETOOTH_CONNECT] === 'granted'
+  ) {
+    // This is an example of how to start scanning for an Omron M7 device.
+    vitalDevicesManager.scanForDevice(omronM7).then(() => {
+      console.log('Scanning for device');
+    });
+  }
+});
 
 const Stack = createNativeStackNavigator();
 

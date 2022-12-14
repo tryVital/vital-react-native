@@ -2,8 +2,9 @@
   "compilerOptions": {
     "baseUrl": "./",
     "paths": {
-      "vital-devices-react-native": ["./src/index"]
+      "vital-devices-react-native": ["./src"]
     },
+    "outDir": "./lib",
     "allowUnreachableCode": false,
     "allowUnusedLabels": false,
     "esModuleInterop": true,

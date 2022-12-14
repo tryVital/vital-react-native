@@ -4,6 +4,7 @@
     "paths": {
       "vital-core-react-native": ["./src/index"]
     },
+    "outDir": "./lib",
     "allowUnreachableCode": false,
     "allowUnusedLabels": false,
     "esModuleInterop": true,
