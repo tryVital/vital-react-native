@@ -1,5 +1,5 @@
 #import <React/RCTBridgeModule.h>
-
+#import <React/RCTEventEmitter.h>
 @interface RCT_EXTERN_MODULE(VitalHealthReactNative, NSObject)
 
 RCT_EXTERN_METHOD(configure:(BOOL)backgroundDeliveryEnabled
@@ -22,6 +22,8 @@ RCT_EXTERN_METHOD(hasAskedForPermission:(NSString *)resource
 RCT_EXTERN_METHOD(syncData:(NSArray<NSString *> *)resources
                   resolver:(RCTPromiseResolveBlock)resolve
                   rejecter:(RCTPromiseRejectBlock)reject)
+
+RCT_EXTERN_METHOD(status)
 
 + (BOOL)requiresMainQueueSetup
 {

@@ -6,6 +6,7 @@ import {createNativeStackNavigator} from '@react-navigation/native-stack';
 import {VitalClient} from '@tryvital/vital-node';
 import {ConnectSource} from './screens/ConnectScreen';
 import Icon from 'react-native-vector-icons/Feather';
+
 import {
   VitalDevicesEvents,
   VitalDevicesManager,
@@ -32,7 +33,7 @@ export const vitalNodeClient = new VitalClient({
 
 // Configuring Vital healthkit core SDK you can do this at any point in your app
 // You can then set the user_id and data will start pushing up to the servers.
-VitalCore.configure(VITAL_ENVIRONMENT, VITAL_API_KEY, VITAL_REGION, true).then(
+VitalCore.configure(VITAL_API_KEY, VITAL_ENVIRONMENT, VITAL_REGION, true).then(
   () => {
     VitalCore.setUserId(VITAL_USER_ID).then(() => {
       VitalHealth.configure(true, 30, true).then(() => {
@@ -47,6 +48,13 @@ VitalCore.configure(VITAL_ENVIRONMENT, VITAL_API_KEY, VITAL_REGION, true).then(
     });
   },
 );
+
+
+const onSessionConnect = event => {
+  console.log(event);
+};
+
+const subscription = VitalHealth.status.addListener('status', onSessionConnect);
 
 //To start getting events from the VitalDevicesManager you need to create an event emitter
 const eventEmitter = new NativeEventEmitter(VitalDevicesNativeModule);
