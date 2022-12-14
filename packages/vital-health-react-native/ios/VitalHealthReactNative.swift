@@ -16,8 +16,8 @@ class VitalHealthReactNative: NSObject {
       await VitalHealthKitClient.configure(
           .init(
               backgroundDeliveryEnabled: backgroundDeliveryEnabled,
-              logsEnabled: enableLogs,
-              numberOfDaysToBackFill: numberOfDaysToBackFill
+              numberOfDaysToBackFill: numberOfDaysToBackFill,
+              logsEnabled: enableLogs
             )
         )
       resolve(())

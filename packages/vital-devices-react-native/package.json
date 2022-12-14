@@ -1,7 +1,7 @@
 {
   "name": "vital-devices-react-native",
-  "version": "0.1.0",
-  "description": "test",
+  "version": "0.2.0",
+  "description": "Client to access Vital's Endpoints",
   "main": "lib/commonjs/index",
   "module": "lib/module/index",
   "types": "lib/typescript/index.d.ts",
