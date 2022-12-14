@@ -304,7 +304,7 @@ PODS:
     - glog
   - react-native-safe-area-context (3.3.2):
     - React-Core
-  - react-native-webview (11.25.0):
+  - react-native-webview (11.26.0):
     - React-Core
   - React-perflogger (0.70.6)
   - React-RCTActionSheet (0.70.6):
@@ -382,15 +382,15 @@ PODS:
   - SocketRocket (0.6.0)
   - vital-core-react-native (0.1.0):
     - React-Core
-    - VitalCore (~> 0.7.5)
+    - VitalCore (~> 0.7.7)
   - vital-devices-react-native (0.1.0):
     - React-Core
   - vital-health-react-native (0.1.0):
     - React-Core
-    - VitalHealthKit (~> 0.7.5)
-  - VitalCore (0.7.5)
-  - VitalHealthKit (0.7.5):
-    - VitalCore (~> 0.7.5)
+    - VitalHealthKit (~> 0.7.7)
+  - VitalCore (0.7.7)
+  - VitalHealthKit (0.7.7):
+    - VitalCore (~> 0.7.7)
   - Yoga (1.14.0)
   - YogaKit (1.18.1):
     - Yoga (~> 1.14)
@@ -606,7 +606,7 @@ SPEC CHECKSUMS:
   React-jsinspector: 60769e5a0a6d4b32294a2456077f59d0266f9a8b
   React-logger: 1623c216abaa88974afce404dc8f479406bbc3a0
   react-native-safe-area-context: 584dc04881deb49474363f3be89e4ca0e854c057
-  react-native-webview: a71da846ed2e9085440e1d6659c04e285528834b
+  react-native-webview: 994b9f8fbb504d6314dc40d83f94f27c6831b3bf
   React-perflogger: 8c79399b0500a30ee8152d0f9f11beae7fc36595
   React-RCTActionSheet: 7316773acabb374642b926c19aef1c115df5c466
   React-RCTAnimation: 5341e288375451297057391227f691d9b2326c3d
@@ -623,11 +623,11 @@ SPEC CHECKSUMS:
   RNSVG: 551acb6562324b1d52a4e0758f7ca0ec234e278f
   RNVectorIcons: fcc2f6cb32f5735b586e66d14103a74ce6ad61f8
   SocketRocket: fccef3f9c5cedea1353a9ef6ada904fde10d6608
-  vital-core-react-native: 1bb035e6b50111ce68780a17bc926401e1d903af
+  vital-core-react-native: 6c2514359e166c783e89401e9bc5746c8af58dc9
   vital-devices-react-native: 230fd90301d5911be8d286dd446a260f8d7b8dfe
-  vital-health-react-native: d0f32d4b92c412b2d97600b7b6dbd4694b4897e8
-  VitalCore: a9f1490db1e5490d3aa166c4fc67fdead78103bf
-  VitalHealthKit: 84e816b86705a084d5bb2c16b1fe1316644202fa
+  vital-health-react-native: d99dfbc40db997ac0df3c1d10ddd97966b38e3e6
+  VitalCore: 15f80cb0e3b025d6febe60d3e1af87f90aa94ddf
+  VitalHealthKit: 2c6fe708e6d4b20dbd59a113ef45a4188b2b781c
   Yoga: 99caf8d5ab45e9d637ee6e0174ec16fbbb01bcfc
   YogaKit: f782866e155069a2cca2517aafea43200b01fd5a
 
