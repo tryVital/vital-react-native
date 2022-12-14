@@ -1,8 +1,53 @@
 import VitalCore
 import VitalHealthKit
+import Combine
 
 @objc(VitalHealthReactNative)
-class VitalHealthReactNative: NSObject {
+class VitalHealthReactNative: RCTEventEmitter {
+
+  public static var status: RCTEventEmitter!
+  public var cancellable: AnyCancellable?
+
+  deinit {
+    cancellable?.cancel()
+  }
+
+  override init() {
+    super.init()
+    VitalHealthReactNative.status = self
+
+    cancellable = VitalHealthKitClient.shared.status.sink { status in
+      var payload: [String: String] = [:]
+      
+      switch status {
+        case let .failedSyncing(resource, error):
+          payload["resource"] = String(describing: resource)
+          payload["status"] = "failedSyncing"
+          payload["extra"] = error?.localizedDescription
+          
+        case let .nothingToSync(resource):
+          payload["resource"] = String(describing: resource)
+          payload["status"] = "nothingToSync"
+          
+        case let .successSyncing(resource, _):
+          payload["resource"] = String(describing: resource)
+          payload["status"] = "successSyncing"
+
+        case let .syncing(resource):
+          payload["resource"] = String(describing: resource)
+          payload["status"] = "syncing"
+          
+        case .syncingCompleted:
+          payload["status"] = "completed"
+      }
+      
+      self.sendEvent(withName: "status", body: payload)
+    }
+  }
+
+  override func supportedEvents() -> [String]! {
+    return ["status"]
+  }
 
   @objc(configure:numberOfDaysToBackFill:enableLogs:resolver:rejecter:)
   func configure(
