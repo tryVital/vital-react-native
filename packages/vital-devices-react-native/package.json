@@ -26,7 +26,6 @@
   "scripts": {
     "test": "jest",
     "typescript": "tsc --declaration",
-    "postinstall": "npm run typescript",
     "lint": "eslint \"**/*.{js,ts,tsx}\"",
     "release": "release-it",
     "example": "yarn --cwd example",
