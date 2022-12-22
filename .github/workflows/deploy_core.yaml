@@ -9,15 +9,16 @@ jobs:
       - uses: actions/checkout@v2
       # Setup .npmrc file to publish to npm
       - uses: actions/setup-node@v2
-        working-directory: packages/vital-core-react-native
         with:
           node-version: '16.x'
           registry-url: 'https://registry.npmjs.org'
       - name: ci
-        working-directory: packages/vital-core-react-native
-        run: npm ci
+        run: |
+          cd packages/vital-core-react-native
+          npm ci
       - name: publish
-        working-directory: packages/vital-core-react-native
-        run: npm publish
+        run: |
+          cd packages/vital-core-react-native
+          npm publish
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_PUBLISH_TOKEN }}
