@@ -27,13 +27,11 @@ jobs:
           node-version: '16.x'
           registry-url: 'https://registry.npmjs.org'
       - name: build
-        working-directory: packages/vital-health-react-native
         run: |
          cd packages/vital-health-react-native
          tsc
   test-build-core:
     runs-on: ubuntu-latest
-    working-directory: packages/vital-core-react-native
     steps:
       - uses: actions/checkout@v2
       # Setup .npmrc file to publish to npm
