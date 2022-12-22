@@ -16,6 +16,7 @@ jobs:
       - name: build
         run: |
          cd packages/vital-devices-react-native
+         npm install
          tsc
   test-build-health:
     runs-on: ubuntu-latest
@@ -29,6 +30,7 @@ jobs:
       - name: build
         run: |
          cd packages/vital-health-react-native
+         npm install
          tsc
   test-build-core:
     runs-on: ubuntu-latest
@@ -42,4 +44,5 @@ jobs:
       - name: build
         run: |
          cd packages/vital-core-react-native
+         npm install
          tsc
