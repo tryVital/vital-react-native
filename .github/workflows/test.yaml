@@ -6,7 +6,6 @@ name: Test compile
 jobs:
   test-build-devices:
     runs-on: ubuntu-latest
-    working-directory: packages/vital-devices-react-native
     steps:
       - uses: actions/checkout@v2
       # Setup .npmrc file to publish to npm
@@ -14,10 +13,13 @@ jobs:
         with:
           node-version: '16.x'
           registry-url: 'https://registry.npmjs.org'
-      - run: tsc
+      - name: build
+        run: |
+         cd packages/vital-devices-react-native
+         npm install
+         tsc
   test-build-health:
     runs-on: ubuntu-latest
-    working-directory: packages/vital-health-react-native
     steps:
       - uses: actions/checkout@v2
       # Setup .npmrc file to publish to npm
@@ -25,10 +27,13 @@ jobs:
         with:
           node-version: '16.x'
           registry-url: 'https://registry.npmjs.org'
-      - run: tsc
+      - name: build
+        run: |
+         cd packages/vital-health-react-native
+         npm install
+         tsc
   test-build-core:
     runs-on: ubuntu-latest
-    working-directory: packages/vital-core-react-native
     steps:
       - uses: actions/checkout@v2
       # Setup .npmrc file to publish to npm
@@ -36,4 +41,8 @@ jobs:
         with:
           node-version: '16.x'
           registry-url: 'https://registry.npmjs.org'
-      - run: tsc
+      - name: build
+        run: |
+         cd packages/vital-core-react-native
+         npm install
+         tsc

@@ -5,7 +5,6 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
-    working-directory: packages/vital-core-devices-react-native
     steps:
       - uses: actions/checkout@v2
       # Setup .npmrc file to publish to npm
@@ -13,7 +12,13 @@ jobs:
         with:
           node-version: '16.x'
           registry-url: 'https://registry.npmjs.org'
-      - run: npm ci
-      - run: npm publish
+      - name: ci
+        run: |
+          cd packages/vital-core-react-native
+          npm ci
+      - name: publish
+        run: |
+          cd packages/vital-core-react-native
+          npm publish
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_PUBLISH_TOKEN }}
