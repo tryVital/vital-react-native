@@ -1,0 +1,39 @@
+on:
+  push:
+    branches-ignore:
+      - master
+name: Test compile
+jobs:
+  test-build-devices:
+    runs-on: ubuntu-latest
+    working-directory: packages/vital-devices-react-native
+    steps:
+      - uses: actions/checkout@v2
+      # Setup .npmrc file to publish to npm
+      - uses: actions/setup-node@v2
+        with:
+          node-version: '16.x'
+          registry-url: 'https://registry.npmjs.org'
+      - run: tsc
+  test-build-health:
+    runs-on: ubuntu-latest
+    working-directory: packages/vital-health-react-native
+    steps:
+      - uses: actions/checkout@v2
+      # Setup .npmrc file to publish to npm
+      - uses: actions/setup-node@v2
+        with:
+          node-version: '16.x'
+          registry-url: 'https://registry.npmjs.org'
+      - run: tsc
+  test-build-core:
+    runs-on: ubuntu-latest
+    working-directory: packages/vital-core-react-native
+    steps:
+      - uses: actions/checkout@v2
+      # Setup .npmrc file to publish to npm
+      - uses: actions/setup-node@v2
+        with:
+          node-version: '16.x'
+          registry-url: 'https://registry.npmjs.org'
+      - run: tsc
