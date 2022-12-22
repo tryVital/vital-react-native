@@ -78,7 +78,10 @@ class VitalHealthReactNative: RCTEventEmitter {
   ) {
     Task {
       do {
-        let outcome = try await VitalHealthKitClient.shared.ask(for: resources.map { try mapResourceToVitalResource($0) })
+        
+        let readPermissions = try resources.map { try mapResourceToVitalResource($0) }
+        let outcome = await VitalHealthKitClient.shared.ask(readPermissions: readPermissions, writePermissions: [])
+
         switch outcome {
           case .success:
             resolve("success")
