@@ -6,26 +6,31 @@ name: Test compile
 jobs:
   test-build-devices:
     runs-on: ubuntu-latest
-    working-directory: packages/vital-devices-react-native
     steps:
       - uses: actions/checkout@v2
+        working-directory: packages/vital-devices-react-native
       # Setup .npmrc file to publish to npm
       - uses: actions/setup-node@v2
+        working-directory: packages/vital-devices-react-native
         with:
           node-version: '16.x'
           registry-url: 'https://registry.npmjs.org'
-      - run: tsc
+      - name: build
+        working-directory: packages/vital-devices-react-native
+        run: tsc
   test-build-health:
     runs-on: ubuntu-latest
-    working-directory: packages/vital-health-react-native
     steps:
       - uses: actions/checkout@v2
       # Setup .npmrc file to publish to npm
       - uses: actions/setup-node@v2
+        working-directory: packages/vital-health-react-native
         with:
           node-version: '16.x'
           registry-url: 'https://registry.npmjs.org'
-      - run: tsc
+      - name: build
+        working-directory: packages/vital-health-react-native
+        run: tsc
   test-build-core:
     runs-on: ubuntu-latest
     working-directory: packages/vital-core-react-native
@@ -33,7 +38,10 @@ jobs:
       - uses: actions/checkout@v2
       # Setup .npmrc file to publish to npm
       - uses: actions/setup-node@v2
+        working-directory: packages/vital-core-react-native
         with:
           node-version: '16.x'
           registry-url: 'https://registry.npmjs.org'
-      - run: tsc
+      - name: build
+        working-directory: packages/vital-core-react-native
+        run: tsc
