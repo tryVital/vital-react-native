@@ -1,6 +1,6 @@
 # vital-devices-react-native
 
-todo
+This library provides helper methods to BLE Devices for Vital. This allows developers to easily make requests and interact with Vital's API.
 
 ## Installation
 
