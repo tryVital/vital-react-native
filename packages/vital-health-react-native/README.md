@@ -1,6 +1,6 @@
 # vital-health-react-native
 
-todo
+This library provides methods to easily connect to Apple Health Kit using Vital's SDK. This allows developers to easily make requests and interact with Vital's API.
 
 ## Installation
 

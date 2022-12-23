@@ -1,6 +1,6 @@
 # vital-core-react-native
 
-todo
+The core react native for Vital. This allows developers to easily make requests and interact with Vital's API.
 
 ## Installation
 
