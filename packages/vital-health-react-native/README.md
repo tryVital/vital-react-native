@@ -6,26 +6,9 @@ This library provides methods to easily connect to Apple Health Kit using Vital'
 
 ```sh
 npm install vital-health-react-native
+cd ios && pod install
+
 ```
+## Getting Started
 
-## Usage
-
-```js
-import { multiply } from 'vital-health-react-native';
-
-// ...
-
-const result = await multiply(3, 7);
-```
-
-## Contributing
-
-See the [contributing guide](CONTRIBUTING.md) to learn how to contribute to the repository and the development workflow.
-
-## License
-
-MIT
-
----
-
-Made with [create-react-native-library](https://github.com/callstack/react-native-builder-bob)
+Please refer to our guide to get started - https://docs.tryvital.io/wearables/sdks/react_native 
