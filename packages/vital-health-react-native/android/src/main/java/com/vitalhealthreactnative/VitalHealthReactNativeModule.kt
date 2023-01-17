@@ -12,12 +12,36 @@ class VitalHealthReactNativeModule(reactContext: ReactApplicationContext) :
     return NAME
   }
 
-  // Example method
-  // See https://reactnative.dev/docs/native-modules-android
   @ReactMethod
-  fun multiply(a: Double, b: Double, promise: Promise) {
-    promise.resolve(a * b)
+  fun configure(
+    backgroundDeliveryEnabled: Boolean,
+    numberOfDaysToBackFill: Int,
+    enableLogs: Boolean,
+    promise: Promise
+  ) {
+    promise.resolve(null)
   }
+
+  @ReactMethod
+  fun askForResources(resources: List<String>, promise: Promise) {
+    promise.resolve(null)
+  }
+
+  @ReactMethod
+  fun hasAskedForPermission(resource: String, promise: Promise) {
+    promise.resolve(null)
+  }
+
+  @ReactMethod
+  fun syncData(resources: List<String>, promise: Promise) {
+    promise.resolve(null)
+  }
+
+  @ReactMethod
+  fun cleanUp(promise: Promise) {
+    promise.resolve(null)
+  }
+
 
   companion object {
     const val NAME = "VitalHealthReactNative"
