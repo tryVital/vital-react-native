@@ -6,8 +6,9 @@ import {createNativeStackNavigator} from '@react-navigation/native-stack';
 import {VitalClient} from '@tryvital/vital-node';
 import {ConnectSource} from './screens/ConnectScreen';
 import Icon from 'react-native-vector-icons/Feather';
-import {VitalHealth, VitalResource} from "vital-health-react-native";
-import {VitalCore} from "vital-core-react-native";
+import {VitalHealth, VitalResource} from 'vital-health-react-native';
+import {VitalCore} from 'vital-core-react-native';
+import UserScreen from './screens/UserScreen';
 
 export const VITAL_API_KEY = 'YOUR API KEY HERE';
 export const VITAL_ENVIRONMENT = 'sandbox';
@@ -55,9 +56,10 @@ const App = () => {
       <NavigationContainer>
         <Stack.Navigator initialRouteName="Home">
           <Stack.Group>
+            <Stack.Screen name="Vital Demo" component={HomeScreen} />
             <Stack.Screen
-              name="Home"
-              component={HomeScreen}
+              name="UserScreen"
+              component={UserScreen}
               options={() => ({
                 title: 'Users',
                 headerRight: () => (
