@@ -1,8 +1,8 @@
 import type { DeviceModel } from './model/device_model';
+import { DeviceKind } from './model/device_model';
 import { NativeModules, Platform } from 'react-native';
 import { checkMultiple, PERMISSIONS } from 'react-native-permissions';
 import { Brand } from './model/brand';
-import { DeviceKind } from './model/device_model';
 
 const LINKING_ERROR =
   `The package 'vital-core-react-native' doesn't seem to be linked. Make sure: \n\n` +
@@ -69,17 +69,29 @@ export class VitalDevicesManager {
   }
 
   private async checkPermission() {
-    const result = await checkMultiple([
-      PERMISSIONS.ANDROID.BLUETOOTH_SCAN,
-      PERMISSIONS.ANDROID.BLUETOOTH_CONNECT,
-    ]);
+    if (Platform.OS === 'ios') {
+      const result = await checkMultiple([
+        PERMISSIONS.IOS.BLUETOOTH_PERIPHERAL,
+      ]);
 
-    if (result[PERMISSIONS.ANDROID.BLUETOOTH_SCAN] !== 'granted') {
-      throw new Error('Bluetooth scan permission is not granted');
-    }
+      if (result[PERMISSIONS.IOS.BLUETOOTH_PERIPHERAL] !== 'granted') {
+        throw new Error(
+          'Bluetooth permission is not granted. Please check your settings.'
+        );
+      }
+    } else {
+      const result = await checkMultiple([
+        PERMISSIONS.ANDROID.BLUETOOTH_SCAN,
+        PERMISSIONS.ANDROID.BLUETOOTH_CONNECT,
+      ]);
 
-    if (result[PERMISSIONS.ANDROID.BLUETOOTH_CONNECT] !== 'granted') {
-      throw new Error('Bluetooth connect permission is not granted');
+      if (result[PERMISSIONS.ANDROID.BLUETOOTH_SCAN] !== 'granted') {
+        throw new Error('Bluetooth scan permission is not granted');
+      }
+
+      if (result[PERMISSIONS.ANDROID.BLUETOOTH_CONNECT] !== 'granted') {
+        throw new Error('Bluetooth connect permission is not granted');
+      }
     }
   }
 

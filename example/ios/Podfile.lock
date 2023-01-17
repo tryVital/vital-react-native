@@ -1,6 +1,7 @@
 PODS:
   - boost (1.76.0)
   - CocoaAsyncSocket (7.6.5)
+  - CombineCoreBluetooth (0.3.1)
   - DoubleConversion (1.1.6)
   - FBLazyVector (0.70.6)
   - FBReactNativeSpec (0.70.6):
@@ -76,6 +77,8 @@ PODS:
   - hermes-engine (0.70.6)
   - libevent (2.1.12)
   - OpenSSL-Universal (1.1.1100)
+  - Permission-BluetoothPeripheral (3.6.1):
+    - RNPermissions
   - RCT-Folly (2021.07.22.00):
     - boost
     - DoubleConversion
@@ -372,6 +375,8 @@ PODS:
     - React-jsi (= 0.70.6)
     - React-logger (= 0.70.6)
     - React-perflogger (= 0.70.6)
+  - RNPermissions (3.6.1):
+    - React-Core
   - RNScreens (3.18.2):
     - React-Core
     - React-RCTImage
@@ -380,13 +385,19 @@ PODS:
   - RNVectorIcons (9.2.0):
     - React-Core
   - SocketRocket (0.6.0)
-  - vital-core-react-native (0.2.4):
+  - vital-core-react-native (0.2.6):
     - React-Core
     - VitalCore (~> 0.7.11)
-  - vital-health-react-native (0.2.4):
+  - vital-devices-react-native (0.2.6):
+    - React-Core
+    - VitalDevices (~> 0.7.11)
+  - vital-health-react-native (0.2.6):
     - React-Core
     - VitalHealthKit (~> 0.7.11)
   - VitalCore (0.7.11)
+  - VitalDevices (0.7.11):
+    - CombineCoreBluetooth (~> 0.3.1)
+    - VitalCore (~> 0.7.11)
   - VitalHealthKit (0.7.11):
     - VitalCore (~> 0.7.11)
   - Yoga (1.14.0)
@@ -423,6 +434,7 @@ DEPENDENCIES:
   - hermes-engine (from `../node_modules/react-native/sdks/hermes/hermes-engine.podspec`)
   - libevent (~> 2.1.12)
   - OpenSSL-Universal (= 1.1.1100)
+  - Permission-BluetoothPeripheral (from `../node_modules/react-native-permissions/ios/BluetoothPeripheral`)
   - RCT-Folly (from `../node_modules/react-native/third-party-podspecs/RCT-Folly.podspec`)
   - RCTRequired (from `../node_modules/react-native/Libraries/RCTRequired`)
   - RCTTypeSafety (from `../node_modules/react-native/Libraries/TypeSafety`)
@@ -454,16 +466,19 @@ DEPENDENCIES:
   - React-RCTVibration (from `../node_modules/react-native/Libraries/Vibration`)
   - React-runtimeexecutor (from `../node_modules/react-native/ReactCommon/runtimeexecutor`)
   - ReactCommon/turbomodule/core (from `../node_modules/react-native/ReactCommon`)
+  - RNPermissions (from `../node_modules/react-native-permissions`)
   - RNScreens (from `../node_modules/react-native-screens`)
   - RNSVG (from `../node_modules/react-native-svg`)
   - RNVectorIcons (from `../node_modules/react-native-vector-icons`)
-  - vital-core-react-native (from `../node_modules/vital-core-react-native`)
-  - vital-health-react-native (from `../node_modules/vital-health-react-native`)
+  - "vital-core-react-native (from `../node_modules/@tryvital/vital-core-react-native`)"
+  - "vital-devices-react-native (from `../node_modules/@tryvital/vital-devices-react-native`)"
+  - "vital-health-react-native (from `../node_modules/@tryvital/vital-health-react-native`)"
   - Yoga (from `../node_modules/react-native/ReactCommon/yoga`)
 
 SPEC REPOS:
   trunk:
     - CocoaAsyncSocket
+    - CombineCoreBluetooth
     - Flipper
     - Flipper-Boost-iOSX
     - Flipper-DoubleConversion
@@ -478,6 +493,7 @@ SPEC REPOS:
     - OpenSSL-Universal
     - SocketRocket
     - VitalCore
+    - VitalDevices
     - VitalHealthKit
     - YogaKit
 
@@ -494,6 +510,8 @@ EXTERNAL SOURCES:
     :podspec: "../node_modules/react-native/third-party-podspecs/glog.podspec"
   hermes-engine:
     :podspec: "../node_modules/react-native/sdks/hermes/hermes-engine.podspec"
+  Permission-BluetoothPeripheral:
+    :path: "../node_modules/react-native-permissions/ios/BluetoothPeripheral"
   RCT-Folly:
     :podspec: "../node_modules/react-native/third-party-podspecs/RCT-Folly.podspec"
   RCTRequired:
@@ -552,6 +570,8 @@ EXTERNAL SOURCES:
     :path: "../node_modules/react-native/ReactCommon/runtimeexecutor"
   ReactCommon:
     :path: "../node_modules/react-native/ReactCommon"
+  RNPermissions:
+    :path: "../node_modules/react-native-permissions"
   RNScreens:
     :path: "../node_modules/react-native-screens"
   RNSVG:
@@ -559,15 +579,18 @@ EXTERNAL SOURCES:
   RNVectorIcons:
     :path: "../node_modules/react-native-vector-icons"
   vital-core-react-native:
-    :path: "../node_modules/vital-core-react-native"
+    :path: "../node_modules/@tryvital/vital-core-react-native"
+  vital-devices-react-native:
+    :path: "../node_modules/@tryvital/vital-devices-react-native"
   vital-health-react-native:
-    :path: "../node_modules/vital-health-react-native"
+    :path: "../node_modules/@tryvital/vital-health-react-native"
   Yoga:
     :path: "../node_modules/react-native/ReactCommon/yoga"
 
 SPEC CHECKSUMS:
   boost: a7c83b31436843459a1961bfd74b96033dc77234
   CocoaAsyncSocket: 065fd1e645c7abab64f7a6a2007a48038fdc6a99
+  CombineCoreBluetooth: 87fc830440fa8b1e1024c35eaa5e116e743c2660
   DoubleConversion: 5189b271737e1565bdce30deb4a08d647e3f5f54
   FBLazyVector: 48289402952f4f7a4e235de70a9a590aa0b79ef4
   FBReactNativeSpec: dd1186fd05255e3457baa2f4ca65e94c2cd1e3ac
@@ -585,6 +608,7 @@ SPEC CHECKSUMS:
   hermes-engine: 2af7b7a59128f250adfd86f15aa1d5a2ecd39995
   libevent: 4049cae6c81cdb3654a443be001fb9bdceff7913
   OpenSSL-Universal: ebc357f1e6bc71fa463ccb2fe676756aff50e88c
+  Permission-BluetoothPeripheral: 67708853584bb9208c76d36d0e0ea4eafb97ea5b
   RCT-Folly: 0080d0a6ebf2577475bda044aa59e2ca1f909cda
   RCTRequired: e1866f61af7049eb3d8e08e8b133abd38bc1ca7a
   RCTTypeSafety: 27c2ac1b00609a432ced1ae701247593f07f901e
@@ -614,17 +638,20 @@ SPEC CHECKSUMS:
   React-RCTVibration: c75ceef7aa60a33b2d5731ebe5800ddde40cefc4
   React-runtimeexecutor: 15437b576139df27635400de0599d9844f1ab817
   ReactCommon: 349be31adeecffc7986a0de875d7fb0dcf4e251c
+  RNPermissions: dcdb7b99796bbeda6975a6e79ad519c41b251b1c
   RNScreens: 34cc502acf1b916c582c60003dc3089fa01dc66d
   RNSVG: 551acb6562324b1d52a4e0758f7ca0ec234e278f
   RNVectorIcons: fcc2f6cb32f5735b586e66d14103a74ce6ad61f8
   SocketRocket: fccef3f9c5cedea1353a9ef6ada904fde10d6608
-  vital-core-react-native: 5544742cdefec7bb7921e2b1a15701224b92ae06
-  vital-health-react-native: 8a26f4c0d952758f7d4a046a6375d60bc99957d6
+  vital-core-react-native: b1e20de727408aa54709e33e089df40992ef6196
+  vital-devices-react-native: b6b4f45df8a0b1ce2c9949dc0cb0995114ebb5c8
+  vital-health-react-native: 64f9270f820866291e3a9208325fe94233517bec
   VitalCore: 69aaf6b147d58b6fb524472ba0ef29ef5f463586
+  VitalDevices: 61c3a6dc8b3b701ac318ba275532d35e15592ce7
   VitalHealthKit: 6eafe4f81219ae11906a0d4ca8520e3e9a054c82
   Yoga: 99caf8d5ab45e9d637ee6e0174ec16fbbb01bcfc
   YogaKit: f782866e155069a2cca2517aafea43200b01fd5a
 
-PODFILE CHECKSUM: e288e8da6fa4ced430327949d1330cdcbaad1b52
+PODFILE CHECKSUM: 99d4eace03afaa1662c855a32b36d86b0fdc57f7
 
 COCOAPODS: 1.11.3
