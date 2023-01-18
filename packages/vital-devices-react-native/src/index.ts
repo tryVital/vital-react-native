@@ -24,10 +24,10 @@ const VitalDevicesReactNative = NativeModules.VitalDevicesReactNative
 export const VitalDevicesNativeModule = VitalDevicesReactNative;
 
 export const VitalDevicesEvents = {
-  scanEvent: VitalDevicesNativeModule.ScanEvent,
-  pairEvent: VitalDevicesNativeModule.PairEvent,
-  glucoseMeterReadEvent: VitalDevicesNativeModule.GlucoseMeterReadEvent,
-  bloodPressureReadEvent: VitalDevicesNativeModule.BloodPressureReadEvent,
+  scanEvent: 'ScanEvent',
+  pairEvent: 'PairEvent',
+  glucoseMeterReadEvent: 'GlucoseMeterReadEvent',
+  bloodPressureReadEvent: 'BloodPressureReadEvent',
 };
 
 export class VitalDevicesManager {

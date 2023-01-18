@@ -50,6 +50,10 @@
   "publishConfig": {
     "registry": "https://registry.npmjs.org/"
   },
+  "peerDependencies": {
+    "react": "*",
+    "react-native": "*"
+  },
   "devDependencies": {
     "@arkweid/lefthook": "^0.7.7",
     "@commitlint/config-conventional": "^17.0.2",
@@ -76,10 +80,6 @@
   },
   "resolutions": {
     "@types/react": "17.0.21"
-  },
-  "peerDependencies": {
-    "react": "*",
-    "react-native": "*"
   },
   "engines": {
     "node": ">= 16.0.0"

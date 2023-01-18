@@ -2,8 +2,7 @@ import {ClientFacingUser} from '@tryvital/vital-node/client/models/user_models';
 import {FlatList, StyleSheet, Text, TextInput, View} from 'react-native';
 import React, {useEffect, useState} from 'react';
 import {vitalNodeClient, VITAL_ENVIRONMENT, VITAL_REGION} from '../App';
-import {HStack, IconButton, Box} from 'native-base';
-import Icon from 'react-native-vector-icons/Feather';
+import {HStack, IconButton, Box, Icon} from 'native-base';
 import Dialog from 'react-native-dialog';
 
 const DeleteIcon = ({onPress}) => (
