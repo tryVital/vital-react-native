@@ -15,7 +15,6 @@ class VitalDevicesReactNative: RCTEventEmitter {
     private var bloodPressureCancellable: Cancellable? = nil
     private var pairCancellable: Cancellable? = nil
 
-
     private var scannerResultCancellable: Cancellable? = nil
     private var scannedDevices: [ScannedDevice] = []
 
@@ -134,7 +133,7 @@ class VitalDevicesReactNative: RCTEventEmitter {
         let scannedDeviceId = UUID(uuidString: scannedDeviceId)!
         let scannedDevice = scannedDevices.first(where: { $0.id == scannedDeviceId })
 
-        
+
         guard scannedDevice != nil else {
             resolve([
                 "error": "DeviceNotFound",
