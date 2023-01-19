@@ -11,9 +11,9 @@ class VitalDevicesReactNative: RCTEventEmitter {
 
     private lazy var deviceManager = DevicesManager()
 
-        private var glucoseMeterCancellable: Cancellable? = nil
-        private var bloodPressureCancellable: Cancellable? = nil
-        private var pairCancellable: Cancellable? = nil
+    private var glucoseMeterCancellable: Cancellable? = nil
+    private var bloodPressureCancellable: Cancellable? = nil
+    private var pairCancellable: Cancellable? = nil
 
 
     private var scannerResultCancellable: Cancellable? = nil
@@ -21,9 +21,9 @@ class VitalDevicesReactNative: RCTEventEmitter {
 
     deinit {
         scannerResultCancellable?.cancel()
-             glucoseMeterCancellable?.cancel()
-             bloodPressureCancellable?.cancel()
-             pairCancellable?.cancel()
+        glucoseMeterCancellable?.cancel()
+        bloodPressureCancellable?.cancel()
+        pairCancellable?.cancel()
     }
 
     @objc(startScanForDevice:name:brand:kind:resolver:rejecter:)
@@ -45,16 +45,26 @@ class VitalDevicesReactNative: RCTEventEmitter {
             scannerResultCancellable =  deviceManager.search(for:deviceModel)
                 .sink {[weak self] value in
                     self?.scannedDevices.append(value)
-                    self?.sendEvent(withName: "ScanEvent", body: encode(InternalScannedDevice(id: value.id.uuidString, name: value.name, deviceModel: value.deviceModel)))
+                    self?.sendEvent(withName: "ScanEvent", body:
+                                        [
+                                            "id": value.id.uuidString,
+                                            "name": value.name,
+                                            "deviceModel": [
+                                                "id": value.deviceModel.id,
+                                                "name": value.deviceModel.name,
+                                                "brand": value.deviceModel.brand.rawValue,
+                                                "kind": value.deviceModel.kind.rawValue
+                                            ]
+                                        ])
                 }
 
             resolve(())
         } catch VitalError.UnsupportedBrand(let errorMessage) {
-            resolve(encode(ErrorResult(code: "UnsupportedBrand", message: errorMessage)))
+            resolve(["error": "UnsupportedBrand", "message": errorMessage])
         } catch VitalError.UnsupportedKind(let errorMessage) {
-            resolve(encode(ErrorResult(code: "UnsupportedKind", message: errorMessage)))
+            resolve(["error": "UnsupportedKind", "message": errorMessage])
         } catch {
-            resolve(encode(ErrorResult(code: "Unknown error")))
+            resolve(["error": "Unknown", "message": error.localizedDescription])
         }
     }
 
@@ -65,14 +75,17 @@ class VitalDevicesReactNative: RCTEventEmitter {
         resolve(())
     }
 
-    @objc(pairDevice:resolver:rejecter:)
-    func pairDevice(_ scannedDeviceId:String,
-                    resolve: @escaping RCTPromiseResolveBlock,
-                    reject:RCTPromiseRejectBlock) -> Void {
+    @objc(pair:resolver:rejecter:)
+    func pair(_ scannedDeviceId:String,
+              resolve: @escaping RCTPromiseResolveBlock,
+              reject:RCTPromiseRejectBlock) -> Void {
         let scannedDevice = scannedDevices.first(where: { $0.id == UUID(uuidString:scannedDeviceId) })
 
         guard scannedDevice != nil else {
-            resolve(encode(ErrorResult(code: "DeviceNotFound", message: "Device not found with id \(scannedDeviceId)")))
+            resolve([
+                "error": "DeviceNotFound",
+                "message": "Device not found with id \(scannedDeviceId)"
+            ])
             return
         }
 
@@ -86,7 +99,7 @@ class VitalDevicesReactNative: RCTEventEmitter {
                     self?.handlePairCompletion(value: value )
                 },
                       receiveValue:{[weak self] value in
-                      self?.handlePairValue()
+                    self?.handlePairValue()
                 })
         case .bloodPressure:
             pairCancellable = deviceManager
@@ -104,27 +117,103 @@ class VitalDevicesReactNative: RCTEventEmitter {
 
     private func handlePairCompletion(value: Subscribers.Completion<any Error>){
         switch value {
-        case .failure(let error):  self.sendEvent(withName: "PairEvent", body: encode(ErrorResult(code: "PairError", message: error.localizedDescription)))
-        case .finished:  self.sendEvent(withName: "PairEvent", body: encode(true))
+        case .failure(let error):  self.sendEvent(withName: "PairEvent", body: ["error": "PairError", "message": error.localizedDescription])
+        case .finished:  self.sendEvent(withName: "PairEvent", body: true)
         }
     }
 
     private func handlePairValue() {
-        self.sendEvent(withName: "PairEvent", body: encode(true))
+        self.sendEvent(withName: "PairEvent", body: true)
     }
 
-    @objc(readBloodPressure:resolver:rejecter:)
-    func readBloodPressure(_ pairedDeviceId:String,
-                           resolve: @escaping RCTPromiseResolveBlock,
-                           reject:RCTPromiseRejectBlock) -> Void {
+    @objc(startReadingGlucoseMeter:resolver:rejecter:)
+    func startReadingGlucoseMeter(_ scannedDeviceId:String,
+                                  resolve: @escaping RCTPromiseResolveBlock,
+                                  reject:RCTPromiseRejectBlock) -> Void {
+
+        let scannedDeviceId = UUID(uuidString: scannedDeviceId)!
+        let scannedDevice = scannedDevices.first(where: { $0.id == scannedDeviceId })
+
+        
+        guard scannedDevice != nil else {
+            resolve([
+                "error": "DeviceNotFound",
+                "message": "Device not found with id \(scannedDeviceId)"
+            ])
+            return
+        }
+
+        glucoseMeterCancellable?.cancel()
+        glucoseMeterCancellable =  deviceManager.glucoseMeter(for :scannedDevice!)
+            .read(device: scannedDevice!)
+            .sink (receiveCompletion: {[weak self] value in
+                self?.sendEvent(withName: "GlucoseMeterReadEvent", body: ["error": "ReadError", "message": "error reading data from device \(value)"])
+            }, receiveValue:{[weak self] value in
+            self?.sendEvent(withName: "GlucoseMeterReadEvent", body: [
+                                "samples": value.map({[
+                                        "id": $0.id,
+                                        "value": $0.value,
+                                        "unit": $0.unit,
+                                        "startDate": $0.startDate.timeIntervalSince1970,
+                                        "endDate": $0.endDate.timeIntervalSince1970,
+                                        "type": $0.type
+                                ]})
+                            ] )
+            })
 
         resolve(())
     }
 
-    @objc(readGlucoseMeter:resolver:rejecter:)
-    func readGlucoseMeter(_ pairedDeviceId:String,
-                          resolve: @escaping RCTPromiseResolveBlock,
-                          reject:RCTPromiseRejectBlock) -> Void {
+    @objc(startReadingBloodPressure:resolver:rejecter:)
+    func startReadingBloodPressure(_ scannedDeviceId:String,
+                                   resolve: @escaping RCTPromiseResolveBlock,
+                                   reject:RCTPromiseRejectBlock) -> Void {
+        let scannedDeviceId = UUID(uuidString: scannedDeviceId)!
+        let scannedDevice = scannedDevices.first(where: { $0.id == scannedDeviceId })
+
+        guard scannedDevice != nil else {
+            resolve([
+                "error": "DeviceNotFound",
+                "message": "Device not found with id \(scannedDeviceId)"
+            ])
+            return
+        }
+
+        bloodPressureCancellable?.cancel()
+        bloodPressureCancellable = deviceManager.bloodPressureReader(for :scannedDevice!)
+            .read(device: scannedDevice!)
+            .sink (receiveCompletion: {[weak self] value in
+                self?.sendEvent(withName: "BloodPressureReadEvent", body: ["error": "ReadError", "message": "error reading data from device \(value)"])
+            }, receiveValue:{[weak self] value in
+                self?.sendEvent(withName: "BloodPressureReadEvent", body:[
+                    "samples": value.map({[
+                        "systolic": [
+                            "id": $0.systolic.id,
+                            "value": $0.systolic.value,
+                            "unit": $0.systolic.unit,
+                            "startDate": $0.systolic.startDate.timeIntervalSince1970,
+                            "endDate": $0.systolic.endDate.timeIntervalSince1970,
+                            "type": $0.systolic.type
+                        ],
+                        "diastolic": [
+                            "id": $0.diastolic.id,
+                            "value": $0.diastolic.value,
+                            "unit": $0.diastolic.unit,
+                            "startDate": $0.diastolic.startDate.timeIntervalSince1970,
+                            "endDate": $0.diastolic.endDate.timeIntervalSince1970,
+                            "type": $0.diastolic.type
+                        ],
+                        "pulse": [
+                            "id": $0.pulse?.id,
+                            "value": $0.pulse?.value,
+                            "unit": $0.pulse?.unit,
+                            "startDate": $0.pulse?.startDate.timeIntervalSince1970,
+                            "endDate": $0.pulse?.endDate.timeIntervalSince1970,
+                            "type": $0.pulse?.type
+                        ]
+                    ]})
+                ] )
+            })
 
         resolve(())
     }
@@ -161,28 +250,6 @@ private func mapBrandToString(_ brand: Brand) -> String {
     case .beurer: return "beurer"
     case .libre: return "libre"
     }
-}
-
-private func encode(_ encodable: Encodable) -> String? {
-  let json: String?
-  let jsonEncoder = JSONEncoder()
-
-  if let data = try? encode(encodable, encoder: jsonEncoder) {
-    json = String(data: data, encoding: .utf8)
-  } else {
-    json = nil
-  }
-  return json
-}
-
-private func encode(_ value: Encodable, encoder: JSONEncoder) throws -> Data? {
-  if let data = value as? Data {
-    return data
-  } else if let string = value as? String {
-    return string.data(using: .utf8)
-  } else {
-    return try encoder.encode(AnyEncodable(value: value))
-  }
 }
 
 public struct InternalScannedDevice: Equatable, Encodable {

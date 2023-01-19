@@ -13,15 +13,15 @@ RCT_EXTERN_METHOD(startScanForDevice:(NSString *)id
 RCT_EXTERN_METHOD(stopScanForDevice:(RCTPromiseResolveBlock)resolve
                   rejecter:(RCTPromiseRejectBlock)reject)
 
-RCT_EXTERN_METHOD(pairDevice:(NSString *)scannedDeviceId
+RCT_EXTERN_METHOD(pair:(NSString *)scannedDeviceId
                   resolver:(RCTPromiseResolveBlock)resolve
                   rejecter:(RCTPromiseRejectBlock)reject)
 
-RCT_EXTERN_METHOD(readBloodPressure:(NSString *)scannedDeviceId
+RCT_EXTERN_METHOD(startReadingBloodPressure:(NSString *)scannedDeviceId
                   resolver:(RCTPromiseResolveBlock)resolve
                   rejecter:(RCTPromiseRejectBlock)reject)
 
-RCT_EXTERN_METHOD(readGlucoseMeter:(NSString *)scannedDeviceId
+RCT_EXTERN_METHOD(startReadingGlucoseMeter:(NSString *)scannedDeviceId
                   resolver:(RCTPromiseResolveBlock)resolve
                   rejecter:(RCTPromiseRejectBlock)reject)
 

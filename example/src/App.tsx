@@ -62,34 +62,45 @@ const vitalDevicesManager = new VitalDevicesManager();
 // This is an example of how to listen to scan event from the VitalDevicesManager.
 // To start scanning for devices you need to call the startScan method on the VitalDevicesManager.
 // The same device can be scanned multiple times.
-eventEmitter.addListener(VitalDevicesEvents.scanEvent, (event: any) => {
+eventEmitter.addListener(VitalDevicesEvents.scanEvent, event => {
   console.log(VitalDevicesEvents.scanEvent, event);
-  vitalDevicesManager.readGlucoseMeter(event.id).then(() => {
-    console.log('Started reading for ', event.id);
-  });
+  console.log('Scanned device', event.id);
+  vitalDevicesManager
+    .readBloodPressure(event.id)
+    .then(() => {
+      console.log('Started reading for ', event.id);
+    })
+    .catch((error: any) => {
+      console.log(error);
+    });
 });
 
 // This is an example of how to listen to reading event from blood pressure device.
 // To start reading from a device you need to call the readingBloodPressure method on the VitalDevicesManager.
-// eventEmitter.addListener(
-//   VitalDevicesEvents.bloodPressureReadEvent,
-//   (event: any) => {
-//     console.log(VitalDevicesEvents.bloodPressureReadEvent, event);
-//     event.samples.forEach((sample: any) => {
-//       console.log(sample.diastolic);
-//       console.log(sample.systolic);
-//       console.log(sample.pulse);
-//     });
-//
-//     // After you are done reading from the device you need to call the scan method
-//     // on the VitalDevicesManager to continuously receive reads.
-//     vitalDevicesManager.scanForDevice(omronM7).then(() => {
-//       console.log('repeat Scanning for device');
-//     });
-//   },
-// );
+eventEmitter.addListener(
+  VitalDevicesEvents.bloodPressureReadEvent,
+  (event: any) => {
+    console.log(VitalDevicesEvents.bloodPressureReadEvent, event);
+    event.samples.forEach((sample: any) => {
+      console.log(sample.diastolic);
+      console.log(sample.systolic);
+      console.log(sample.pulse);
+    });
 
-let omronM7 = VitalDevicesManager.supportedDevices[2];
+    // After you are done reading from the device you need to call the scan method
+    // on the VitalDevicesManager to continuously receive reads.
+    vitalDevicesManager
+      .scanForDevice(omronM7)
+      .then(() => {
+        console.log('repeat Scanning for device');
+      })
+      .catch((error: any) => {
+        console.log(error);
+      });
+  },
+);
+
+let omronM7 = VitalDevicesManager.supportedDevices[1];
 requestMultiple([
   PERMISSIONS.ANDROID.BLUETOOTH_SCAN,
   PERMISSIONS.ANDROID.BLUETOOTH_CONNECT,
@@ -102,9 +113,14 @@ requestMultiple([
     statuses[PERMISSIONS.IOS.BLUETOOTH_PERIPHERAL] === 'granted'
   ) {
     // This is an example of how to start scanning for an Omron M7 device.
-    vitalDevicesManager.scanForDevice(omronM7).then(() => {
-      console.log('Scanning for device');
-    });
+    vitalDevicesManager
+      .scanForDevice(omronM7)
+      .then(() => {
+        console.log('Scanning for device');
+      })
+      .catch((error: any) => {
+        console.log(error);
+      });
   }
 });
 
