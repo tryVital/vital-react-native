@@ -12,11 +12,19 @@ class VitalCoreReactNativeModule(reactContext: ReactApplicationContext) :
     return NAME
   }
 
-  // Example method
-  // See https://reactnative.dev/docs/native-modules-android
   @ReactMethod
-  fun multiply(a: Double, b: Double, promise: Promise) {
-    promise.resolve(a * b)
+  fun setUserId(userId: String, promise: Promise) {
+    promise.resolve(null)
+  }
+
+  @ReactMethod
+  fun configure(apiKey: String, environment: String, region: String, enableLogs: Boolean, promise: Promise) {
+    promise.resolve(null)
+  }
+
+  @ReactMethod
+  fun cleanUp(promise: Promise) {
+    promise.resolve(null)
   }
 
   companion object {

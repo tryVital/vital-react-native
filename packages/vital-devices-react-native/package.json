@@ -51,6 +51,10 @@
   "dependencies": {
     "react-native-permissions": "^3.6.1"
   },
+  "peerDependencies": {
+    "react": "*",
+    "react-native": "*"
+  },
   "devDependencies": {
     "@arkweid/lefthook": "^0.7.7",
     "@commitlint/config-conventional": "^17.0.2",

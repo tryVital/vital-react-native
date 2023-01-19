@@ -2209,6 +2209,17 @@
   resolved "https://registry.yarnpkg.com/@tootallnate/once/-/once-1.1.2.tgz#ccb91445360179a04e7fe6aff78c00ffc1eeaf82"
   integrity sha512-RbzJvlNzmRq5c3O09UipeuXno4tA1FE6ikOjxZK0tuxVv3412l64l5t1W5pj4+rJq9vpkm/kwiR07aZXnsKPxw==
 
+"@tryvital/vital-core-react-native@file:../packages/vital-core-react-native":
+  version "0.2.6"
+
+"@tryvital/vital-devices-react-native@file:../packages/vital-devices-react-native":
+  version "0.2.6"
+  dependencies:
+    react-native-permissions "^3.6.1"
+
+"@tryvital/vital-health-react-native@file:../packages/vital-health-react-native":
+  version "0.2.6"
+
 "@tryvital/vital-node@^2.1.1":
   version "2.1.2"
   resolved "https://registry.yarnpkg.com/@tryvital/vital-node/-/vital-node-2.1.2.tgz#73980186403588ae5debb5545a4a5add2cb3bd9a"
@@ -6889,6 +6900,11 @@ react-native-gradle-plugin@^0.70.3:
   resolved "https://registry.yarnpkg.com/react-native-gradle-plugin/-/react-native-gradle-plugin-0.70.3.tgz#cbcf0619cbfbddaa9128701aa2d7b4145f9c4fc8"
   integrity sha512-oOanj84fJEXUg9FoEAQomA8ISG+DVIrTZ3qF7m69VQUJyOGYyDZmPqKcjvRku4KXlEH6hWO9i4ACLzNBh8gC0A==
 
+react-native-permissions@^3.6.1:
+  version "3.6.1"
+  resolved "https://registry.yarnpkg.com/react-native-permissions/-/react-native-permissions-3.6.1.tgz#73adcc1cef8cd57a9ef167b4507405f4ff5749c4"
+  integrity sha512-fzPpPQXeD34inUccqtoResSwYubfrwUguP4qrVUUv8+KSMjYSaHGoS5HaIJLZHlN9gO+TvLJZ2L5ZljTsb6qnQ==
+
 react-native-safe-area-context@3.3.2:
   version "3.3.2"
   resolved "https://registry.yarnpkg.com/react-native-safe-area-context/-/react-native-safe-area-context-3.3.2.tgz#9549a2ce580f2374edb05e49d661258d1b8bcaed"
@@ -8161,12 +8177,6 @@ vary@~1.1.2:
   version "1.1.2"
   resolved "https://registry.yarnpkg.com/vary/-/vary-1.1.2.tgz#2299f02c6ded30d4a5961b0b9f74524a18f634fc"
   integrity sha512-BNGbWLfd0eUPabhkXUVm0j8uuvREyTh5ovRa/dyow/BqAbZJyC+5fU+IzQOzmAKzYqYRAISoRhdQr3eIZ/PXqg==
-
-"vital-core-react-native@file:../packages/vital-core-react-native":
-  version "0.2.2"
-
-"vital-health-react-native@file:../packages/vital-health-react-native":
-  version "0.2.2"
 
 vlq@^1.0.0:
   version "1.0.1"
