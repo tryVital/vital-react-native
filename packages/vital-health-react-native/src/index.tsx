@@ -90,6 +90,6 @@ export enum VitalResource {
 
 export enum VitalWriteResource {
   Water = 'water',
-  Caffeine = 'caffeine', // ios only
+  Caffeine = 'caffeine', // iOS only
   MindfulSession = 'mindfulSession', // iOS only, value is ignored
 }
