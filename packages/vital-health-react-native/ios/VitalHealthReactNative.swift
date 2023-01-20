@@ -157,6 +157,8 @@ class VitalHealthReactNative: RCTEventEmitter {
             dataInput = .water(milliliters: Int(value))
           case .nutrition(.caffeine):
             dataInput = .caffeine(grams: Int(value))
+           case .vitals(.mindfulSession):
+            dataInput = .mindfulSession
           default:
             fatalError("\(resource) not supported for writing to HealthKit")
         }
@@ -192,6 +194,8 @@ private func mapResourceToReadableVitalResource(_ name: String) throws -> VitalR
       return .vitals(.bloodPressure)
     case "heartRate":
       return .vitals(.hearthRate)
+    case "mindfulSession":
+      return .vitals(.mindfulSession)
     case "steps":
       return .individual(.steps)
     case "activeEnergyBurned":
@@ -223,6 +227,8 @@ private func mapResourceToWritableVitalResource(_ name: String) throws -> Writab
       return .water
     case "caffeine":
       return .caffeine
+    case "mindfulSession":
+      return .mindfulSession
     default:
       throw VitalError.UnsupportedResource(name)
   }

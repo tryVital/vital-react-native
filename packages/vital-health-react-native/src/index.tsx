@@ -38,7 +38,7 @@ export class VitalHealth {
 
   static ask(
     readResources: VitalResource[],
-    writeResources: VitalResource[]
+    writeResources: VitalWriteResource[]
   ): Promise<void> {
     return VitalHealthReactNative.ask(readResources, writeResources);
   }
@@ -85,9 +85,11 @@ export enum VitalResource {
   BasalEnergyBurned = 'basalEnergyBurned',
   Water = 'water',
   Caffeine = 'caffeine',
+  MindfulSession = 'mindfulSession',
 }
 
 export enum VitalWriteResource {
   Water = 'water',
-  Caffeine = 'caffeine',
+  Caffeine = 'caffeine', // ios only
+  MindfulSession = 'mindfulSession', // iOS only, value is ignored
 }
