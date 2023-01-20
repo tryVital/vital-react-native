@@ -17,6 +17,7 @@ jobs:
           cd packages/vital-core-react-native
           npm install
           npm ci
+          npm run typescript
       - name: publish
         run: |
           cd packages/vital-core-react-native
