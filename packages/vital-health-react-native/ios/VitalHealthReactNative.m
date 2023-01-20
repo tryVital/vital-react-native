@@ -12,6 +12,18 @@ RCT_EXTERN_METHOD(askForResources:(NSArray<NSString *> *)resources
                   resolver:(RCTPromiseResolveBlock)resolve
                   rejecter:(RCTPromiseRejectBlock)reject)
 
+RCT_EXTERN_METHOD(ask:(NSArray<NSString *> *)readResources
+                  writeResources:(NSArray<NSString *> *)writeResources
+                  resolver:(RCTPromiseResolveBlock)resolve
+                  rejecter:(RCTPromiseRejectBlock)reject)
+
+RCT_EXTERN_METHOD(writeHealthData:(NSString *)resource
+                  value:(double)value
+                  startDate:(double)startDate
+                  endDate:(double)endDate
+                  resolver:(RCTPromiseResolveBlock)resolve
+                  rejecter:(RCTPromiseRejectBlock)reject)
+
 RCT_EXTERN_METHOD(cleanUp:(RCTPromiseResolveBlock)resolve
                   rejecter:(RCTPromiseRejectBlock)reject)
 
