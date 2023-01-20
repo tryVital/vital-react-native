@@ -30,7 +30,6 @@
     "test": "jest",
     "typescript": "tsc --declaration",
     "lint": "eslint \"**/*.{js,ts,tsx}\"",
-    "release": "release-it",
     "example": "yarn --cwd example",
     "bootstrap": "yarn example && yarn install && yarn example pods",
     "clean": "del-cli android/build example/android/build example/android/app/build example/ios/build"
@@ -55,7 +54,6 @@
   },
   "devDependencies": {
     "@react-native-community/eslint-config": "^3.0.2",
-    "@release-it/conventional-changelog": "^5.0.0",
     "@types/jest": "^28.1.2",
     "@types/react": "~17.0.21",
     "@types/react-native": "0.70.0",
@@ -71,7 +69,6 @@
     "react-native": "0.70.6",
     "react-native-builder-bob": "^0.20.2",
     "react-native-version": "^4.0.0",
-    "release-it": "^15.0.0",
     "typescript": "^4.5.2"
   },
   "resolutions": {
@@ -87,23 +84,6 @@
       "<rootDir>/example/node_modules",
       "<rootDir>/lib/"
     ]
-  },
-  "release-it": {
-    "git": {
-      "commitMessage": "chore: release ${version}",
-      "tagName": "v${version}"
-    },
-    "npm": {
-      "publish": true
-    },
-    "github": {
-      "release": true
-    },
-    "plugins": {
-      "@release-it/conventional-changelog": {
-        "preset": "angular"
-      }
-    }
   },
   "eslintConfig": {
     "root": true,
