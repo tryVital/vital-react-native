@@ -18,17 +18,17 @@ class VitalHealthReactNative: RCTEventEmitter {
 
     cancellable = VitalHealthKitClient.shared.status.sink { status in
       var payload: [String: String] = [:]
-      
+
       switch status {
         case let .failedSyncing(resource, error):
           payload["resource"] = String(describing: resource)
           payload["status"] = "failedSyncing"
           payload["extra"] = error?.localizedDescription
-          
+
         case let .nothingToSync(resource):
           payload["resource"] = String(describing: resource)
           payload["status"] = "nothingToSync"
-          
+
         case let .successSyncing(resource, _):
           payload["resource"] = String(describing: resource)
           payload["status"] = "successSyncing"
@@ -36,11 +36,11 @@ class VitalHealthReactNative: RCTEventEmitter {
         case let .syncing(resource):
           payload["resource"] = String(describing: resource)
           payload["status"] = "syncing"
-          
+
         case .syncingCompleted:
           payload["status"] = "completed"
       }
-      
+
       self.sendEvent(withName: "status", body: payload)
     }
   }
@@ -70,17 +70,18 @@ class VitalHealthReactNative: RCTEventEmitter {
   }
 
 
-  @objc(askForResources:resolver:rejecter:)
-  func askForResources(
-    _ resources: [String],
+  @objc(ask:writeResources:resolver:rejecter:)
+  func ask(
+    _ readResources: [String],
+    writeResources: [String],
     resolve: @escaping RCTPromiseResolveBlock,
     reject: @escaping RCTPromiseRejectBlock
   ) {
     Task {
       do {
-        
-        let readPermissions = try resources.map { try mapResourceToVitalResource($0) }
-        let outcome = await VitalHealthKitClient.shared.ask(readPermissions: readPermissions, writePermissions: [])
+        let readPermissions = try readResources.map { try mapResourceToReadableVitalResource($0) }
+        let writePermissions = try writeResources.map { try mapResourceToWritableVitalResource($0) }
+        let outcome = await VitalHealthKitClient.shared.ask(readPermissions: readPermissions, writePermissions: writePermissions)
 
         switch outcome {
           case .success:
@@ -105,7 +106,7 @@ class VitalHealthReactNative: RCTEventEmitter {
     reject: RCTPromiseRejectBlock
   ) {
     do {
-      try VitalHealthKitClient.shared.syncData(for: resources.map { try mapResourceToVitalResource($0) })
+      try VitalHealthKitClient.shared.syncData(for: resources.map { try mapResourceToReadableVitalResource($0) })
       resolve(())
     } catch VitalError.UnsupportedResource(let errorMessage) {
       reject("UnsupportedResource", errorMessage, nil)
@@ -125,7 +126,7 @@ class VitalHealthReactNative: RCTEventEmitter {
   @objc(hasAskedForPermission:resolver:rejecter:)
   func hasAskedForPermission(_ resource: String, resolve: RCTPromiseResolveBlock, reject: RCTPromiseRejectBlock) {
     do {
-      let vitalResource = try mapResourceToVitalResource(resource)
+      let vitalResource = try mapResourceToReadableVitalResource(resource)
       let value: Bool = VitalHealthKitClient.shared.hasAskedForPermission(resource: vitalResource)
       resolve(value)
     } catch VitalError.UnsupportedResource(let errorMessage) {
@@ -134,9 +135,46 @@ class VitalHealthReactNative: RCTEventEmitter {
         reject(nil, "Unknown error", nil)
     }
   }
+
+  @objc(writeHealthData:value:startDate:endDate:resolver:rejecter:)
+     func writeHealthData(_ resource: String,
+         value: Double,
+         startDate: Double,
+         endDate: Double,
+         resolve: @escaping RCTPromiseResolveBlock,
+         reject: RCTPromiseRejectBlock
+     ){
+      do {
+        let resource = try mapResourceToReadableVitalResource(resource)
+
+        let startDate = Date(timeIntervalSince1970: startDate / 1000)
+        let endDate = Date(timeIntervalSince1970: endDate / 1000)
+
+        let dataInput: DataInput
+
+        switch resource {
+          case .nutrition(.water):
+            dataInput = .water(milliliters: Int(value))
+          case .nutrition(.caffeine):
+            dataInput = .caffeine(grams: Int(value))
+          default:
+            fatalError("\(resource) not supported for writing to HealthKit")
+        }
+
+        Task {
+          try await VitalHealthKitClient.shared.write(input: dataInput, startDate: startDate, endDate: endDate)
+          resolve(())
+        }
+      } catch VitalError.UnsupportedResource(let errorMessage) {
+        reject("UnsupportedResource", errorMessage, nil)
+      } catch {
+        reject(nil, "Unknown error", nil)
+      }
+    }
+
 }
 
-private func mapResourceToVitalResource(_ name: String) throws -> VitalResource {
+private func mapResourceToReadableVitalResource(_ name: String) throws -> VitalResource {
   switch name {
     case "profile":
       return .profile
@@ -170,6 +208,21 @@ private func mapResourceToVitalResource(_ name: String) throws -> VitalResource 
       return .individual(.weight)
     case "bodyFat":
       return .individual(.bodyFat)
+    case "water":
+      return .nutrition(.water)
+    case "caffeine":
+      return .nutrition(.caffeine)
+    default:
+      throw VitalError.UnsupportedResource(name)
+  }
+}
+
+private func mapResourceToWritableVitalResource(_ name: String) throws -> WritableVitalResource {
+  switch name {
+    case "water":
+      return .water
+    case "caffeine":
+      return .caffeine
     default:
       throw VitalError.UnsupportedResource(name)
   }

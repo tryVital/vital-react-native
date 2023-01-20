@@ -2210,15 +2210,15 @@
   integrity sha512-RbzJvlNzmRq5c3O09UipeuXno4tA1FE6ikOjxZK0tuxVv3412l64l5t1W5pj4+rJq9vpkm/kwiR07aZXnsKPxw==
 
 "@tryvital/vital-core-react-native@file:../packages/vital-core-react-native":
-  version "0.2.6"
+  version "0.3.0"
 
 "@tryvital/vital-devices-react-native@file:../packages/vital-devices-react-native":
-  version "0.2.6"
+  version "0.3.0"
   dependencies:
     react-native-permissions "^3.6.1"
 
 "@tryvital/vital-health-react-native@file:../packages/vital-health-react-native":
-  version "0.2.6"
+  version "0.3.0"
 
 "@tryvital/vital-node@^2.1.1":
   version "2.1.2"

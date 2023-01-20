@@ -35,10 +35,16 @@
 			</dict>
 		</dict>
 	</dict>
+	<key>NSBluetoothAlwaysUsageDescription</key>
+	<string>YOUR TEXT</string>
+	<key>NSBluetoothPeripheralUsageDescription</key>
+	<string>YOUR TEXT</string>
 	<key>NSHealthClinicalHealthRecordsShareUsageDescription</key>
 	<string>Vital demo requires access to health</string>
 	<key>NSHealthShareUsageDescription</key>
 	<string>We access your data to share it with your provider.</string>
+	<key>NSHealthUpdateUsageDescription</key>
+	<string>We access your data to update it</string>
 	<key>NSLocationWhenInUseUsageDescription</key>
 	<string></string>
 	<key>UIAppFonts</key>
@@ -74,9 +80,5 @@
 	</array>
 	<key>UIViewControllerBasedStatusBarAppearance</key>
 	<false/>
-	<key>NSBluetoothAlwaysUsageDescription</key>
-    <string>YOUR TEXT</string>
-    <key>NSBluetoothPeripheralUsageDescription</key>
-    <string>YOUR TEXT</string>
 </dict>
 </plist>

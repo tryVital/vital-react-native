@@ -33,7 +33,28 @@ export class VitalHealth {
   }
 
   static askForResources(resources: VitalResource[]): Promise<void> {
-    return VitalHealthReactNative.askForResources(resources);
+    return VitalHealthReactNative.ask(resources, []);
+  }
+
+  static ask(
+    readResources: VitalResource[],
+    writeResources: VitalResource[]
+  ): Promise<void> {
+    return VitalHealthReactNative.ask(readResources, writeResources);
+  }
+
+  static writeHealthData(
+    resource: VitalWriteResource,
+    value: number,
+    startDate: Date,
+    endDate: Date
+  ): Promise<void> {
+    return VitalHealthReactNative.writeHealthData(
+      resource,
+      value,
+      startDate.getTime(),
+      endDate.getTime()
+    );
   }
 
   static hasAskedForPermission(resource: VitalResource): Promise<boolean> {
@@ -49,6 +70,7 @@ export class VitalHealth {
   }
 }
 
+// noinspection JSUnusedGlobalSymbols
 export enum VitalResource {
   Profile = 'profile',
   Body = 'body',
@@ -61,4 +83,11 @@ export enum VitalResource {
   Steps = 'steps',
   ActiveEnergyBurned = 'activeEnergyBurned',
   BasalEnergyBurned = 'basalEnergyBurned',
+  Water = 'water',
+  Caffeine = 'caffeine',
+}
+
+export enum VitalWriteResource {
+  Water = 'water',
+  Caffeine = 'caffeine',
 }
