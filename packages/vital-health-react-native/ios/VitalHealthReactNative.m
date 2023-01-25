@@ -8,6 +8,17 @@ RCT_EXTERN_METHOD(configure:(BOOL)backgroundDeliveryEnabled
                   resolver:(RCTPromiseResolveBlock)resolve
                   rejecter:(RCTPromiseRejectBlock)reject)
 
+RCT_EXTERN_METHOD(setUserId:(NSString *)userId
+                  resolver:(RCTPromiseResolveBlock)resolve
+                  rejecter:(RCTPromiseRejectBlock)reject)
+
+RCT_EXTERN_METHOD(configureClient:(NSString *)apiKey
+                  environment:(NSString *)environment
+                  region:(NSString *)region
+                  enableLogs:(BOOL)enableLogs
+                  resolver:(RCTPromiseResolveBlock)resolve
+                  rejecter:(RCTPromiseRejectBlock)reject)
+
 RCT_EXTERN_METHOD(askForResources:(NSArray<NSString *> *)resources
                   resolver:(RCTPromiseResolveBlock)resolve
                   rejecter:(RCTPromiseRejectBlock)reject)
