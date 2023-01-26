@@ -2,14 +2,14 @@ export class HealthConfig {
   logsEnabled = true;
   numberOfDaysToBackFill = 90;
   androidConfig = new AndroidHealthConfig();
-  iosConfig = new IosHealthConfig();
+  iOSConfig = new IOSHealthConfig();
 }
 
 export class AndroidHealthConfig {
   syncOnAppStart = true;
 }
 
-export class IosHealthConfig {
+export class IOSHealthConfig {
   dataPushMode = 'automatic';
   backgroundDeliveryEnabled = true;
 }

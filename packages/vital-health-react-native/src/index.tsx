@@ -36,7 +36,7 @@ export class VitalHealth {
       );
     } else {
       return VitalHealthReactNative.configure(
-        healthConfig.iosConfig.backgroundDeliveryEnabled,
+        healthConfig.iOSConfig.backgroundDeliveryEnabled,
         healthConfig.numberOfDaysToBackFill,
         healthConfig.logsEnabled
       );
