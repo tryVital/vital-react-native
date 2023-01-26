@@ -1,4 +1,5 @@
 import { NativeEventEmitter, NativeModules, Platform } from 'react-native';
+import type { HealthConfig } from './health_config';
 
 const LINKING_ERROR =
   `The package 'vital-health-react-native' doesn't seem to be linked. Make sure: \n\n` +
@@ -17,17 +18,45 @@ const VitalHealthReactNative = NativeModules.VitalHealthReactNative
       }
     );
 
+export const VitalHealthReactNativeModule = VitalHealthReactNative;
+
+export const VitalHealthEvents = {
+  statusEvent: 'Status',
+};
+
 export class VitalHealth {
   static status = new NativeEventEmitter(VitalHealthReactNative);
 
-  static configure(
-    backgroundDeliveryEnabled: boolean,
-    numberOfDaysToBackFill: number,
+  static configure(healthConfig: HealthConfig): Promise<void> {
+    if (Platform.OS === 'android') {
+      return VitalHealthReactNative.configure(
+        healthConfig.androidConfig.syncOnAppStart,
+        healthConfig.numberOfDaysToBackFill,
+        healthConfig.logsEnabled
+      );
+    } else {
+      return VitalHealthReactNative.configure(
+        healthConfig.iOSConfig.backgroundDeliveryEnabled,
+        healthConfig.numberOfDaysToBackFill,
+        healthConfig.logsEnabled
+      );
+    }
+  }
+
+  static setUserId(userId: string): Promise<void> {
+    return VitalHealthReactNative.setUserId(userId);
+  }
+
+  static configureClient(
+    apiKey: string,
+    environment: string,
+    region: string,
     enableLogs: boolean
   ): Promise<void> {
-    return VitalHealthReactNative.configure(
-      backgroundDeliveryEnabled,
-      numberOfDaysToBackFill,
+    return VitalHealthReactNative.configureClient(
+      apiKey,
+      environment,
+      region,
       enableLogs
     );
   }

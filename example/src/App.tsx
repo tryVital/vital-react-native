@@ -3,10 +3,14 @@ import {NavigationContainer} from '@react-navigation/native';
 import {Icon, IconButton, NativeBaseProvider} from 'native-base';
 import {createNativeStackNavigator} from '@react-navigation/native-stack';
 import {VitalClient} from '@tryvital/vital-node';
-import {VitalCore} from '@tryvital/vital-core-react-native';
 import HomeScreen from './screens/HomeScreen';
 import {ConnectSource} from './screens/ConnectScreen';
-import {VitalHealth, VitalResource} from '@tryvital/vital-health-react-native';
+import {
+  VitalHealth,
+  VitalHealthEvents,
+  VitalHealthReactNativeModule,
+  VitalResource,
+} from '@tryvital/vital-health-react-native';
 import {
   VitalDevicesEvents,
   VitalDevicesManager,
@@ -14,6 +18,7 @@ import {
 } from '@tryvital/vital-devices-react-native';
 import {PERMISSIONS, requestMultiple} from 'react-native-permissions';
 import {NativeEventEmitter} from 'react-native';
+import {HealthConfig} from '@tryvital/vital-health-react-native/lib/health_config';
 
 export const VITAL_API_KEY = 'YOUR API KEY HERE';
 export const VITAL_ENVIRONMENT = 'sandbox';
@@ -29,40 +34,56 @@ export const vitalNodeClient = new VitalClient({
   region: VITAL_REGION,
 });
 
-// Configuring Vital healthkit core SDK you can do this at any point in your app
+// Configuring Vital health SDK you can do this at any point in your app
 // You can then set the user_id and data will start pushing up to the servers.
-VitalCore.configure(VITAL_API_KEY, VITAL_ENVIRONMENT, VITAL_REGION, true).then(
-  () => {
-    VitalCore.setUserId(VITAL_USER_ID).then(() => {
-      VitalHealth.configure(true, 30, true).then(() => {
-        VitalHealth.hasAskedForPermission(VitalResource.Steps)
+VitalHealth.configureClient(
+  VITAL_API_KEY,
+  VITAL_ENVIRONMENT,
+  VITAL_REGION,
+  true,
+).then(() => {
+  console.log('VitalHealth configured client');
+  VitalHealth.configure(new HealthConfig()).then(() => {
+    console.log('VitalHealth configured');
+    VitalHealth.setUserId(VITAL_USER_ID)
+      .then(() => {
+        console.log('VitalHealth setUserId');
+        VitalHealth.askForResources([VitalResource.Steps])
           .then(() => {
             console.log('VitalHealth asked for resources');
+            VitalHealth.syncData([VitalResource.Steps])
+              .then(() => {
+                console.log('VitalHealth synced data');
+              })
+              .catch((error: any) => {
+                console.log(error);
+              });
           })
           .catch((error: any) => {
             console.log(error);
           });
+      })
+      .catch((error: any) => {
+        console.log(error);
       });
-    });
-  },
-);
+  });
+});
 
-const onSessionConnect = (event: any) => {
-  console.log(event);
-  subscription.remove();
-};
+const healthEventEmitter = new NativeEventEmitter(VitalHealthReactNativeModule);
 
-const subscription = VitalHealth.status.addListener('status', onSessionConnect);
+healthEventEmitter.addListener(VitalHealthEvents.statusEvent, (event: any) => {
+  console.log(VitalHealthEvents.statusEvent, event);
+});
 
 //To start getting events from the VitalDevicesManager you need to create an event emitter
-const eventEmitter = new NativeEventEmitter(VitalDevicesNativeModule);
+const devicesEventEmitter = new NativeEventEmitter(VitalDevicesNativeModule);
 
 const vitalDevicesManager = new VitalDevicesManager();
 
 // This is an example of how to listen to scan event from the VitalDevicesManager.
 // To start scanning for devices you need to call the startScan method on the VitalDevicesManager.
 // The same device can be scanned multiple times.
-eventEmitter.addListener(VitalDevicesEvents.scanEvent, event => {
+devicesEventEmitter.addListener(VitalDevicesEvents.scanEvent, event => {
   console.log(VitalDevicesEvents.scanEvent, event);
   console.log('Scanned device', event.id);
   vitalDevicesManager
@@ -77,7 +98,7 @@ eventEmitter.addListener(VitalDevicesEvents.scanEvent, event => {
 
 // This is an example of how to listen to reading event from blood pressure device.
 // To start reading from a device you need to call the readingBloodPressure method on the VitalDevicesManager.
-eventEmitter.addListener(
+devicesEventEmitter.addListener(
   VitalDevicesEvents.bloodPressureReadEvent,
   (event: any) => {
     console.log(VitalDevicesEvents.bloodPressureReadEvent, event);

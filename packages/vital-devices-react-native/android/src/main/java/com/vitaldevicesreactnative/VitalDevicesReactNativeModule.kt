@@ -44,7 +44,7 @@ class VitalDevicesReactNativeModule(reactContext: ReactApplicationContext) :
             sendEvent(VitalDevicesEvent.ScanEvent, WritableNativeMap().apply {
               putString("id", it.address)
               putString("name", it.name)
-              putString("id", it.address)
+              putString("address", it.address)
               putMap("deviceModel", WritableNativeMap().apply {
                 putString("name", it.deviceModel.name)
                 putString("brand", brandToString(it.deviceModel.brand))
