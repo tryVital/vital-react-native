@@ -20,8 +20,7 @@ import {PERMISSIONS, requestMultiple} from 'react-native-permissions';
 import {NativeEventEmitter} from 'react-native';
 import {HealthConfig} from '@tryvital/vital-health-react-native/lib/health_config';
 
-export const VITAL_API_KEY =
-  'sk_us_WUg9-SYEgl7Un20ppSpLTYi5hru_GPXurFlY7lHUfwA';
+export const VITAL_API_KEY = 'YOUR API KEY HERE';
 export const VITAL_ENVIRONMENT = 'sandbox';
 export const VITAL_REGION = 'us';
 export const VITAL_USER_ID = 'db5f35cd-e328-41e4-b545-ec97386468e2';
