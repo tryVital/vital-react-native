@@ -305,9 +305,11 @@ PODS:
   - React-jsinspector (0.70.6)
   - React-logger (0.70.6):
     - glog
+  - react-native-randombytes (3.6.1):
+    - React-Core
   - react-native-safe-area-context (3.3.2):
     - React-Core
-  - react-native-webview (11.26.0):
+  - react-native-webview (11.26.1):
     - React-Core
   - React-perflogger (0.70.6)
   - React-RCTActionSheet (0.70.6):
@@ -377,21 +379,21 @@ PODS:
     - React-perflogger (= 0.70.6)
   - RNPermissions (3.6.1):
     - React-Core
-  - RNScreens (3.18.2):
+  - RNScreens (3.19.0):
     - React-Core
     - React-RCTImage
-  - RNSVG (12.1.1):
-    - React
+  - RNSVG (12.5.1):
+    - React-Core
   - RNVectorIcons (9.2.0):
     - React-Core
   - SocketRocket (0.6.0)
-  - vital-core-react-native (0.3.0):
+  - vital-core-react-native (1.1.0):
     - React-Core
     - VitalCore (~> 0.7.13)
-  - vital-devices-react-native (0.3.0):
+  - vital-devices-react-native (1.1.0):
     - React-Core
     - VitalDevices (~> 0.7.13)
-  - vital-health-react-native (0.3.0):
+  - vital-health-react-native (1.1.0):
     - React-Core
     - VitalHealthKit (~> 0.7.13)
   - VitalCore (0.7.13)
@@ -452,6 +454,7 @@ DEPENDENCIES:
   - React-jsiexecutor (from `../node_modules/react-native/ReactCommon/jsiexecutor`)
   - React-jsinspector (from `../node_modules/react-native/ReactCommon/jsinspector`)
   - React-logger (from `../node_modules/react-native/ReactCommon/logger`)
+  - react-native-randombytes (from `../node_modules/react-native-randombytes`)
   - react-native-safe-area-context (from `../node_modules/react-native-safe-area-context`)
   - react-native-webview (from `../node_modules/react-native-webview`)
   - React-perflogger (from `../node_modules/react-native/ReactCommon/reactperflogger`)
@@ -542,6 +545,8 @@ EXTERNAL SOURCES:
     :path: "../node_modules/react-native/ReactCommon/jsinspector"
   React-logger:
     :path: "../node_modules/react-native/ReactCommon/logger"
+  react-native-randombytes:
+    :path: "../node_modules/react-native-randombytes"
   react-native-safe-area-context:
     :path: "../node_modules/react-native-safe-area-context"
   react-native-webview:
@@ -624,8 +629,9 @@ SPEC CHECKSUMS:
   React-jsiexecutor: b4a65947391c658450151275aa406f2b8263178f
   React-jsinspector: 60769e5a0a6d4b32294a2456077f59d0266f9a8b
   React-logger: 1623c216abaa88974afce404dc8f479406bbc3a0
+  react-native-randombytes: 421f1c7d48c0af8dbcd471b0324393ebf8fe7846
   react-native-safe-area-context: 584dc04881deb49474363f3be89e4ca0e854c057
-  react-native-webview: 994b9f8fbb504d6314dc40d83f94f27c6831b3bf
+  react-native-webview: 9f111dfbcfc826084d6c507f569e5e03342ee1c1
   React-perflogger: 8c79399b0500a30ee8152d0f9f11beae7fc36595
   React-RCTActionSheet: 7316773acabb374642b926c19aef1c115df5c466
   React-RCTAnimation: 5341e288375451297057391227f691d9b2326c3d
@@ -639,13 +645,13 @@ SPEC CHECKSUMS:
   React-runtimeexecutor: 15437b576139df27635400de0599d9844f1ab817
   ReactCommon: 349be31adeecffc7986a0de875d7fb0dcf4e251c
   RNPermissions: dcdb7b99796bbeda6975a6e79ad519c41b251b1c
-  RNScreens: 34cc502acf1b916c582c60003dc3089fa01dc66d
-  RNSVG: 551acb6562324b1d52a4e0758f7ca0ec234e278f
+  RNScreens: ea4cd3a853063cda19a4e3c28d2e52180c80f4eb
+  RNSVG: d7d7bc8229af3842c9cfc3a723c815a52cdd1105
   RNVectorIcons: fcc2f6cb32f5735b586e66d14103a74ce6ad61f8
   SocketRocket: fccef3f9c5cedea1353a9ef6ada904fde10d6608
-  vital-core-react-native: f8a641fc8f5a4fa817df019a7c416add52615d03
-  vital-devices-react-native: 025430f59b78970fd8c657638e0b52695b8c6342
-  vital-health-react-native: 91fff8f7901085b25fd9ce6126c81e90a37e9507
+  vital-core-react-native: 73d419619035957ab100b756c99aadfb8f63fec2
+  vital-devices-react-native: 52f95c9b319550deb9eebb142b591beb3fa7bdc8
+  vital-health-react-native: b0e63d2d36fa3fe74275279fb89db89bebe4bcbb
   VitalCore: 04c237bc7380b6ee81fec315f7843ff6aed0407c
   VitalDevices: 1fa23716aff3d68a8d17c23a1c25e960fef7e0f6
   VitalHealthKit: f5ad46e4ba8df0aaa226aaaa660f6b49e0ae3a9f

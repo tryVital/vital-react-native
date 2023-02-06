@@ -1,0 +1,16 @@
+{
+    "name": "vital-react-native-monorepo",
+    "private": true,
+    "workspaces": {
+        "packages": ["packages/*", "example"]
+    },
+    "scripts": {
+        "build": "yarn workspaces run build",
+        "clean": "yarn workspaces run clean",
+        "clean:metro": "yarn workspace example clean:metro",
+        "example:build:ios": "yarn build && yarn workspace example build:ios",
+        "example:build:android": "yarn build && yarn workspace example build:android",
+        "example:start:ios": "yarn workspace example start:ios",
+        "example:start:android": "yarn workspace example start:android"
+    }
+}

@@ -18,7 +18,7 @@ import {
 } from '@tryvital/vital-devices-react-native';
 import {PERMISSIONS, requestMultiple} from 'react-native-permissions';
 import {NativeEventEmitter} from 'react-native';
-import {HealthConfig} from '@tryvital/vital-health-react-native/lib/health_config';
+import {HealthConfig} from '@tryvital/vital-health-react-native';
 
 export const VITAL_API_KEY = 'YOUR API KEY HERE';
 export const VITAL_ENVIRONMENT = 'sandbox';
