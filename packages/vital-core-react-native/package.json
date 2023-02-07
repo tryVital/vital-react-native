@@ -2,12 +2,13 @@
   "name": "@tryvital/vital-core-react-native",
   "version": "1.1.0",
   "description": "test",
-  "main": "lib/index.js",
-  "types": "lib/index.d.ts",
+  "main": "lib/commonjs/index.js",
+  "module": "lib/module/index.js",
+  "types": "lib/typescript/index.d.ts",
   "source": "src/index",
   "files": [
     "src",
-    "lib",
+    "lib/**/*",
     "android",
     "ios",
     "cpp",
@@ -25,14 +26,13 @@
     "!**/.*"
   ],
   "scripts": {
+    "build": "bob build",
+    "clean": "del lib",
+    "prepack": "yarn run clean && yarn run build",
     "np": "np --no-publish",
     "postversion": "react-native-version",
     "test": "jest",
-    "typescript": "tsc --declaration",
-    "lint": "eslint \"**/*.{js,ts,tsx}\"",
-    "example": "yarn --cwd example",
-    "bootstrap": "yarn example && yarn install && yarn example pods",
-    "clean": "del-cli android/build example/android/build example/android/app/build example/ios/build"
+    "lint": "eslint \"**/*.{js,ts,tsx}\""
   },
   "keywords": [
     "react-native",
@@ -63,7 +63,7 @@
     "prettier": "^2.0.5",
     "react": "18.1.0",
     "react-native": "0.70.6",
-    "react-native-builder-bob": "^0.20.2",
+    "react-native-builder-bob": "^0.20.3",
     "react-native-version": "^4.0.0",
     "typescript": "^4.5.2"
   },
@@ -78,6 +78,23 @@
     "node": ">= 16.0.0"
   },
   "packageManager": "^yarn@1.22.15",
+  "react-native-builder-bob": {
+    "source": "src",
+    "output": "lib",
+    "files": [
+      "src/"
+    ],
+    "targets": [
+      "commonjs",
+      "module",
+      [
+        "typescript",
+        {
+          "project": "tsconfig.build.json"
+        }
+      ]
+    ]
+  },
   "jest": {
     "preset": "react-native",
     "modulePathIgnorePatterns": [

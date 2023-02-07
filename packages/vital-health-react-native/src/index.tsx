@@ -1,6 +1,9 @@
 import { NativeEventEmitter, NativeModules, Platform } from 'react-native';
 import type { HealthConfig } from './health_config';
 
+// Reexports
+export * from './health_config';
+
 const LINKING_ERROR =
   `The package 'vital-health-react-native' doesn't seem to be linked. Make sure: \n\n` +
   Platform.select({ ios: "- You have run 'pod install'\n", default: '' }) +

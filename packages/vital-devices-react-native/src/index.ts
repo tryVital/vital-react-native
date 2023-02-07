@@ -1,8 +1,12 @@
 import type { DeviceModel } from './model/device_model';
 import { DeviceKind } from './model/device_model';
+import { Brand } from './model/brand';
 import { NativeModules, Platform } from 'react-native';
 import { checkMultiple, PERMISSIONS } from 'react-native-permissions';
-import { Brand } from './model/brand';
+
+export * from './model/device_model';
+export * from './model/brand';
+export * from './model/scanned_device';
 
 const LINKING_ERROR =
   `The package 'vital-core-react-native' doesn't seem to be linked. Make sure: \n\n` +
