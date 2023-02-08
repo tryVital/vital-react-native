@@ -13,6 +13,7 @@ import io.tryvital.client.Region
 import io.tryvital.client.VitalClient
 import io.tryvital.client.utils.VitalLogger
 import io.tryvital.vitalhealthconnect.VitalHealthConnectManager
+import io.tryvital.vitalhealthconnect.model.HealthConnectAvailability
 import io.tryvital.vitalhealthconnect.model.HealthResource
 import io.tryvital.vitalhealthconnect.model.SyncStatus
 import kotlinx.coroutines.*
@@ -50,32 +51,42 @@ class VitalHealthReactNativeModule(reactContext: ReactApplicationContext) :
     promise: Promise
   ) {
     if (vitalClient == null) {
-      promise.reject(
+      return promise.reject(
         "VitalClient is not configured",
         "VitalClient is not configured",
       )
     }
 
-    vitalHealthConnectManager = VitalHealthConnectManager.create(
+    val manager = VitalHealthConnectManager.create(
       reactApplicationContext,
       vitalClient!!.apiKey,
       vitalClient!!.region,
       vitalClient!!.environment
     )
+    val availability = manager.isAvailable(reactApplicationContext)
 
-    mainScope?.cancel()
-    mainScope = MainScope()
-    mainScope!!.launch {
-      vitalHealthConnectManager!!.configureHealthConnectClient(
-        logsEnabled = enableLogs,
-        syncOnAppStart = syncOnAppStart,
-        numberOfDaysToBackFill = numberOfDaysToBackFill,
+    if (availability != HealthConnectAvailability.Installed) {
+      return promise.reject(
+        "Health Connect is unavailable: ${availability}",
+        "Health Connect is unavailable: ${availability}",
       )
     }
 
-    startStatusUpdate()
+    vitalHealthConnectManager = manager
 
-    promise.resolve(null)
+    mainScope?.cancel()
+    mainScope = MainScope().apply {
+      launch {
+        manager.configureHealthConnectClient(
+          logsEnabled = enableLogs,
+          syncOnAppStart = syncOnAppStart,
+          numberOfDaysToBackFill = numberOfDaysToBackFill,
+        )
+        promise.resolve(null)
+      }
+    }
+
+    startStatusUpdate()
   }
 
   @ReactMethod
