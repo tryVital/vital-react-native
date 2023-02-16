@@ -17,11 +17,11 @@ RCT_EXTERN_METHOD(pair:(NSString *)scannedDeviceId
                   resolver:(RCTPromiseResolveBlock)resolve
                   rejecter:(RCTPromiseRejectBlock)reject)
 
-RCT_EXTERN_METHOD(startReadingBloodPressure:(NSString *)scannedDeviceId
+RCT_EXTERN_METHOD(readBloodPressure:(NSString *)scannedDeviceId
                   resolver:(RCTPromiseResolveBlock)resolve
                   rejecter:(RCTPromiseRejectBlock)reject)
 
-RCT_EXTERN_METHOD(startReadingGlucoseMeter:(NSString *)scannedDeviceId
+RCT_EXTERN_METHOD(readGlucoseMeter:(NSString *)scannedDeviceId
                   resolver:(RCTPromiseResolveBlock)resolve
                   rejecter:(RCTPromiseRejectBlock)reject)
 

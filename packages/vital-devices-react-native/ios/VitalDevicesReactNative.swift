@@ -26,12 +26,14 @@ class VitalDevicesReactNative: RCTEventEmitter {
     }
 
     @objc(startScanForDevice:name:brand:kind:resolver:rejecter:)
-    func startScanForDevice(_ id:String,
-                            name: String,
-                            brand: String,
-                            kind: String,
-                            resolve: @escaping RCTPromiseResolveBlock,
-                            reject:RCTPromiseRejectBlock) -> Void {
+    func startScanForDevice(
+        _ id:String,
+        name: String,
+        brand: String,
+        kind: String,
+        resolve: @escaping RCTPromiseResolveBlock,
+        reject: @escaping RCTPromiseRejectBlock
+    ) {
         do {
             let deviceModel = DeviceModel(
                 id: id,
@@ -41,184 +43,171 @@ class VitalDevicesReactNative: RCTEventEmitter {
             )
 
             scannerResultCancellable?.cancel()
-            scannerResultCancellable =  deviceManager.search(for:deviceModel)
-                .sink {[weak self] value in
+            scannerResultCancellable =  deviceManager
+                .search(for: deviceModel)
+                .receive(on: DispatchQueue.main)
+                .sink { [weak self] value in
                     self?.scannedDevices.append(value)
-                    self?.sendEvent(withName: "ScanEvent", body:
-                                        [
-                                            "id": value.id.uuidString,
-                                            "name": value.name,
-                                            "deviceModel": [
-                                                "id": value.deviceModel.id,
-                                                "name": value.deviceModel.name,
-                                                "brand": value.deviceModel.brand.rawValue,
-                                                "kind": value.deviceModel.kind.rawValue
-                                            ]
-                                        ])
+                    self?.sendEvent(
+                        withName: "ScanEvent",
+                        body: [
+                            "id": value.id.uuidString,
+                            "name": value.name,
+                            "deviceModel": [
+                                "id": value.deviceModel.id,
+                                "name": value.deviceModel.name,
+                                "brand": value.deviceModel.brand.rawValue,
+                                "kind": value.deviceModel.kind.rawValue
+                            ]
+                        ]
+                    )
                 }
 
             resolve(())
         } catch VitalError.UnsupportedBrand(let errorMessage) {
-            resolve(["error": "UnsupportedBrand", "message": errorMessage])
+            reject("UnsupportedBrand", errorMessage, nil)
         } catch VitalError.UnsupportedKind(let errorMessage) {
-            resolve(["error": "UnsupportedKind", "message": errorMessage])
-        } catch {
-            resolve(["error": "Unknown", "message": error.localizedDescription])
+            reject("UnsupportedKind", errorMessage, nil)
+        } catch let error {
+            reject("Unknown", error.localizedDescription, error)
         }
     }
 
     @objc(stopScanForDevice:rejecter:)
     func stopScanForDevice(_ resolve: @escaping RCTPromiseResolveBlock,
-                           reject:RCTPromiseRejectBlock) -> Void {
+                           reject:RCTPromiseRejectBlock) {
         scannerResultCancellable?.cancel()
         resolve(())
     }
 
     @objc(pair:resolver:rejecter:)
-    func pair(_ scannedDeviceId:String,
-              resolve: @escaping RCTPromiseResolveBlock,
-              reject:RCTPromiseRejectBlock) -> Void {
-        let scannedDevice = scannedDevices.first(where: { $0.id == UUID(uuidString:scannedDeviceId) })
-
-        guard scannedDevice != nil else {
-            resolve([
-                "error": "DeviceNotFound",
-                "message": "Device not found with id \(scannedDeviceId)"
-            ])
+    func pair(
+        _ scannedDeviceId: String,
+        resolve: @escaping RCTPromiseResolveBlock,
+        reject: @escaping RCTPromiseRejectBlock
+    ) {
+        guard
+            let scannedDeviceUUID = UUID(uuidString: scannedDeviceId),
+            let scannedDevice = scannedDevices.first(where: { $0.id == scannedDeviceUUID })
+        else {
+            reject("DeviceNotFound", "Device not found with id \(scannedDeviceId)", nil)
             return
         }
 
-        pairCancellable?.cancel()
-        switch scannedDevice!.deviceModel.kind{
+        let pairable: DevicePairable
+
+        switch scannedDevice.deviceModel.kind{
         case .glucoseMeter:
-            pairCancellable = deviceManager
-                .glucoseMeter(for: scannedDevice!)
-                .pair(device: scannedDevice!)
-                .sink(receiveCompletion: {[weak self] value in
-                    self?.handlePairCompletion(value: value )
-                },
-                      receiveValue:{[weak self] value in
-                    self?.handlePairValue()
-                })
+            pairable = deviceManager.glucoseMeter(for: scannedDevice)
         case .bloodPressure:
-            pairCancellable = deviceManager
-                .bloodPressureReader(for: scannedDevice!)
-                .pair(device: scannedDevice!)
-                .sink(receiveCompletion: {[weak self] value in
-                    self?.handlePairCompletion(value: value )
-                },
-                      receiveValue:{[weak self] value in
-                    self?.handlePairValue()
-                })
+            pairable = deviceManager.bloodPressureReader(for: scannedDevice)
         }
-        resolve(())
+
+        pairCancellable = pairable
+            .pair(device: scannedDevice)
+            .sink { completion in
+                switch completion {
+                case .finished:
+                    resolve(())
+                case let .failure(error):
+                    reject("PairError", error.localizedDescription, error)
+                }
+            } receiveValue: { _ in }
     }
 
-    private func handlePairCompletion(value: Subscribers.Completion<any Error>){
-        switch value {
-        case .failure(let error):  self.sendEvent(withName: "PairEvent", body: ["error": "PairError", "message": error.localizedDescription])
-        case .finished:  self.sendEvent(withName: "PairEvent", body: true)
-        }
-    }
-
-    private func handlePairValue() {
-        self.sendEvent(withName: "PairEvent", body: true)
-    }
-
-    @objc(startReadingGlucoseMeter:resolver:rejecter:)
-    func startReadingGlucoseMeter(_ scannedDeviceId:String,
-                                  resolve: @escaping RCTPromiseResolveBlock,
-                                  reject:RCTPromiseRejectBlock) -> Void {
-
-        let scannedDeviceId = UUID(uuidString: scannedDeviceId)!
-        let scannedDevice = scannedDevices.first(where: { $0.id == scannedDeviceId })
-
-
-        guard scannedDevice != nil else {
-            resolve([
-                "error": "DeviceNotFound",
-                "message": "Device not found with id \(scannedDeviceId)"
-            ])
+    @objc(readGlucoseMeter:resolver:rejecter:)
+    func readGlucoseMeter(
+        _ scannedDeviceId:String,
+        resolve: @escaping RCTPromiseResolveBlock,
+        reject: @escaping RCTPromiseRejectBlock
+    ) {    
+        guard
+            let scannedDeviceId = UUID(uuidString: scannedDeviceId),
+            let scannedDevice = scannedDevices.first(where: { $0.id == scannedDeviceId })
+        else {
+            reject("DeviceNotFound", "Device not found with id \(scannedDeviceId)", nil)
             return
         }
 
         glucoseMeterCancellable?.cancel()
-        glucoseMeterCancellable =  deviceManager.glucoseMeter(for :scannedDevice!)
-            .read(device: scannedDevice!)
-            .sink (receiveCompletion: {[weak self] value in
-                self?.sendEvent(withName: "GlucoseMeterReadEvent", body: ["error": "ReadError", "message": "error reading data from device \(value)"])
-            }, receiveValue:{[weak self] value in
-            self?.sendEvent(withName: "GlucoseMeterReadEvent", body: [
-                                "samples": value.map({[
-                                        "id": $0.id,
-                                        "value": $0.value,
-                                        "unit": $0.unit,
-                                        "startDate": $0.startDate.timeIntervalSince1970,
-                                        "endDate": $0.endDate.timeIntervalSince1970,
-                                        "type": $0.type
-                                ]})
-                            ] )
-            })
-
-        resolve(())
+        glucoseMeterCancellable = deviceManager
+            .glucoseMeter(for: scannedDevice)
+            .read(device: scannedDevice)
+            .sink { completion in
+                if case let .failure(error) = completion {
+                    reject("ReadError", "error reading data from device \(error)", error)
+                }
+            } receiveValue: { samples in
+                let mappedSamples = samples.map { sample in
+                    [
+                        "id": sample.id,
+                        "value": sample.value,
+                        "unit": sample.unit,
+                        "startDate": sample.startDate.timeIntervalSince1970,
+                        "endDate": sample.endDate.timeIntervalSince1970,
+                        "type": sample.type
+                    ] as [String: Any?]
+                }
+                resolve(["samples": mappedSamples])
+            }
     }
 
-    @objc(startReadingBloodPressure:resolver:rejecter:)
-    func startReadingBloodPressure(_ scannedDeviceId:String,
-                                   resolve: @escaping RCTPromiseResolveBlock,
-                                   reject:RCTPromiseRejectBlock) -> Void {
-        let scannedDeviceId = UUID(uuidString: scannedDeviceId)!
-        let scannedDevice = scannedDevices.first(where: { $0.id == scannedDeviceId })
-
-        guard scannedDevice != nil else {
-            resolve([
-                "error": "DeviceNotFound",
-                "message": "Device not found with id \(scannedDeviceId)"
-            ])
+    @objc(readBloodPressure:resolver:rejecter:)
+    func readBloodPressure(
+        _ scannedDeviceId: String,
+        resolve: @escaping RCTPromiseResolveBlock,
+        reject: @escaping RCTPromiseRejectBlock
+    ) {
+        guard
+            let scannedDeviceId = UUID(uuidString: scannedDeviceId),
+            let scannedDevice = scannedDevices.first(where: { $0.id == scannedDeviceId })
+        else {
+            reject("DeviceNotFound", "Device not found with id \(scannedDeviceId)", nil)
             return
         }
 
         bloodPressureCancellable?.cancel()
-        bloodPressureCancellable = deviceManager.bloodPressureReader(for :scannedDevice!)
-            .read(device: scannedDevice!)
-            .sink (receiveCompletion: {[weak self] value in
-                self?.sendEvent(withName: "BloodPressureReadEvent", body: ["error": "ReadError", "message": "error reading data from device \(value)"])
-            }, receiveValue:{[weak self] value in
-                self?.sendEvent(withName: "BloodPressureReadEvent", body:[
-                    "samples": value.map({[
+        bloodPressureCancellable = deviceManager.bloodPressureReader(for: scannedDevice)
+            .read(device: scannedDevice)
+            .sink { completion in
+                if case let .failure(error) = completion {
+                    reject("ReadError", "error reading data from device \(error)", error)
+                }
+            } receiveValue: { samples in
+                let mappedSamples = samples.map { sample in
+                    [
                         "systolic": [
-                            "id": $0.systolic.id,
-                            "value": $0.systolic.value,
-                            "unit": $0.systolic.unit,
-                            "startDate": $0.systolic.startDate.timeIntervalSince1970,
-                            "endDate": $0.systolic.endDate.timeIntervalSince1970,
-                            "type": $0.systolic.type
-                        ],
+                            "id": sample.systolic.id,
+                            "value": sample.systolic.value,
+                            "unit": sample.systolic.unit,
+                            "startDate": sample.systolic.startDate.timeIntervalSince1970,
+                            "endDate": sample.systolic.endDate.timeIntervalSince1970,
+                            "type": sample.systolic.type
+                        ] as [String: Any?],
                         "diastolic": [
-                            "id": $0.diastolic.id,
-                            "value": $0.diastolic.value,
-                            "unit": $0.diastolic.unit,
-                            "startDate": $0.diastolic.startDate.timeIntervalSince1970,
-                            "endDate": $0.diastolic.endDate.timeIntervalSince1970,
-                            "type": $0.diastolic.type
-                        ],
+                            "id": sample.diastolic.id,
+                            "value": sample.diastolic.value,
+                            "unit": sample.diastolic.unit,
+                            "startDate": sample.diastolic.startDate.timeIntervalSince1970,
+                            "endDate": sample.diastolic.endDate.timeIntervalSince1970,
+                            "type": sample.diastolic.type
+                        ] as [String: Any?],
                         "pulse": [
-                            "id": $0.pulse?.id,
-                            "value": $0.pulse?.value,
-                            "unit": $0.pulse?.unit,
-                            "startDate": $0.pulse?.startDate.timeIntervalSince1970,
-                            "endDate": $0.pulse?.endDate.timeIntervalSince1970,
-                            "type": $0.pulse?.type
-                        ]
-                    ]})
-                ] )
-            })
-
-        resolve(())
+                            "id": sample.pulse?.id,
+                            "value": sample.pulse?.value,
+                            "unit": sample.pulse?.unit,
+                            "startDate": sample.pulse?.startDate.timeIntervalSince1970,
+                            "endDate": sample.pulse?.endDate.timeIntervalSince1970,
+                            "type": sample.pulse?.type
+                        ] as [String: Any?]
+                    ]
+                }
+                resolve(["samples": mappedSamples])
+            }
     }
 
     override func supportedEvents() -> [String]! {
-        return ["ScanEvent","PairEvent","GlucoseMeterReadEvent","BloodPressureReadEvent"]
+        return ["ScanEvent"]
     }
 }
 

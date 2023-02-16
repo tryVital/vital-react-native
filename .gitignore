@@ -1,4 +1,6 @@
 .DS_Store
 node_modules/
 yarn-error.log
+gradlew.bat
+gradle-wrapper.jar
 

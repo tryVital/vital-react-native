@@ -13,16 +13,20 @@ import {
   VitalResource,
 } from '@tryvital/vital-health-react-native';
 import {
-  VitalDevicesEvents,
+  Brand,
+  Cancellable,
+  DeviceKind,
+  DeviceModel,
   VitalDevicesManager,
-  VitalDevicesNativeModule,
 } from '@tryvital/vital-devices-react-native';
 import {PERMISSIONS, requestMultiple} from 'react-native-permissions';
-import {NativeEventEmitter} from 'react-native';
+import {NativeEventEmitter, NativeModules, Platform} from 'react-native';
 import {HealthConfig} from '@tryvital/vital-health-react-native';
 import {VITAL_API_KEY, VITAL_ENVIRONMENT, VITAL_REGION, VITAL_USER_ID} from './Environment';
 
 import styles from './Styles';
+
+const { VitalDevicesReactNative } = NativeModules;
 
 // Configuring Vital client SDK for making API calls on client side
 // Recommended way is to do this on the backend but for the sake of an example
@@ -74,53 +78,15 @@ healthEventEmitter.addListener(VitalHealthEvents.statusEvent, (event: any) => {
   console.log(VitalHealthEvents.statusEvent, event);
 });
 
-//To start getting events from the VitalDevicesManager you need to create an event emitter
-const devicesEventEmitter = new NativeEventEmitter(VitalDevicesNativeModule);
+const vitalDevicesManager = new VitalDevicesManager((module) => new NativeEventEmitter(module));
 
-const vitalDevicesManager = new VitalDevicesManager();
+let bleSimulator: DeviceModel = {
+  id: (Platform.OS == "ios" ? '$vital_ble_simulator$' : '_vital_ble_simulator_'),
+  name: 'Vital BLE Simulator',
+  brand: Brand.AccuChek,
+  kind: DeviceKind.GlucoseMeter,
+};
 
-// This is an example of how to listen to scan event from the VitalDevicesManager.
-// To start scanning for devices you need to call the startScan method on the VitalDevicesManager.
-// The same device can be scanned multiple times.
-devicesEventEmitter.addListener(VitalDevicesEvents.scanEvent, event => {
-  console.log(VitalDevicesEvents.scanEvent, event);
-  console.log('Scanned device', event.id);
-  vitalDevicesManager
-    .readBloodPressure(event.id)
-    .then(() => {
-      console.log('Started reading for ', event.id);
-    })
-    .catch((error: any) => {
-      console.log(error);
-    });
-});
-
-// This is an example of how to listen to reading event from blood pressure device.
-// To start reading from a device you need to call the readingBloodPressure method on the VitalDevicesManager.
-devicesEventEmitter.addListener(
-  VitalDevicesEvents.bloodPressureReadEvent,
-  (event: any) => {
-    console.log(VitalDevicesEvents.bloodPressureReadEvent, event);
-    event.samples.forEach((sample: any) => {
-      console.log(sample.diastolic);
-      console.log(sample.systolic);
-      console.log(sample.pulse);
-    });
-
-    // After you are done reading from the device you need to call the scan method
-    // on the VitalDevicesManager to continuously receive reads.
-    vitalDevicesManager
-      .scanForDevice(omronM7)
-      .then(() => {
-        console.log('repeat Scanning for device');
-      })
-      .catch((error: any) => {
-        console.log(error);
-      });
-  },
-);
-
-let omronM7 = VitalDevicesManager.supportedDevices[1];
 requestMultiple([
   PERMISSIONS.ANDROID.BLUETOOTH_SCAN,
   PERMISSIONS.ANDROID.BLUETOOTH_CONNECT,
@@ -132,15 +98,33 @@ requestMultiple([
       statuses[PERMISSIONS.ANDROID.BLUETOOTH_CONNECT] === 'granted') ||
     statuses[PERMISSIONS.IOS.BLUETOOTH_PERIPHERAL] === 'granted'
   ) {
-    // This is an example of how to start scanning for an Omron M7 device.
-    vitalDevicesManager
-      .scanForDevice(omronM7)
-      .then(() => {
-        console.log('Scanning for device');
-      })
-      .catch((error: any) => {
-        console.log(error);
-      });
+    console.log("@@@ Start scanning for device type: " + bleSimulator.name)
+
+    var scanner: Cancellable | null
+    scanner = vitalDevicesManager.scanForDevice(
+      bleSimulator,
+      {
+        onDiscovered: (device) => {
+          console.log("@@@ Discovered device: " + device.name + " (id = " + device.id + ")")
+          scanner?.cancel()
+
+          console.log("@@@ Start pairing device: " + device.name + " (id = " + device.id + ")")
+          vitalDevicesManager.pairDevice(device.id)
+            .then(() => {
+              console.log("@@@ Successfully paired device: " + device.name + " (id = " + device.id + ")")
+              console.log("@@@ Start reading from device: " + device.name + " (id = " + device.id + ")")
+
+              return vitalDevicesManager.readGlucoseMeter(device.id)
+            })
+            .then((samples) => {
+              console.log("@@@ Read " + samples.length + " samples from device: " + device.name + " (id = " + device.id + ")")
+              console.log(samples)
+            })
+            .catch((error) => console.log(error))
+        },
+        onError: (error) => console.log(error)
+      }
+    )
   }
 });
 
