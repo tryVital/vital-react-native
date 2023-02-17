@@ -1,6 +1,7 @@
 import React from 'react';
 import {NavigationContainer} from '@react-navigation/native';
-import {Icon, IconButton, NativeBaseProvider} from 'native-base';
+import {NativeBaseProvider} from 'native-base';
+import Icon from 'react-native-vector-icons/FontAwesome';
 import {createNativeStackNavigator} from '@react-navigation/native-stack';
 import {VitalClient} from '@tryvital/vital-node';
 import HomeScreen from './screens/HomeScreen';
@@ -19,11 +20,9 @@ import {
 import {PERMISSIONS, requestMultiple} from 'react-native-permissions';
 import {NativeEventEmitter} from 'react-native';
 import {HealthConfig} from '@tryvital/vital-health-react-native';
+import {VITAL_API_KEY, VITAL_ENVIRONMENT, VITAL_REGION, VITAL_USER_ID} from './Environment';
 
-export const VITAL_API_KEY = 'YOUR API KEY HERE';
-export const VITAL_ENVIRONMENT = 'sandbox';
-export const VITAL_REGION = 'us';
-export const VITAL_USER_ID = 'db5f35cd-e328-41e4-b545-ec97386468e2';
+import styles from './Styles';
 
 // Configuring Vital client SDK for making API calls on client side
 // Recommended way is to do this on the backend but for the sake of an example
@@ -157,21 +156,7 @@ const App = () => {
               name="Home"
               component={HomeScreen}
               options={() => ({
-                title: 'Users',
-                headerRight: () => (
-                  <IconButton
-                    p={0}
-                    variant="ghost"
-                    onPress={console.log}
-                    icon={
-                      <Icon
-                        size={20}
-                        name="plus-circle"
-                        color="rgb(64,64,64)"
-                      />
-                    }
-                  />
-                ),
+                title: 'Users'
               })}
             />
           </Stack.Group>

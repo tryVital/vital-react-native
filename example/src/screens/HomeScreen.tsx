@@ -1,45 +1,67 @@
 import {ClientFacingUser} from '@tryvital/vital-node/client/models/user_models';
 import {FlatList, StyleSheet, Text, TextInput, View} from 'react-native';
 import React, {useEffect, useState} from 'react';
-import {vitalNodeClient, VITAL_ENVIRONMENT, VITAL_REGION} from '../App';
-import {HStack, IconButton, Box, Icon} from 'native-base';
+import {vitalNodeClient} from '../App';
+import { VITAL_ENVIRONMENT, VITAL_REGION } from '../Environment';
+import {HStack, VStack, Box} from 'native-base';
+import Icon from 'react-native-vector-icons/FontAwesome';
 import Dialog from 'react-native-dialog';
+import styles from '../Styles';
 
-const DeleteIcon = ({onPress}) => (
-  <IconButton onPress={onPress} icon={<Icon name={'trash'} size={16} />} />
-);
-
-const LinkIcon = ({onPress, isLoading}) => (
-  <IconButton
+const DeleteButton = ({onPress}) => (
+  <Icon
     onPress={onPress}
-    icon={<Icon name={'link'} size={16} />}
-    disabled={isLoading}
+    name="trash"
+    style={styles.iconButtonDestructive}
   />
 );
 
+const LinkButton = ({onPress, isLoading}) => (
+  <Icon
+    onPress={onPress}
+    name="link"
+    disabled={isLoading}
+    style={styles.iconButton}
+  />
+);
+
+enum ResourceStatus {
+  Loaded, Loading, Failure
+}
+
+type ResourceLoaded<T> = { status: ResourceStatus.Loaded, users: T };
+type ResourceLoading = { status: ResourceStatus.Loading };
+type ResourceFailure = { status: ResourceStatus.Failure, error: any };
+
+type ResourceState<T> = ResourceLoaded<T> | ResourceLoading | ResourceFailure
+
 const HomeScreen = ({navigation}) => {
-  const [getUsers, setUsers] = useState(Array<ClientFacingUser>());
+  const [getUsers, setUsers] = useState({ status: ResourceStatus.Loading } as ResourceState<ClientFacingUser[]>);
   const [isLoading, setLoading] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
   const textInput = React.useRef<TextInput>(null);
 
   useEffect(() => {
+    setLoading(true);
+
     vitalNodeClient.User.getAll()
-      .then(users => {
-        setUsers(users.users);
+      .then(response => {
+        setUsers({ status: ResourceStatus.Loaded, users: response.users });
       })
       .catch(err => {
+        setUsers({ status: ResourceStatus.Failure, error: err });
         console.log({err});
-      });
+      })
+      .finally(() => setLoading(false));
+
     navigation.setOptions({
       headerRight: () => (
-        <IconButton
-          p={0}
-          variant="ghost"
+        <Icon
+          name="plus"
           onPress={() => {
             setIsOpen(true);
           }}
-          icon={<Icon size={20} name="plus-circle" color="rgb(64,64,64)" />}
+          style={styles.iconButton}
         />
       ),
     });
@@ -53,14 +75,13 @@ const HomeScreen = ({navigation}) => {
       .then(_ => {
         return vitalNodeClient.User.getAll();
       })
-      .then(users => {
-        setUsers(users.users);
-        setLoading(false);
+      .then(response => {
+        setUsers({ status: ResourceStatus.Loaded, users: response.users });
       })
       .catch(err => {
         console.log(err);
-        setLoading(false);
-      });
+      })
+      .finally(() => setLoading(false));
   };
 
   const handlePressOnConnectDevice = async (user_id: string) => {
@@ -81,40 +102,63 @@ const HomeScreen = ({navigation}) => {
       .then(_ => {
         return vitalNodeClient.User.getAll();
       })
-      .then(users => {
-        setUsers(users.users);
-        setLoading(false);
+      .then(response => {
+        setUsers({ status: ResourceStatus.Loaded, users: response.users });
       })
       .catch(err => {
         console.log(err);
-        setLoading(false);
-      });
+      })
+      .finally(() => setLoading(false));
+  };
+
+  type UserListProps = {
+    state: ResourceState<ClientFacingUser[]>
+  };
+  const UserList = (props: UserListProps) => {
+    switch (props.state.status) {
+      case ResourceStatus.Loading:
+        return <Text>Loading</Text>;
+      case ResourceStatus.Failure:
+        return (
+          <VStack>
+            <Text>Error</Text>
+            <Text>{props.state.error.toString()}</Text>
+          </VStack>
+        );
+      case ResourceStatus.Loaded:
+      return (
+        <FlatList
+          data={props.state.users}
+          renderItem={({item}) => (
+            <HStack
+              justifyContent={'space-between'}
+              px={2}
+              py={2}
+              borderBottomColor={'gray.100'}
+              borderBottomWidth={1}>
+              <Box>
+                <Text style={styles.item}>{item.client_user_id}</Text>
+              </Box>
+              <HStack>
+                <LinkButton
+                  onPress={() => handlePressOnConnectDevice(item.user_id)}
+                  isLoading={isLoading}
+                />
+                <DeleteButton
+                  name="trash"
+                  onPress={() => handlePressDeleteUser(item.user_id)}
+                />
+              </HStack>
+            </HStack>
+          )}
+        />
+      );
+    }
   };
 
   return (
     <View style={styles.container}>
-      <FlatList
-        data={getUsers}
-        renderItem={({item}) => (
-          <HStack
-            justifyContent={'space-between'}
-            px={2}
-            py={2}
-            borderBottomColor={'gray.100'}
-            borderBottomWidth={1}>
-            <Box>
-              <Text style={styles.item}>{item.client_user_id}</Text>
-            </Box>
-            <HStack>
-              <LinkIcon
-                onPress={() => handlePressOnConnectDevice(item.user_id)}
-                isLoading={isLoading}
-              />
-              <DeleteIcon onPress={() => handlePressDeleteUser(item.user_id)} />
-            </HStack>
-          </HStack>
-        )}
-      />
+      <UserList state={getUsers} />
       <View>
         <Dialog.Container visible={isOpen}>
           <Dialog.Title>Create User</Dialog.Title>
@@ -132,18 +176,5 @@ const HomeScreen = ({navigation}) => {
     </View>
   );
 };
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    paddingTop: 22,
-    backgroundColor: 'white',
-  },
-  item: {
-    padding: 10,
-    fontSize: 18,
-    height: 44,
-  },
-});
 
 export default HomeScreen;
