@@ -1,8 +1,19 @@
 ### Vital React Native Library 
 
-The Vital React Native Library, allows developers to easily connect to Vital's API using React Native. Our React Native library mirrors the functionality of our iOS and Android SDKs. It is a wrapper around the native SDKs, and it exposes the same methods and events. It is split into three parts: Core, Health and BLE Devices. They can be used interchangeably, but you need to install them separately. An example app can be found (here)[https://github.com/tryVital/vital-react-native/tree/main/example].
+The Vital React Native Library, allows developers to easily connect to Vital's API using React Native. Our React Native library mirrors the functionality of our iOS and Android SDKs. It is a wrapper around the native SDKs, and it exposes the same methods and events. It is split into three parts: Core, Health and BLE Devices. They can be used interchangeably, but you need to install them separately. An example app project can be found under the `example` directory at the project root.
 
-The docs can be found (here)[https://docs.tryvital.io/wearables/sdks/react_native]. 
+The documentation can be found [here](https://docs.tryvital.io/wearables/sdks/react_native). 
+
+### SDK requirements
+
+The SDKs require a minimum deployment target of 14.0+ on iOS. Note that you might need to update your Podfile in addition to the Xcode project:
+
+```diff
+# Podfile
+
+-platform :ios, min_ios_version_supported
++platform :ios, '14.0'
+```
 
 ### Building the example app
 
