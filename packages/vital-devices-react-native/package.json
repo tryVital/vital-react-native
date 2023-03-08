@@ -49,7 +49,8 @@
     "registry": "https://registry.npmjs.org/"
   },
   "dependencies": {
-    "react-native-permissions": "^3.6.1"
+    "react-native-permissions": "^3.6.1",
+    "@tryvital/vital-core-react-native": "1.1.0"
   },
   "peerDependencies": {
     "react": "*",

@@ -2853,6 +2853,7 @@
 "@tryvital/vital-devices-react-native@file:packages/vital-devices-react-native":
   version "1.1.0"
   dependencies:
+    "@tryvital/vital-core-react-native" "1.1.0"
     react-native-permissions "^3.6.1"
 
 "@tryvital/vital-health-react-native@file:packages/vital-health-react-native":

@@ -4,7 +4,7 @@ on:
       - master
 name: Test compile
 jobs:
-  test-build-devices:
+  test-build:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
@@ -15,34 +15,4 @@ jobs:
           registry-url: 'https://registry.npmjs.org'
       - name: build
         run: |
-         cd packages/vital-devices-react-native
-         npm install
-         tsc
-  test-build-health:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v2
-      # Setup .npmrc file to publish to npm
-      - uses: actions/setup-node@v2
-        with:
-          node-version: '16.x'
-          registry-url: 'https://registry.npmjs.org'
-      - name: build
-        run: |
-         cd packages/vital-health-react-native
-         npm install
-         tsc
-  test-build-core:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v2
-      # Setup .npmrc file to publish to npm
-      - uses: actions/setup-node@v2
-        with:
-          node-version: '16.x'
-          registry-url: 'https://registry.npmjs.org'
-      - name: build
-        run: |
-         cd packages/vital-core-react-native
-         npm install
-         tsc
+         yarn install && yarn build
