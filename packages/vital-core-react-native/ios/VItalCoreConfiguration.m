@@ -1,12 +1,12 @@
 #import "VitalCoreConfiguration.h"
 #import <React/RCTBridgeModule.h>
 
-@import VitalHealthKit;
+@import VitalCore;
 
 @implementation VitalCoreConfiguration
 
 + (void)automaticConfiguration {
-  [VitalClient automaticConfiguration];
+  [VitalClient automaticConfigurationWithCompletionHandler:^{}];
 }
 
 @end
