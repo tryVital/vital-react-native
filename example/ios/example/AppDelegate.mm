@@ -1,5 +1,6 @@
 #import "AppDelegate.h"
 #import "VitalHealthKitConfiguration.h"
+#import "VitalCoreConfiguration.h"
 
 #import <React/RCTBridge.h>
 #import <React/RCTBundleURLProvider.h>
@@ -54,6 +55,7 @@ static NSString *const kRNConcurrentRoot = @"concurrentRoot";
     rootView.backgroundColor = [UIColor whiteColor];
   }
   
+  [VitalCoreConfiguration automaticConfiguration];
   [VitalHealthKitConfiguration configureWithBackgroundDeliveryEnabled:true numberOfDaysToBackFill:90 enableLogs:true];
 
 
