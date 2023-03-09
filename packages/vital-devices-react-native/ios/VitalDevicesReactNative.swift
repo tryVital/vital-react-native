@@ -16,13 +16,56 @@ class VitalDevicesReactNative: RCTEventEmitter {
     private var pairCancellable: Cancellable? = nil
 
     private var scannerResultCancellable: Cancellable? = nil
-    private var scannedDevices: [ScannedDevice] = []
+    private var knownScannedDevices: [UUID: ScannedDevice] = []
 
     deinit {
         scannerResultCancellable?.cancel()
         glucoseMeterCancellable?.cancel()
         bloodPressureCancellable?.cancel()
         pairCancellable?.cancel()
+    }
+
+    @objc(getConnectedDevices:name:brand:kind:resolver:rejecter:)
+    func connectedDevices(
+        _ id: String,
+        name: String,
+        brand: String,
+        kind: String,
+        resolve: @escaping RCTPromiseResolveBlock,
+        reject: @escaping RCTPromiseRejectBlock
+    ) {
+        do {
+            let deviceModel = DeviceModel(
+                id: id,
+                name: name,
+                brand: try mapStringToBrand(brand),
+                kind: try mapStringToKind(kind)
+            )
+
+            let devices = deviceManager.connected(deviceModel)
+            let responses: [[String: Any?]] = devices.map { device in
+                [
+                    "id": device.id.uuidString,
+                    "name": device.name,
+                    "deviceModel": [
+                        "id": device.deviceModel.id,
+                        "name": device.deviceModel.name,
+                        "brand": device.deviceModel.brand.rawValue,
+                        "kind": device.deviceModel.kind.rawValue
+                    ]
+                ]
+            }
+
+            devices.forEach { knownScannedDevices[$0.id] = $0 }
+
+            resolve(["devices": responses])
+        } catch VitalError.UnsupportedBrand(let errorMessage) {
+            reject("UnsupportedBrand", errorMessage, nil)
+        } catch VitalError.UnsupportedKind(let errorMessage) {
+            reject("UnsupportedKind", errorMessage, nil)
+        } catch let error {
+            reject("Unknown", error.localizedDescription, error)
+        }
     }
 
     @objc(startScanForDevice:name:brand:kind:resolver:rejecter:)
@@ -47,7 +90,7 @@ class VitalDevicesReactNative: RCTEventEmitter {
                 .search(for: deviceModel)
                 .receive(on: DispatchQueue.main)
                 .sink { [weak self] value in
-                    self?.scannedDevices.append(value)
+                    self?.knownScannedDevices[value.id] = value
                     self?.sendEvent(
                         withName: "ScanEvent",
                         body: [
@@ -88,7 +131,7 @@ class VitalDevicesReactNative: RCTEventEmitter {
     ) {
         guard
             let scannedDeviceUUID = UUID(uuidString: scannedDeviceId),
-            let scannedDevice = scannedDevices.first(where: { $0.id == scannedDeviceUUID })
+            let scannedDevice = knownScannedDevices[scannedDeviceUUID]
         else {
             reject("DeviceNotFound", "Device not found with id \(scannedDeviceId)", nil)
             return
@@ -123,7 +166,7 @@ class VitalDevicesReactNative: RCTEventEmitter {
     ) {    
         guard
             let scannedDeviceId = UUID(uuidString: scannedDeviceId),
-            let scannedDevice = scannedDevices.first(where: { $0.id == scannedDeviceId })
+            let scannedDevice = knownScannedDevices[scannedDeviceId]
         else {
             reject("DeviceNotFound", "Device not found with id \(scannedDeviceId)", nil)
             return
@@ -160,7 +203,7 @@ class VitalDevicesReactNative: RCTEventEmitter {
     ) {
         guard
             let scannedDeviceId = UUID(uuidString: scannedDeviceId),
-            let scannedDevice = scannedDevices.first(where: { $0.id == scannedDeviceId })
+            let scannedDevice = knownScannedDevices[scannedDeviceId]
         else {
             reject("DeviceNotFound", "Device not found with id \(scannedDeviceId)", nil)
             return

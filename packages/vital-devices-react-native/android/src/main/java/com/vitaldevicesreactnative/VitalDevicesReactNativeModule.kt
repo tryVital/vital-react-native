@@ -13,12 +13,52 @@ class VitalDevicesReactNativeModule(reactContext: ReactApplicationContext) :
   ReactContextBaseJavaModule(reactContext) {
 
   private val vitalDeviceManager = VitalDeviceManager(reactContext)
-  private val scannedDevices: MutableList<ScannedDevice> = mutableListOf()
+  private val knownScannedDevices: MutableMap<String, ScannedDevice> = mutableMapOf()
   private var mainScope = MainScope()
   private var activeScan: Job? = null
 
   override fun getName(): String {
     return NAME
+  }
+
+  @ReactMethod
+  private fun getConnectedDevices(
+    id: String,
+    name: String,
+    brand: String,
+    kind: String,
+    promise: Promise
+  ) {
+    try {
+      val deviceModel = DeviceModel(
+        id = id,
+        name = name,
+        brand = stringToBrand(brand),
+        kind = stringToKind(kind),
+      )
+
+      val devices = vitalDeviceManager.connected(deviceModel)
+      devices.forEach { knownScannedDevices[it.address] = it }
+
+      promise.resolve(WritableNativeMap().apply {
+        putArray("devices", WritableNativeArray().apply {
+          devices.forEach {
+            WritableNativeMap().apply {
+              putString("id", it.address)
+              putString("name", it.name)
+              putString("address", it.address)
+              putMap("deviceModel", WritableNativeMap().apply {
+                putString("name", it.deviceModel.name)
+                putString("brand", brandToString(it.deviceModel.brand))
+                putString("kind", kindToString(it.deviceModel.kind))
+              })
+            }
+          }
+        }
+      })
+    } catch (e: Exception) {
+        promise.reject("ScanError", e.message, e)
+    }
   }
 
   @ReactMethod
@@ -42,7 +82,8 @@ class VitalDevicesReactNativeModule(reactContext: ReactApplicationContext) :
         .search(deviceModel)
         .flowOn(Dispatchers.IO)
         .onEach {
-          scannedDevices.add(it)
+          knownScannedDevices[it.address] = it
+
           sendEvent(VitalDevicesEvent.ScanEvent, WritableNativeMap().apply {
             putString("id", it.address)
             putString("name", it.name)
@@ -69,7 +110,7 @@ class VitalDevicesReactNativeModule(reactContext: ReactApplicationContext) :
 
   @ReactMethod
   fun pair(scannedDeviceId: String, promise: Promise) {
-    val scannedDevice = scannedDevices.firstOrNull { it.address == scannedDeviceId }
+    val scannedDevice = knownScannedDevices[scannedDeviceId]
 
     if (scannedDevice == null) {
       promise.reject("PairError", "Device not found", null)
@@ -92,7 +133,7 @@ class VitalDevicesReactNativeModule(reactContext: ReactApplicationContext) :
 
   @ReactMethod
   private fun readGlucoseMeter(scannedDeviceId: String, promise: Promise) {
-    val scannedDevice = scannedDevices.firstOrNull { it.address == scannedDeviceId }
+    val scannedDevice = knownScannedDevices[scannedDeviceId]
 
     if (scannedDevice == null) {
       promise.reject("ReadError", "Device not found", null)
@@ -123,7 +164,7 @@ class VitalDevicesReactNativeModule(reactContext: ReactApplicationContext) :
 
   @ReactMethod
   private fun readBloodPressure(scannedDeviceId: String, promise: Promise) {
-    val scannedDevice = scannedDevices.firstOrNull { it.address == scannedDeviceId }
+    val scannedDevice = knownScannedDevices[scannedDeviceId]
 
     if (scannedDevice == null) {
       promise.reject("ReadError", "Device not found", null)

@@ -13,6 +13,13 @@ RCT_EXTERN_METHOD(startScanForDevice:(NSString *)id
 RCT_EXTERN_METHOD(stopScanForDevice:(RCTPromiseResolveBlock)resolve
                   rejecter:(RCTPromiseRejectBlock)reject)
 
+RCT_EXTERN_METHOD(getConnectedDevices:(NSString *)id
+                  name:(NSString *)name
+                  brand:(NSString *)brand
+                  kind:(NSString *)kind
+                  resolver:(RCTPromiseResolveBlock)resolve
+                  rejecter:(RCTPromiseRejectBlock)reject)
+
 RCT_EXTERN_METHOD(pair:(NSString *)scannedDeviceId
                   resolver:(RCTPromiseResolveBlock)resolve
                   rejecter:(RCTPromiseRejectBlock)reject)

@@ -40,6 +40,18 @@ export class VitalDevicesManager {
     this.eventEmitter = eventEmitter(NativeModules.VitalDevicesReactNative)
   }
 
+  async getConnectedDevices(deviceModel: DeviceModel): Promise<ScannedDevice[]> {
+    await this.checkPermission()
+    let response: { devices: ScannedDevice[] } = await NativeModules.VitalDevicesReactNative
+      .getConnectedDevices(
+        deviceModel.id,
+        deviceModel.name,
+        deviceModel.brand,
+        deviceModel.kind
+      )
+    return response.devices
+  }
+
   scanForDevice(deviceModel: DeviceModel, listener: { onDiscovered: (device: ScannedDevice) => void, onError: (error: Error) => void }): Cancellable {
     var subscription = this.eventEmitter.addListener(VitalDevicesEvents.scanEvent, (event) => {
       listener.onDiscovered(
