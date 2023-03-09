@@ -23,7 +23,7 @@ import kotlin.reflect.KClass
 class VitalHealthReactNativeModule(reactContext: ReactApplicationContext) :
   ReactContextBaseJavaModule(reactContext), ActivityEventListener {
 
-  private val logger = VitalLogger.create()
+  private val logger = VitalLogger.getOrCreate()
 
   private var vitalClient: VitalClient? = null
   private var vitalHealthConnectManager: VitalHealthConnectManager? = null

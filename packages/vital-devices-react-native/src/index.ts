@@ -1,75 +1,97 @@
 import type { DeviceModel } from './model/device_model';
 import { DeviceKind } from './model/device_model';
 import { Brand } from './model/brand';
-import { NativeModules, Platform } from 'react-native';
+import { NativeEventEmitter, NativeModule, NativeModules, Platform } from 'react-native';
 import { checkMultiple, PERMISSIONS } from 'react-native-permissions';
+
+import type { BloodPressureSample, QuantitySample } from '@tryvital/vital-core-react-native';
+import type { ScannedDevice } from './model/scanned_device';
 
 export * from './model/device_model';
 export * from './model/brand';
 export * from './model/scanned_device';
 
-const LINKING_ERROR =
-  `The package 'vital-core-react-native' doesn't seem to be linked. Make sure: \n\n` +
-  Platform.select({ ios: "- You have run 'pod install'\n", default: '' }) +
-  '- You rebuilt the app after installing the package\n' +
-  '- You are not using Expo Go\n';
+const VitalDevicesEvents = {
+  scanEvent: 'ScanEvent'
+};
 
-const VitalDevicesReactNative = NativeModules.VitalDevicesReactNative
-  ? NativeModules.VitalDevicesReactNative
-  : new Proxy(
-      {},
-      {
-        get() {
-          throw new Error(LINKING_ERROR);
-        },
+export class Cancellable {
+  private hasCancelled: Boolean = false
+  private onCancel: () => void
+
+  constructor(onCancel: () => void) {
+    this.onCancel = onCancel
+  }
+
+  cancel() {
+    if (this.hasCancelled) {
+      return
+    }
+
+    this.hasCancelled = true
+    this.onCancel()
+  }
+}
+
+export class VitalDevicesManager {
+  eventEmitter: NativeEventEmitter
+  
+  constructor(eventEmitter: (module: NativeModule) => NativeEventEmitter) {
+    this.eventEmitter = eventEmitter(NativeModules.VitalDevicesReactNative)
+  }
+
+  scanForDevice(deviceModel: DeviceModel, listener: { onDiscovered: (device: ScannedDevice) => void, onError: (error: Error) => void }): Cancellable {
+    var subscription = this.eventEmitter.addListener(VitalDevicesEvents.scanEvent, (event) => {
+      listener.onDiscovered(
+        {
+          id: event.id,
+          name: event.name,
+          deviceModel: event.deviceModel as DeviceModel
+        }
+      )
+    })
+
+    const cancellable = new Cancellable(
+      () => {
+        subscription.remove()
+        NativeModules.VitalDevicesReactNative.stopScanForDevice();
       }
     );
 
-export const VitalDevicesNativeModule = VitalDevicesReactNative;
+    this.checkPermission()
+    .then(() => {
+      NativeModules.VitalDevicesReactNative.startScanForDevice(
+        deviceModel.id,
+        deviceModel.name,
+        deviceModel.brand,
+        deviceModel.kind
+      );
+    })
+    .catch((error) => {
+      listener.onError(new Error(error.toString()))
+      cancellable.cancel()
+    });
 
-export const VitalDevicesEvents = {
-  scanEvent: 'ScanEvent',
-  pairEvent: 'PairEvent',
-  glucoseMeterReadEvent: 'GlucoseMeterReadEvent',
-  bloodPressureReadEvent: 'BloodPressureReadEvent',
-};
-
-export class VitalDevicesManager {
-  async scanForDevice(deviceModel: DeviceModel) {
-    await this.checkPermission();
-
-    return NativeModules.VitalDevicesReactNative.startScanForDevice(
-      deviceModel.id,
-      deviceModel.name,
-      deviceModel.brand,
-      deviceModel.kind
-    );
+    return cancellable;
   }
 
-  async stopScan() {
-    return NativeModules.VitalDevicesReactNative.stopScanForDevice();
+  async pairDevice(scannedDeviceId: string): Promise<void> {
+    await this.checkPermission();
+    return await NativeModules.VitalDevicesReactNative.pair(scannedDeviceId);
   }
 
-  async pairDevice(scannedDeviceId: string) {
+  async readBloodPressure(scannedDeviceId: string): Promise<BloodPressureSample[]> {
     await this.checkPermission();
-
-    return NativeModules.VitalDevicesReactNative.pair(scannedDeviceId);
+    let response: { samples: BloodPressureSample[] } = await NativeModules.VitalDevicesReactNative
+      .readBloodPressure(scannedDeviceId)
+    return response.samples
   }
 
-  async readBloodPressure(scannedDeviceId: string) {
+  async readGlucoseMeter(scannedDeviceId: string): Promise<QuantitySample[]> {
     await this.checkPermission();
-
-    return NativeModules.VitalDevicesReactNative.startReadingBloodPressure(
-      scannedDeviceId
-    );
-  }
-
-  async readGlucoseMeter(scannedDeviceId: string) {
-    await this.checkPermission();
-
-    return NativeModules.VitalDevicesReactNative.startReadingGlucoseMeter(
-      scannedDeviceId
-    );
+    let response : { samples: QuantitySample[] } = await NativeModules.VitalDevicesReactNative
+      .readGlucoseMeter(scannedDeviceId)
+    return response.samples
   }
 
   private async checkPermission() {
@@ -107,7 +129,7 @@ export class VitalDevicesManager {
     Brand.Libre,
   ];
 
-  static supportedDevices = [
+  static supportedDevices: DeviceModel[] = [
     {
       id: 'omron_m4',
       name: 'Omron Intelli IT M4',

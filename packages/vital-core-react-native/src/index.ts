@@ -1,5 +1,8 @@
 import { NativeModules, Platform } from 'react-native';
 
+export * as QuantitySample from './models/QuantitySample';
+export * as BloodPressureSample from './models/BloodPressureSample';
+
 const LINKING_ERROR =
   `The package 'vital-core-react-native' doesn't seem to be linked. Make sure: \n\n` +
   Platform.select({ ios: "- You have run 'pod install'\n", default: '' }) +

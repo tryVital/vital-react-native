@@ -3,10 +3,10 @@ package com.vitaldevicesreactnative
 import android.util.Log
 import com.facebook.react.bridge.*
 import com.facebook.react.modules.core.DeviceEventManagerModule
-import io.tryvital.client.services.data.QuantitySample
+import io.tryvital.client.services.data.QuantitySamplePayload
 import io.tryvital.vitaldevices.*
 import kotlinx.coroutines.*
-import kotlinx.coroutines.flow.flowOn
+import kotlinx.coroutines.flow.*
 
 
 class VitalDevicesReactNativeModule(reactContext: ReactApplicationContext) :
@@ -14,7 +14,8 @@ class VitalDevicesReactNativeModule(reactContext: ReactApplicationContext) :
 
   private val vitalDeviceManager = VitalDeviceManager(reactContext)
   private val scannedDevices: MutableList<ScannedDevice> = mutableListOf()
-  private var mainScope: CoroutineScope? = null
+  private var mainScope = MainScope()
+  private var activeScan: Job? = null
 
   override fun getName(): String {
     return NAME
@@ -34,40 +35,35 @@ class VitalDevicesReactNativeModule(reactContext: ReactApplicationContext) :
       brand = stringToBrand(brand),
       kind = stringToKind(kind),
     )
-    mainScope?.cancel()
-    mainScope = MainScope()
-    mainScope?.launch {
-      try {
-        vitalDeviceManager.search(deviceModel).flowOn(Dispatchers.IO).collect {
-          withContext(Dispatchers.Main) {
-            scannedDevices.add(it)
-            sendEvent(VitalDevicesEvent.ScanEvent, WritableNativeMap().apply {
-              putString("id", it.address)
-              putString("name", it.name)
-              putString("address", it.address)
-              putMap("deviceModel", WritableNativeMap().apply {
-                putString("name", it.deviceModel.name)
-                putString("brand", brandToString(it.deviceModel.brand))
-                putString("kind", kindToString(it.deviceModel.kind))
-              })
-            }
-            )
-          }
-        }
-      } catch (e: Exception) {
-        withContext(Dispatchers.Main) {
+
+    try {
+      activeScan?.cancel()
+      activeScan = vitalDeviceManager
+        .search(deviceModel)
+        .flowOn(Dispatchers.IO)
+        .onEach {
+          scannedDevices.add(it)
           sendEvent(VitalDevicesEvent.ScanEvent, WritableNativeMap().apply {
-            putString("error", e.message)
+            putString("id", it.address)
+            putString("name", it.name)
+            putString("address", it.address)
+            putMap("deviceModel", WritableNativeMap().apply {
+              putString("name", it.deviceModel.name)
+              putString("brand", brandToString(it.deviceModel.brand))
+              putString("kind", kindToString(it.deviceModel.kind))
+            })
           })
         }
-      }
+        .onStart { promise.resolve(null) }
+        .launchIn(mainScope)
+    } catch (e: Exception) {
+        promise.reject("ScanError", e.message, e)
     }
-    promise.resolve(null)
   }
 
   @ReactMethod
   fun stopScanForDevice(promise: Promise) {
-    mainScope?.cancel()
+    activeScan?.cancel()
     promise.resolve(null)
   }
 
@@ -76,128 +72,95 @@ class VitalDevicesReactNativeModule(reactContext: ReactApplicationContext) :
     val scannedDevice = scannedDevices.firstOrNull { it.address == scannedDeviceId }
 
     if (scannedDevice == null) {
-      sendEvent(VitalDevicesEvent.PairEvent, WritableNativeMap().apply {
-        putString("error", "Device not found")
-      })
-    } else {
-      mainScope?.cancel()
-      mainScope = MainScope()
-      mainScope?.launch {
-        try {
-          withContext(Dispatchers.Default) {
-            vitalDeviceManager.pair(scannedDevice).collect {
-              withContext(Dispatchers.Main) {
-                sendEvent(VitalDevicesEvent.PairEvent, it)
-              }
+      promise.reject("PairError", "Device not found", null)
+      return
+    }
+
+    mainScope.launch {
+      try {
+        vitalDeviceManager
+          .pair(scannedDevice)
+          .flowOn(Dispatchers.IO)
+          .collect()
+
+        promise.resolve(null)
+      } catch (e: Exception) {
+        promise.reject("PairError", e.message, e)
+      }
+    }
+  }
+
+  @ReactMethod
+  private fun readGlucoseMeter(scannedDeviceId: String, promise: Promise) {
+    val scannedDevice = scannedDevices.firstOrNull { it.address == scannedDeviceId }
+
+    if (scannedDevice == null) {
+      promise.reject("ReadError", "Device not found", null)
+      return
+    }
+
+    mainScope.launch {
+      try {
+        val samples = vitalDeviceManager
+          .glucoseMeter(reactApplicationContext, scannedDevice)
+          .flowOn(Dispatchers.IO)
+          .first()
+
+        promise.resolve(WritableNativeMap().apply {
+          putArray("samples", WritableNativeArray().apply {
+            samples.forEach {
+              pushMap(WritableNativeMap().apply {
+                mapSample(it)
+              })
             }
-          }
-        } catch (e: Exception) {
-          withContext(Dispatchers.Main) {
-            sendEvent(VitalDevicesEvent.PairEvent, WritableNativeMap().apply {
-              putString("error", e.message)
-            })
-          }
-        }
+          })
+        })
+      } catch (e: Exception) {
+        promise.reject("ReadError", e.message, e)
       }
-      promise.resolve(null)
     }
   }
 
   @ReactMethod
-  private fun startReadingGlucoseMeter(scannedDeviceId: String, promise: Promise) {
+  private fun readBloodPressure(scannedDeviceId: String, promise: Promise) {
     val scannedDevice = scannedDevices.firstOrNull { it.address == scannedDeviceId }
 
     if (scannedDevice == null) {
-      sendEvent(VitalDevicesEvent.GlucoseMeterReadEvent, WritableNativeMap().apply {
-        putString("error", "Device not found")
-      })
-    } else {
-      mainScope?.cancel()
-      mainScope = MainScope()
-      mainScope?.launch {
-        try {
-          withContext(Dispatchers.Default) {
-            vitalDeviceManager.glucoseMeter(reactApplicationContext, scannedDevice)
-              .flowOn(Dispatchers.IO)
-              .collect { samples ->
-                withContext(Dispatchers.Main) {
-                  sendEvent(VitalDevicesEvent.GlucoseMeterReadEvent, WritableNativeMap().apply {
-                    putArray("samples", WritableNativeArray().apply {
-                      samples.forEach {
-                        pushMap(WritableNativeMap().apply {
-                          mapSample(it)
-                        })
-                      }
-                    })
-                  })
-                }
-              }
-          }
-        } catch (e: Exception) {
-          withContext(Dispatchers.Main) {
-            sendEvent(VitalDevicesEvent.GlucoseMeterReadEvent, WritableNativeMap().apply {
-              putString("error", e.message)
-            })
-          }
-        }
+      promise.reject("ReadError", "Device not found", null)
+      return
+    }
+
+    mainScope.launch {
+      try {
+        val samples = vitalDeviceManager
+          .bloodPressure(reactApplicationContext, scannedDevice)
+          .flowOn(Dispatchers.IO)
+          .first()
+
+        promise.resolve(WritableNativeMap().apply {
+          putArray("samples", WritableNativeArray().apply {
+            samples.forEach {
+              pushMap(WritableNativeMap().apply {
+                putMap("systolic", WritableNativeMap().apply {
+                  mapSample(it.systolic)
+                })
+                putMap("diastolic", WritableNativeMap().apply {
+                  mapSample(it.diastolic)
+                })
+                putMap("pulse", WritableNativeMap().apply {
+                  mapSample(it.pulse)
+                })
+              })
+            }
+          })
+        })
+      } catch (e: Exception) {
+        promise.reject("ReadError", e.message, e)
       }
-      promise.resolve(null)
     }
   }
 
-  @ReactMethod
-  private fun startReadingBloodPressure(scannedDeviceId: String, promise: Promise) {
-    val scannedDevice = scannedDevices.firstOrNull { it.address == scannedDeviceId }
-
-    if (scannedDevice == null) {
-      sendEvent(VitalDevicesEvent.BloodPressureReadEvent, WritableNativeMap().apply {
-        putString("error", "Device not found")
-      })
-    } else {
-      mainScope?.cancel()
-      mainScope = MainScope()
-      mainScope?.launch {
-        try {
-          withContext(Dispatchers.Default) {
-            vitalDeviceManager.bloodPressure(reactApplicationContext, scannedDevice)
-              .flowOn(Dispatchers.IO)
-              .collect { samples ->
-                withContext(Dispatchers.Main) {
-                  sendEvent(VitalDevicesEvent.BloodPressureReadEvent, WritableNativeMap().apply {
-                    putArray("samples", WritableNativeArray().apply {
-                      samples.forEach {
-                        pushMap(WritableNativeMap().apply {
-                          putMap("systolic", WritableNativeMap().apply {
-                            mapSample(it.systolic)
-                          })
-                          putMap("diastolic", WritableNativeMap().apply {
-                            mapSample(it.diastolic)
-                          })
-                          putMap("pulse", WritableNativeMap().apply {
-                            mapSample(it.pulse)
-                          })
-                        })
-                      }
-                    })
-                  })
-                }
-              }
-          }
-        } catch (e: Exception) {
-          withContext(Dispatchers.Main) {
-            sendEvent(VitalDevicesEvent.BloodPressureReadEvent, WritableNativeMap().apply {
-              putString("error", e.message)
-            })
-          }
-
-        }
-      }
-
-      promise.resolve(null)
-    }
-  }
-
-  private fun WritableNativeMap.mapSample(it: QuantitySample) {
+  private fun WritableNativeMap.mapSample(it: QuantitySamplePayload) {
     putString("id", it.id)
     putString("value", it.value)
     putString("unit", it.unit)
