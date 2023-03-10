@@ -18,6 +18,7 @@
 
 #import <react/config/ReactNativeConfig.h>
 
+@import VitalHealthKit;
 
 static NSString *const kRNConcurrentRoot = @"concurrentRoot";
 
@@ -55,7 +56,7 @@ static NSString *const kRNConcurrentRoot = @"concurrentRoot";
     rootView.backgroundColor = [UIColor whiteColor];
   }
   
-  [VitalCoreConfiguration automaticConfiguration];
+  [VitalHealthKitConfiguration automaticConfiguration];
   [VitalHealthKitConfiguration configureWithBackgroundDeliveryEnabled:true numberOfDaysToBackFill:90 enableLogs:true];
 
 

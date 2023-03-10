@@ -6,7 +6,7 @@
 @implementation VitalCoreConfiguration
 
 + (void)automaticConfiguration {
-  [VitalClient automaticConfigurationWithCompletionHandler:^{}];
+  [VitalClient automaticConfigurationWithCompletion:nil];
 }
 
 @end

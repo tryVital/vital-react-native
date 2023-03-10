@@ -41,10 +41,8 @@ class VitalCoreReactNative: NSObject {
         return
     }
 
-    Task {
-      await VitalClient.configure(apiKey: apiKey, environment: env, configuration: .init(logsEnable: enableLogs))
-      resolve(())
-    }
+    VitalClient.configure(apiKey: apiKey, environment: env, configuration: .init(logsEnable: enableLogs))
+    resolve(())
   }
 
   @objc(cleanUp:rejecter:)
