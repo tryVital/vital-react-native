@@ -57,16 +57,14 @@ class VitalHealthReactNative: RCTEventEmitter {
     resolve: @escaping RCTPromiseResolveBlock,
     reject: RCTPromiseRejectBlock
   ) {
-    Task {
-      await VitalHealthKitClient.configure(
-          .init(
-              backgroundDeliveryEnabled: backgroundDeliveryEnabled,
-              numberOfDaysToBackFill: numberOfDaysToBackFill,
-              logsEnabled: enableLogs
-            )
-        )
-      resolve(())
-    }
+    VitalHealthKitClient.configure(
+        .init(
+            backgroundDeliveryEnabled: backgroundDeliveryEnabled,
+            numberOfDaysToBackFill: numberOfDaysToBackFill,
+            logsEnabled: enableLogs
+          )
+      )
+    resolve(())
   }
 
    @objc(setUserId:resolver:rejecter:)
@@ -107,10 +105,8 @@ class VitalHealthReactNative: RCTEventEmitter {
           return
       }
 
-      Task {
-        await VitalClient.configure(apiKey: apiKey, environment: env, configuration: .init(logsEnable: enableLogs))
-        resolve(())
-      }
+      VitalClient.configure(apiKey: apiKey, environment: env, configuration: .init(logsEnable: enableLogs))
+      resolve(())
     }
 
   @objc(ask:writeResources:resolver:rejecter:)
