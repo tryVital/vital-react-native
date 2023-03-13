@@ -26,7 +26,8 @@
     "!**/.*"
   ],
   "scripts": {
-    "build": "bob build",
+    "build": "bob build && yarn run postbuild-copy-declarations",
+    "postbuild-copy-declarations": "copyfiles -u 1 src/**/*.d.ts lib/typescript",
     "clean": "del lib",
     "prepack": "yarn run clean && yarn run build",
     "np": "np --no-publish",
@@ -52,6 +53,7 @@
     "@types/jest": "^28.1.2",
     "@types/react": "~17.0.21",
     "@types/react-native": "0.70.0",
+    "copyfiles": "^2.4.1",
     "del-cli": "^5.0.0",
     "eslint": "^8.4.1",
     "eslint-config-prettier": "^8.5.0",
