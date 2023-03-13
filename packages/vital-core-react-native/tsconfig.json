@@ -2,7 +2,7 @@
   "compilerOptions": {
     "baseUrl": "./",
     "paths": {
-      "vital-core-react-native": ["./src/index"]
+      "vital-core-react-native": ["./src/*", "./src/models/*"]
     },
     "outDir": "./lib",
     "allowUnreachableCode": false,
