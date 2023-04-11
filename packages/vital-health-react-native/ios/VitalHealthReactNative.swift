@@ -5,8 +5,12 @@ import Combine
 @objc(VitalHealthReactNative)
 class VitalHealthReactNative: RCTEventEmitter {
 
-  public static var status: RCTEventEmitter!
   public var cancellable: AnyCancellable?
+
+  /// Whether or not this native module is active & not invalidated.
+  var isActive: Bool {
+    callableJSModules != nil
+  }
 
   deinit {
     cancellable?.cancel()
@@ -14,9 +18,10 @@ class VitalHealthReactNative: RCTEventEmitter {
 
   override init() {
     super.init()
-    VitalHealthReactNative.status = self
 
     cancellable = VitalHealthKitClient.shared.status.sink { [weak self] status in
+      guard let self = self, self.isActive else { return }
+
       var payload: [String: String] = [:]
 
       switch status {
@@ -41,7 +46,7 @@ class VitalHealthReactNative: RCTEventEmitter {
           payload["status"] = "completed"
       }
 
-      self?.sendEvent(withName: "Status", body: payload)
+      self.sendEvent(withName: "Status", body: payload)
     }
   }
 
