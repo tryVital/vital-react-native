@@ -16,7 +16,7 @@ class VitalHealthReactNative: RCTEventEmitter {
     super.init()
     VitalHealthReactNative.status = self
 
-    cancellable = VitalHealthKitClient.shared.status.sink { status in
+    cancellable = VitalHealthKitClient.shared.status.sink { [weak self] status in
       var payload: [String: String] = [:]
 
       switch status {
@@ -41,7 +41,7 @@ class VitalHealthReactNative: RCTEventEmitter {
           payload["status"] = "completed"
       }
 
-      self.sendEvent(withName: "Status", body: payload)
+      self?.sendEvent(withName: "Status", body: payload)
     }
   }
 
