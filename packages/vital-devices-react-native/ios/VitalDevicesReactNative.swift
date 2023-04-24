@@ -138,16 +138,7 @@ class VitalDevicesReactNative: RCTEventEmitter {
                     reject("ReadError", "error reading data from device \(error)", error)
                 }
             } receiveValue: { samples in
-                let mappedSamples = samples.map { sample in
-                    [
-                        "id": sample.id,
-                        "value": sample.value,
-                        "unit": sample.unit,
-                        "startDate": sample.startDate.timeIntervalSince1970,
-                        "endDate": sample.endDate.timeIntervalSince1970,
-                        "type": sample.type
-                    ] as [String: Any?]
-                }
+                let mappedSamples = samples.map { $0.toDictionary() }
                 resolve(["samples": mappedSamples])
             }
     }
@@ -176,30 +167,9 @@ class VitalDevicesReactNative: RCTEventEmitter {
             } receiveValue: { samples in
                 let mappedSamples = samples.map { sample in
                     [
-                        "systolic": [
-                            "id": sample.systolic.id,
-                            "value": sample.systolic.value,
-                            "unit": sample.systolic.unit,
-                            "startDate": sample.systolic.startDate.timeIntervalSince1970,
-                            "endDate": sample.systolic.endDate.timeIntervalSince1970,
-                            "type": sample.systolic.type
-                        ] as [String: Any?],
-                        "diastolic": [
-                            "id": sample.diastolic.id,
-                            "value": sample.diastolic.value,
-                            "unit": sample.diastolic.unit,
-                            "startDate": sample.diastolic.startDate.timeIntervalSince1970,
-                            "endDate": sample.diastolic.endDate.timeIntervalSince1970,
-                            "type": sample.diastolic.type
-                        ] as [String: Any?],
-                        "pulse": [
-                            "id": sample.pulse?.id,
-                            "value": sample.pulse?.value,
-                            "unit": sample.pulse?.unit,
-                            "startDate": sample.pulse?.startDate.timeIntervalSince1970,
-                            "endDate": sample.pulse?.endDate.timeIntervalSince1970,
-                            "type": sample.pulse?.type
-                        ] as [String: Any?]
+                        "systolic": sample.systolic.toDictionary(),
+                        "diastolic": sample.diastolic.toDictionary(),
+                        "pulse": sample.pulse?.toDictionary()
                     ]
                 }
                 resolve(["samples": mappedSamples])
@@ -237,6 +207,19 @@ private func mapBrandToString(_ brand: Brand) -> String {
     case .contour: return "contour"
     case .beurer: return "beurer"
     case .libre: return "libre"
+    }
+}
+
+extension QuantitySample {
+    func toDictionary() -> [String: Any?] {
+        [
+            "id": id,
+            "value": value,
+            "unit": unit,
+            "startDate": startDate.timeIntervalSince1970,
+            "endDate": endDate.timeIntervalSince1970,
+            "type": type
+        ]
     }
 }
 
