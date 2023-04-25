@@ -147,9 +147,13 @@ class VitalDevicesReactNativeModule(reactContext: ReactApplicationContext) :
                 putMap("diastolic", WritableNativeMap().apply {
                   mapSample(it.diastolic)
                 })
-                putMap("pulse", WritableNativeMap().apply {
-                  mapSample(it.pulse)
-                })
+                if (it.pulse != null) {
+                  putMap("pulse", WritableNativeMap().apply {
+                    mapSample(it.pulse)
+                  })
+                } else {
+                  putNull("pulse")
+                }
               })
             }
           })
@@ -162,10 +166,10 @@ class VitalDevicesReactNativeModule(reactContext: ReactApplicationContext) :
 
   private fun WritableNativeMap.mapSample(it: QuantitySamplePayload) {
     putString("id", it.id)
-    putString("value", it.value)
+    putDouble("value", it.value.toDouble())
     putString("unit", it.unit)
-    putString("startDate", it.startDate.time.toString())
-    putString("endDate", it.endDate.time.toString())
+    putDouble("startDate", it.startDate.time.toDouble())
+    putDouble("endDate", it.endDate.time.toDouble())
     putString("type", it.type)
   }
 

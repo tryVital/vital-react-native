@@ -216,8 +216,9 @@ extension QuantitySample {
             "id": id,
             "value": value,
             "unit": unit,
-            "startDate": startDate.timeIntervalSince1970,
-            "endDate": endDate.timeIntervalSince1970,
+            // JS interop expects epoch millisecond
+            "startDate": startDate.timeIntervalSince1970 * 1000,
+            "endDate": endDate.timeIntervalSince1970 * 1000,
             "type": type
         ]
     }

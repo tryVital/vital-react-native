@@ -84,14 +84,14 @@ export class VitalDevicesManager {
     await this.checkPermission();
     let response: { samples: BloodPressureSample[] } = await NativeModules.VitalDevicesReactNative
       .readBloodPressure(scannedDeviceId)
-    return response.samples
+    return response.samples.map(fix_blood_pressure_sample)
   }
 
   async readGlucoseMeter(scannedDeviceId: string): Promise<QuantitySample[]> {
     await this.checkPermission();
     let response : { samples: QuantitySample[] } = await NativeModules.VitalDevicesReactNative
       .readGlucoseMeter(scannedDeviceId)
-    return response.samples
+    return response.samples.map(fix_quantity_sample)
   }
 
   private async checkPermission() {
@@ -179,4 +179,22 @@ export class VitalDevicesManager {
       kind: DeviceKind.GlucoseMeter,
     },
   ];
+}
+
+function fix_blood_pressure_sample(sample: BloodPressureSample): BloodPressureSample {
+  sample.systolic = fix_quantity_sample(sample.systolic)
+  sample.diastolic = fix_quantity_sample(sample.diastolic)
+  sample.pulse = sample.pulse != null ? fix_quantity_sample(sample.pulse) : null
+  return sample
+}
+
+function fix_quantity_sample(sample: QuantitySample): QuantitySample {
+  // Android & iOS: epoch milliseconds in double
+  // Convert to JS Date
+  if (typeof sample.startDate !== 'number' || typeof sample.endDate !== 'number') {
+    throw Error("vital-device native bridge: Expected number for Date. Found " + typeof sample.startDate)
+  }
+  sample.startDate = new Date(sample.startDate)
+  sample.endDate = new Date(sample.endDate)
+  return sample
 }
