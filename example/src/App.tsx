@@ -15,7 +15,7 @@ import {
 } from '@tryvital/vital-devices-react-native';
 import {NativeEventEmitter} from 'react-native';
 import {VITAL_API_KEY, VITAL_ENVIRONMENT, VITAL_REGION} from './Environment';
-import {syncActivityData, readBLEGlucoseMeter} from './ExampleUseCases';
+import {syncActivityData, readBLEGlucoseMeter, readBLEBloodPressureMeter} from './ExampleUseCases';
 import { initializeVitalSDK } from './Initialization';
 
 // Configuring Vital client SDK for making API calls on client side
@@ -50,6 +50,9 @@ const App = () => {
 
       // Example: Read BLE Glucose Meter
       await readBLEGlucoseMeter(vitalDevicesManager)
+
+      // Example: Read BLE Blood Pressure
+      // await readBLEBloodPressureMeter(vitalDevicesManager)
     }
 
     initialize()
