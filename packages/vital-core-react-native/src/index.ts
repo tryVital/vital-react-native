@@ -1,7 +1,11 @@
 import { NativeModules, Platform } from 'react-native';
+import type { TimeSeriesData } from './models/TimeSeriesData';
+import type { ManualProviderSlug } from './models/Provider';
 
 export { default as QuantitySample } from './models/QuantitySample';
 export { default as BloodPressureSample } from './models/BloodPressureSample';
+export * from './models/TimeSeriesData';
+export { ManualProviderSlug } from './models/Provider';
 
 const LINKING_ERROR =
   `The package 'vital-core-react-native' doesn't seem to be linked. Make sure: \n\n` +
@@ -36,6 +40,18 @@ export class VitalCore {
       environment,
       region,
       enableLogs
+    );
+  }
+
+  static postTimeSeriesData(
+    data: TimeSeriesData,
+    provider: ManualProviderSlug,
+    timeZone: string | undefined = undefined
+  ): Promise<void> {
+    return VitalCoreReactNative.postTimeSeriesData(
+      JSON.stringify(data),
+      provider,
+      timeZone
     );
   }
 
