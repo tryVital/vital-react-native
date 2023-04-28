@@ -56,7 +56,7 @@ class VitalDevicesReactNativeModule(reactContext: ReactApplicationContext) :
         }
         .onStart { promise.resolve(null) }
         .launchIn(mainScope)
-    } catch (e: Exception) {
+    } catch (e: Throwable) {
         promise.reject("ScanError", e.message, e)
     }
   }
@@ -89,7 +89,7 @@ class VitalDevicesReactNativeModule(reactContext: ReactApplicationContext) :
         }
 
         promise.resolve(null)
-      } catch (e: Exception) {
+      } catch (e: Throwable) {
         promise.reject("PairError", e.message, e)
       }
     }
@@ -119,7 +119,7 @@ class VitalDevicesReactNativeModule(reactContext: ReactApplicationContext) :
             }
           })
         })
-      } catch (e: Exception) {
+      } catch (e: Throwable) {
         promise.reject("ReadError", e.message, e)
       }
     }
@@ -163,7 +163,7 @@ class VitalDevicesReactNativeModule(reactContext: ReactApplicationContext) :
             }
           })
         })
-      } catch (e: Exception) {
+      } catch (e: Throwable) {
         promise.reject("ReadError", e.message, e)
       }
     }
@@ -193,7 +193,7 @@ class VitalDevicesReactNativeModule(reactContext: ReactApplicationContext) :
       reactApplicationContext
         .getJSModule(DeviceEventManagerModule.RCTDeviceEventEmitter::class.java)
         .emit(event.value, params)
-    } catch (e: Exception) {
+    } catch (e: Throwable) {
       Log.e("VitalDevices", "sendEvent: $e")
     }
   }
