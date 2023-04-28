@@ -14,8 +14,9 @@ import io.tryvital.client.VitalClient
 import io.tryvital.client.utils.VitalLogger
 import io.tryvital.vitalhealthconnect.VitalHealthConnectManager
 import io.tryvital.vitalhealthconnect.model.HealthConnectAvailability
-import io.tryvital.vitalhealthconnect.model.HealthResource
 import io.tryvital.vitalhealthconnect.model.SyncStatus
+import io.tryvital.vitalhealthconnect.model.VitalResource
+import io.tryvital.vitalhealthconnect.model.WritableVitalResource
 import kotlinx.coroutines.*
 import java.time.Instant
 import kotlin.reflect.KClass
@@ -29,7 +30,7 @@ class VitalHealthReactNativeModule(reactContext: ReactApplicationContext) :
   private var vitalHealthConnectManager: VitalHealthConnectManager? = null
 
   private var askForResourcesResult: Promise? = null
-  private var askedHealthPermissions: Set<HealthPermission>? = null
+  private var askedHealthPermissions: Set<String>? = null
 
   private var mainScope: CoroutineScope? = null
   private var statusScope: CoroutineScope? = null
@@ -57,20 +58,21 @@ class VitalHealthReactNativeModule(reactContext: ReactApplicationContext) :
       )
     }
 
+    val availability = VitalHealthConnectManager.isAvailable(reactApplicationContext)
+
+    if (availability != HealthConnectAvailability.Installed) {
+      return promise.reject(
+        "Health Connect is unavailable: $availability",
+        "Health Connect is unavailable: $availability",
+      )
+    }
+
     val manager = VitalHealthConnectManager.create(
       reactApplicationContext,
       vitalClient!!.apiKey,
       vitalClient!!.region,
       vitalClient!!.environment
     )
-    val availability = manager.isAvailable(reactApplicationContext)
-
-    if (availability != HealthConnectAvailability.Installed) {
-      return promise.reject(
-        "Health Connect is unavailable: ${availability}",
-        "Health Connect is unavailable: ${availability}",
-      )
-    }
 
     vitalHealthConnectManager = manager
 
@@ -141,16 +143,17 @@ class VitalHealthReactNativeModule(reactContext: ReactApplicationContext) :
     writeResources: ReadableArray?,
     promise: Promise
   ) {
+    // TODO: VIT-2947 Remove after VitalResource Permission API lands in vital-android
     val requestPermissionActivityContract =
       PermissionController.createRequestPermissionResultContract()
     val healthPermissions =
       readResources.toArrayList().toList().map { mapReadResourceToHealthRecord(it as String) }
         .flatten()
-        .map { HealthPermission.createReadPermission(it) }.toSet().plus(
+        .map { HealthPermission.getReadPermission(it) }.toSet().plus(
           writeResources?.toArrayList()?.toList()
             ?.map { mapWriteResourceToHealthRecord(it as String) }
             ?.flatten()
-            ?.map { HealthPermission.createWritePermission(it) }?.toSet() ?: emptySet()
+            ?.map { HealthPermission.getWritePermission(it) }?.toSet() ?: emptySet()
         )
 
     askForResourcesResult = promise
@@ -166,6 +169,7 @@ class VitalHealthReactNativeModule(reactContext: ReactApplicationContext) :
 
   @ReactMethod
   fun hasAskedForPermission(resource: String, promise: Promise) {
+    // TODO: VIT-2947 Delegate to VitalResource Permission API lands in vital-android
     promise.resolve(false)
   }
 
@@ -179,13 +183,21 @@ class VitalHealthReactNativeModule(reactContext: ReactApplicationContext) :
       return
     }
 
+    val vitalResources = resources.toArrayList().toList()
+      .mapNotNull {
+        try {
+          VitalResource.valueOf(it.toString())
+        } catch (e: IllegalArgumentException) {
+          promise.reject("VitalHealthError", "Unrecognized vital resource: $it")
+          return@syncData
+        }
+      }
+      .toSet()
+
     mainScope?.cancel()
     mainScope = MainScope()
     mainScope!!.launch {
-      vitalHealthConnectManager!!.syncData(
-        resources.toArrayList().toList().mapNotNull { mapStringToHealthResource(it as String) }
-          .toSet()
-      )
+      vitalHealthConnectManager!!.syncData(vitalResources)
       promise.resolve(null)
     }
   }
@@ -215,12 +227,22 @@ class VitalHealthReactNativeModule(reactContext: ReactApplicationContext) :
       return
     }
 
+    // TODO: VIT-2947 Missing WritableVitalResource.valueOf()
+    val writableResource = when (resource) {
+      "water" -> WritableVitalResource.Water
+      "glucose" -> WritableVitalResource.Glucose
+      else -> {
+        promise.reject("VitalHealthError", "Unrecognized writable resource: $resource")
+        return
+      }
+    }
+
     writeScope?.cancel()
     writeScope = MainScope()
     writeScope!!.launch {
       try {
-        vitalHealthConnectManager!!.addHealthResource(
-          mapStringToHealthResource(resource)!!,
+        vitalHealthConnectManager!!.writeRecord(
+          writableResource,
           startDate = Instant.ofEpochMilli(startDate),
           endDate = Instant.ofEpochMilli(endDate),
           value = value,
@@ -369,6 +391,7 @@ private fun stringToEnvironment(environment: String): Environment {
   throw Exception("Unsupported environment $environment")
 }
 
+// TODO: VIT-2947 Remove after VitalResource Permission API lands in vital-android
 private fun mapReadResourceToHealthRecord(resource: String): List<KClass<out Record>> {
   when (resource) {
     "profile" -> return listOf(HeightRecord::class, WeightRecord::class)
@@ -385,7 +408,7 @@ private fun mapReadResourceToHealthRecord(resource: String): List<KClass<out Rec
     "sleep" -> return listOf(SleepSessionRecord::class)
     "glucose" -> return listOf(BloodGlucoseRecord::class)
     "bloodPressure" -> return listOf(BloodPressureRecord::class)
-    "heartRate" -> return listOf(HeartRateVariabilitySdnnRecord::class)
+    "heartRate" -> return listOf(HeartRateVariabilityRmssdRecord::class)
     "steps" -> return listOf(StepsRecord::class)
     "activeEnergyBurned" -> return listOf(ActiveCaloriesBurnedRecord::class)
     "basalEnergyBurned" -> return listOf(BasalMetabolicRateRecord::class)
@@ -394,28 +417,11 @@ private fun mapReadResourceToHealthRecord(resource: String): List<KClass<out Rec
   return listOf()
 }
 
+// TODO: VIT-2947 Remove after VitalResource Permission API lands in vital-android
 private fun mapWriteResourceToHealthRecord(resource: String): List<KClass<out Record>> {
   when (resource) {
     "water" -> return listOf(HydrationRecord::class)
   }
 
   return listOf()
-}
-
-private fun mapStringToHealthResource(resource: String): HealthResource? {
-  return when (resource) {
-    "profile" -> return HealthResource.Profile
-    "body" -> return HealthResource.Body
-    "workout" -> return HealthResource.Workout
-    "activity" -> return HealthResource.Activity
-    "sleep" -> return HealthResource.Sleep
-    "glucose" -> return HealthResource.Glucose
-    "bloodPressure" -> return HealthResource.BloodPressure
-    "heartRate" -> return HealthResource.HeartRate
-    "steps" -> return HealthResource.Steps
-    "activeEnergyBurned" -> return HealthResource.ActiveEnergyBurned
-    "basalEnergyBurned" -> return HealthResource.BasalEnergyBurned
-    "water" -> return HealthResource.Water
-    else -> null
-  }
 }

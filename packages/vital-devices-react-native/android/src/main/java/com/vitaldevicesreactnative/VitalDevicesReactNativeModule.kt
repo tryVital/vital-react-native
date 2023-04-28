@@ -78,10 +78,15 @@ class VitalDevicesReactNativeModule(reactContext: ReactApplicationContext) :
 
     mainScope.launch {
       try {
-        vitalDeviceManager
-          .pair(scannedDevice)
-          .flowOn(Dispatchers.IO)
-          .collect()
+        when (scannedDevice.deviceModel.kind) {
+          Kind.GlucoseMeter -> vitalDeviceManager
+            .glucoseMeter(reactApplicationContext, scannedDevice)
+            .pair()
+
+          Kind.BloodPressure -> vitalDeviceManager
+            .bloodPressure(reactApplicationContext, scannedDevice)
+            .pair()
+        }
 
         promise.resolve(null)
       } catch (e: Exception) {
@@ -103,8 +108,7 @@ class VitalDevicesReactNativeModule(reactContext: ReactApplicationContext) :
       try {
         val samples = vitalDeviceManager
           .glucoseMeter(reactApplicationContext, scannedDevice)
-          .flowOn(Dispatchers.IO)
-          .first()
+          .read()
 
         promise.resolve(WritableNativeMap().apply {
           putArray("samples", WritableNativeArray().apply {
@@ -134,8 +138,7 @@ class VitalDevicesReactNativeModule(reactContext: ReactApplicationContext) :
       try {
         val samples = vitalDeviceManager
           .bloodPressure(reactApplicationContext, scannedDevice)
-          .flowOn(Dispatchers.IO)
-          .first()
+          .read()
 
         promise.resolve(WritableNativeMap().apply {
           putArray("samples", WritableNativeArray().apply {
@@ -147,9 +150,11 @@ class VitalDevicesReactNativeModule(reactContext: ReactApplicationContext) :
                 putMap("diastolic", WritableNativeMap().apply {
                   mapSample(it.diastolic)
                 })
-                if (it.pulse != null) {
+
+                val pulse = it.pulse
+                if (pulse != null) {
                   putMap("pulse", WritableNativeMap().apply {
-                    mapSample(it.pulse)
+                    mapSample(pulse)
                   })
                 } else {
                   putNull("pulse")

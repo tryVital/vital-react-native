@@ -1,6 +1,7 @@
 import { ProviderSlug, VitalCore } from "@tryvital/vital-core-react-native";
 import { Brand, Cancellable, DeviceKind, ScannedDevice, VitalDevicesManager } from "@tryvital/vital-devices-react-native";
 import { VitalHealth, VitalResource } from "@tryvital/vital-health-react-native";
+import { Platform } from "react-native";
 import { PERMISSIONS, requestMultiple } from "react-native-permissions";
 
 // VitalHealth example use case: Sync Activity data
@@ -66,10 +67,12 @@ async function readScannedGlucoseMeter(
     console.log("@@@ Read " + samples.length + " samples from device: " + device.name + " (id = " + device.id + ")")
     console.log(samples)
 
-    await VitalCore.postTimeSeriesData(
-        { "type": "glucose", "samples": samples },
-        ProviderSlug.AccuchekBLE
-    )
+    if (Platform.OS == "ios") {
+        await VitalCore.postTimeSeriesData(
+            { "type": "glucose", "samples": samples },
+            ProviderSlug.AccuchekBLE
+        )
+    }
 
     return samples
 }
@@ -118,10 +121,12 @@ async function readScannedBloodPressureMeter(
     console.log("@@@ Read " + samples.length + " samples from device: " + device.name + " (id = " + device.id + ")")
     console.log(samples)
 
-    await VitalCore.postTimeSeriesData(
-        { "type": "blood_pressure", "samples": samples },
-        ProviderSlug.OmronBLE
-    )
+    if (Platform.OS == "ios") {
+        await VitalCore.postTimeSeriesData(
+            { "type": "blood_pressure", "samples": samples },
+            ProviderSlug.OmronBLE
+        )
+    }
 
     return samples
 }
