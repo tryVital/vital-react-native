@@ -1,6 +1,7 @@
 import { ProviderSlug, VitalCore } from "@tryvital/vital-core-react-native";
 import { Brand, Cancellable, DeviceKind, ScannedDevice, VitalDevicesManager } from "@tryvital/vital-devices-react-native";
 import { VitalHealth, VitalResource } from "@tryvital/vital-health-react-native";
+import { Platform } from "react-native";
 import { PERMISSIONS, requestMultiple } from "react-native-permissions";
 
 // VitalHealth example use case: Sync Activity data
@@ -66,10 +67,12 @@ async function readScannedGlucoseMeter(
     console.log("@@@ Read " + samples.length + " samples from device: " + device.name + " (id = " + device.id + ")")
     console.log(samples)
 
-    await VitalCore.postTimeSeriesData(
-        { "type": "glucose", "samples": samples },
-        ProviderSlug.AccuchekBLE
-    )
+    if (Platform.OS == "ios") {
+        await VitalCore.postTimeSeriesData(
+            { "type": "glucose", "samples": samples },
+            ProviderSlug.AccuchekBLE
+        )
+    }
 
     return samples
 }
@@ -105,12 +108,14 @@ async function readScannedBloodPressureMeter(
     device: ScannedDevice,
     deviceManager: VitalDevicesManager
 ) {
-    console.log("@@@ Start pairing device: " + device.name + " (id = " + device.id + ")")
-
-    await deviceManager.pairDevice(device.id)
-
-    console.log("@@@ Successfully paired device: " + device.name + " (id = " + device.id + ")")
-
+    // IMPORTANT:
+    //
+    // For Blood Pressure meters specifically, it is recommended to call
+    // `deviceManager.readBloodPressure` directly. Pairing will happen automatically
+    // as part of the reading process, if it has not already been done so.
+    //
+    // Use `deviceManager.pair` only if the intent is to work with the Pairing mode
+    // of the Blood Pressure meter.
     console.log("@@@ Start reading from device: " + device.name + " (id = " + device.id + ")")
 
     let samples = await deviceManager.readBloodPressure(device.id)
@@ -118,10 +123,12 @@ async function readScannedBloodPressureMeter(
     console.log("@@@ Read " + samples.length + " samples from device: " + device.name + " (id = " + device.id + ")")
     console.log(samples)
 
-    await VitalCore.postTimeSeriesData(
-        { "type": "blood_pressure", "samples": samples },
-        ProviderSlug.OmronBLE
-    )
+    if (Platform.OS == "ios") {
+        await VitalCore.postTimeSeriesData(
+            { "type": "blood_pressure", "samples": samples },
+            ProviderSlug.OmronBLE
+        )
+    }
 
     return samples
 }
