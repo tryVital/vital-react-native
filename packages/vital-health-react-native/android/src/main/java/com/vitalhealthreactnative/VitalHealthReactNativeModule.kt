@@ -13,6 +13,8 @@ import io.tryvital.client.utils.VitalLogger
 import io.tryvital.vitalhealthconnect.VitalHealthConnectManager
 import io.tryvital.vitalhealthconnect.model.*
 import kotlinx.coroutines.*
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
 import java.time.Instant
 
 const val VITAL_HEALTH_ERROR = "VitalHealthError"
@@ -61,8 +63,7 @@ class VitalHealthReactNativeModule(reactContext: ReactApplicationContext) :
       )
     }
 
-    mainScope.cancel()
-    mainScope = MainScope()
+    reset()
 
     val manager = VitalHealthConnectManager.create(
       reactApplicationContext,
@@ -72,19 +73,19 @@ class VitalHealthReactNativeModule(reactContext: ReactApplicationContext) :
     )
 
     vitalHealthConnectManager = manager
+    // Start status observation before we do anything that can update it.
+    manager.startStatusUpdate()
 
-    mainScope.apply {
-      launch {
-        manager.configureHealthConnectClient(
-          logsEnabled = enableLogs,
-          syncOnAppStart = syncOnAppStart,
-          numberOfDaysToBackFill = numberOfDaysToBackFill,
-        )
-        promise.resolve(null)
-      }
+    mainScope.launch {
+      manager.configureHealthConnectClient(
+        logsEnabled = enableLogs,
+        // This key is intended for VitalHealthAutoStarter, which is not used by the RN SDK.
+        syncOnAppStart = false,
+        numberOfDaysToBackFill = numberOfDaysToBackFill,
+      )
+
+      promise.resolve(null)
     }
-
-    startStatusUpdate()
   }
 
   @ReactMethod
@@ -202,10 +203,16 @@ class VitalHealthReactNativeModule(reactContext: ReactApplicationContext) :
 
   @ReactMethod
   fun cleanUp(promise: Promise) {
+    reset()
+    promise.resolve(null)
+  }
+
+  private fun reset() {
     mainScope.cancel()
     mainScope = MainScope()
 
-    promise.resolve(null)
+    vitalHealthConnectManager?.close()
+    vitalHealthConnectManager = null
   }
 
   @ReactMethod
@@ -253,60 +260,48 @@ class VitalHealthReactNativeModule(reactContext: ReactApplicationContext) :
     // Keep: Required for RN built in Event Emitter Calls.
   }
 
-  private fun startStatusUpdate() {
-    mainScope.launch {
-      try {
-        withContext(Dispatchers.Default) {
-          vitalHealthConnectManager?.status?.collect {
-            logger.logI("Status: $it")
-            withContext(Dispatchers.Main) {
-              when (it) {
-                is SyncStatus.ResourceSyncFailed -> {
-                  sendEvent(VitalHealthEvent.Status, WritableNativeMap().apply {
-                    putString("status", "failedSyncing")
-                    putString("resource", it.resource.name)
-                  })
-                }
-                is SyncStatus.ResourceNothingToSync -> {
-                  sendEvent(VitalHealthEvent.Status, WritableNativeMap().apply {
-                    putString("status", "nothingToSync")
-                    putString("resource", it.resource.name)
-                  })
-                }
-                is SyncStatus.ResourceSyncing -> {
-                  sendEvent(VitalHealthEvent.Status, WritableNativeMap().apply {
-                    putString("status", "syncing")
-                    putString("resource", it.resource.name)
-                  })
-                }
-                is SyncStatus.ResourceSyncingComplete -> {
-                  sendEvent(VitalHealthEvent.Status, WritableNativeMap().apply {
-                    putString("status", "successSyncing")
-                    putString("resource", it.resource.name)
-                  })
-                }
-                SyncStatus.SyncingCompleted -> {
-                  sendEvent(VitalHealthEvent.Status, WritableNativeMap().apply {
-                    putString("status", "syncingCompleted")
-                  })
-                }
-                SyncStatus.Unknown -> {
-                  sendEvent(VitalHealthEvent.Status, WritableNativeMap().apply {
-                    putString("status", "unknown")
-                  })
-                }
-              }
-            }
+  private fun VitalHealthConnectManager.startStatusUpdate() {
+    this.status
+      .onEach {
+        logger.logI("Status: $it")
+        when (it) {
+          is SyncStatus.ResourceSyncFailed -> {
+            sendEvent(VitalHealthEvent.Status, WritableNativeMap().apply {
+              putString("status", "failedSyncing")
+              putString("resource", it.resource.name)
+            })
+          }
+          is SyncStatus.ResourceNothingToSync -> {
+            sendEvent(VitalHealthEvent.Status, WritableNativeMap().apply {
+              putString("status", "nothingToSync")
+              putString("resource", it.resource.name)
+            })
+          }
+          is SyncStatus.ResourceSyncing -> {
+            sendEvent(VitalHealthEvent.Status, WritableNativeMap().apply {
+              putString("status", "syncing")
+              putString("resource", it.resource.name)
+            })
+          }
+          is SyncStatus.ResourceSyncingComplete -> {
+            sendEvent(VitalHealthEvent.Status, WritableNativeMap().apply {
+              putString("status", "successSyncing")
+              putString("resource", it.resource.name)
+            })
+          }
+          SyncStatus.SyncingCompleted -> {
+            sendEvent(VitalHealthEvent.Status, WritableNativeMap().apply {
+              putString("status", "syncingCompleted")
+            })
+          }
+          SyncStatus.Unknown -> {
+            sendEvent(VitalHealthEvent.Status, WritableNativeMap().apply {
+              putString("status", "unknown")
+            })
           }
         }
-      } catch (e: Exception) {
-        withContext(Dispatchers.Main) {
-          sendEvent(VitalHealthEvent.Status, WritableNativeMap().apply {
-            putString("status", "failedSyncing")
-          })
-        }
       }
-    }
+      .launchIn(mainScope)
   }
 
   private fun sendEvent(event: VitalHealthEvent, params: Any) {
