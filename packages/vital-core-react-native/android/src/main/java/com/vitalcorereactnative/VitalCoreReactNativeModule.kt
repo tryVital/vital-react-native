@@ -4,13 +4,15 @@ import com.facebook.react.bridge.ReactApplicationContext
 import com.facebook.react.bridge.ReactContextBaseJavaModule
 import com.facebook.react.bridge.ReactMethod
 import com.facebook.react.bridge.Promise
+import com.facebook.react.bridge.WritableNativeArray
+import com.facebook.react.bridge.WritableNativeMap
 import com.facebook.react.module.annotations.ReactModule
 import com.squareup.moshi.Moshi
 import com.squareup.moshi.adapter
-import io.tryvital.client.Environment
-import io.tryvital.client.Region
-import io.tryvital.client.VitalClient
+import io.tryvital.client.*
 import io.tryvital.client.services.data.ManualProviderSlug
+import io.tryvital.client.services.data.ProviderSlug
+import io.tryvital.client.services.data.Source
 import io.tryvital.client.services.data.TimeseriesPayload
 import io.tryvital.client.utils.VitalLogger
 import kotlinx.coroutines.MainScope
@@ -60,6 +62,63 @@ class VitalCoreReactNativeModule(reactContext: ReactApplicationContext) :
   @ReactMethod
   fun cleanUp(promise: Promise) {
     promise.resolve(null)
+  }
+
+  @ReactMethod
+  fun hasUserConnectedTo(provider: String, promise: Promise) {
+    val client = client ?: return promise.rejectCoreNotConfigured()
+
+    val slug = try { ProviderSlug.valueOf(provider) } catch (e: IllegalArgumentException) {
+      return promise.reject(VITAL_CORE_ERROR, "Unrecognized provider slug: $provider")
+    }
+
+    promise.resolve(client.hasUserConnectedTo(slug))
+  }
+
+  @ReactMethod
+  fun userConnectedSources(promise: Promise) {
+    val client = client ?: return promise.rejectCoreNotConfigured()
+    val userId = userId ?: return promise.rejectUserIDNotSet()
+
+    mainScope.launch {
+      try {
+        val sources = client.userConnectedSources(userId)
+        promise.resolve(
+          WritableNativeArray().apply {
+            for (source in sources) {
+              WritableNativeMap()
+                .apply {
+                  putString("name", source.name)
+                  putString("slug", source.slug.toString())
+                  putString("logo", source.logo)
+                }
+                .let(this::pushMap)
+            }
+          }
+        )
+      } catch (e: Throwable) {
+        promise.reject(VITAL_CORE_ERROR, "Failed to look up user connected source: ${e.message}", e)
+      }
+    }
+  }
+
+  @ReactMethod
+  fun createConnectedSourceIfNotExist(provider: String, promise: Promise) {
+    val client = client ?: return promise.rejectCoreNotConfigured()
+    val userId = userId ?: return promise.rejectUserIDNotSet()
+
+    val slug = try { ManualProviderSlug.valueOf(provider) } catch (e: IllegalArgumentException) {
+      return promise.reject(VITAL_CORE_ERROR, "Unrecognized manual provider: $provider")
+    }
+
+    mainScope.launch {
+      try {
+        client.createConnectedSourceIfNotExist(slug, userId)
+        promise.resolve(null)
+      } catch (e: Throwable) {
+        promise.reject(VITAL_CORE_ERROR, "Failed to create connected source for $provider: ${e.message}", e)
+      }
+    }
   }
 
   @ReactMethod

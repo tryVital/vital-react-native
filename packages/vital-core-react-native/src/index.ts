@@ -1,6 +1,6 @@
 import { NativeModules, Platform } from 'react-native';
 import type { TimeSeriesData } from './models/TimeSeriesData';
-import type { ManualProviderSlug } from './models/Provider';
+import type { ManualProviderSlug, Provider } from './models/Provider';
 
 export { default as QuantitySample } from './models/QuantitySample';
 export { default as BloodPressureSample } from './models/BloodPressureSample';
@@ -41,6 +41,22 @@ export class VitalCore {
       region,
       enableLogs
     );
+  }
+
+  static hasUserConnectedTo(
+    provider: ManualProviderSlug
+  ): Promise<boolean> {
+    return VitalCoreReactNative.hasUserConnectedTo(provider);
+  }
+
+  static userConnectedSources(): Promise<Provider[]> {
+    return VitalCoreReactNative.userConnectedSources();
+  }
+
+  static createConnectedSourceIfNotExist(
+    provider: ManualProviderSlug
+  ): Promise<void> {
+    return VitalCoreReactNative.createConnectedSourceIfNotExist(provider);
   }
 
   static postTimeSeriesData(

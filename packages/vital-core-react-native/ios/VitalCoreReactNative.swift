@@ -1,5 +1,7 @@
 import VitalCore
 
+private let errorKey = "VitalCoreError"
+
 @objc(VitalCoreReactNative)
 class VitalCoreReactNative: NSObject {
 
@@ -45,6 +47,65 @@ class VitalCoreReactNative: NSObject {
     resolve(())
   }
 
+  @objc(hasUserConnectedTo:resolver:rejecter:)
+  func hasUserConnectedTo(
+    _ provider: String,
+    resolve: @escaping RCTPromiseResolveBlock,
+    reject: @escaping RCTPromiseRejectBlock
+  ) {
+    guard let slug = Provider.Slug(rawValue: provider) else {
+      reject(errorKey, "Unrecognized provider slug: \(provider)", nil)
+      return
+    }
+
+    Task {
+      do {
+        let result = try await VitalClient.shared.isUserConnected(to: slug)
+        resolve(result)
+      } catch let error {
+        reject(errorKey, error.localizedDescription, error)
+      }
+    }
+  }
+
+  @objc(userConnectedSourcesWithResolver:rejecter:)
+  func userConnectedSources(
+    resolve: @escaping RCTPromiseResolveBlock,
+    reject: @escaping RCTPromiseRejectBlock
+  ) {
+    Task {
+      do {
+        let sources = try await VitalClient.shared.user.userConnectedSources()
+        let jsonObjects = sources.map { source -> [String: String?] in
+          ["name": source.name, "slug": source.slug.rawValue, "logo": source.logo]
+        }
+        resolve(jsonObjects)
+      } catch let error {
+        reject(errorKey, error.localizedDescription, error)
+      }
+    }
+  }
+
+  @objc(createConnectedSourceIfNotExist:resolver:rejecter:)
+  func createConnectedSourceIfNotExist(
+    for provider: String,
+    resolve: @escaping RCTPromiseResolveBlock,
+    reject: @escaping RCTPromiseRejectBlock
+  ) {
+    guard let slug = Provider.Slug(rawValue: provider) else {
+      reject(errorKey, "Unrecognized provider slug: \(provider)", nil)
+      return
+    }
+
+    Task {
+      do {
+        try await VitalClient.shared.checkConnectedSource(for: slug)
+      } catch let error {
+        reject(errorKey, error.localizedDescription, error)
+      }
+    }
+  }
+
   @objc(postTimeSeriesData:provider:timeZone:resolver:rejecter:)
   func postTimeSeriesData(
     _ jsonString: String,
@@ -57,7 +118,7 @@ class VitalCoreReactNative: NSObject {
 
     if let name = timeZoneString {
       guard let namedTimeZone = TimeZone(identifier: name) else {
-        reject("VitalPostError", "Unrecognized named time zone: \(name)", nil)
+        reject(errorKey, "Unrecognized named time zone: \(name)", nil)
         return
       }
 
@@ -67,12 +128,12 @@ class VitalCoreReactNative: NSObject {
     }
 
     guard let jsonData = jsonString.data(using: .utf8) else {
-      reject("VitalPostError", "Failed to coerce the provided JSON String as UTF-8 data", nil)
+      reject(errorKey, "Failed to coerce the provided JSON String as UTF-8 data", nil)
       return
     }
 
     guard let slug = Provider.Slug(rawValue: provider) else {
-      reject("VitalPostError", "Unrecognized provider slug: \(provider)", nil)
+      reject(errorKey, "Unrecognized provider slug: \(provider)", nil)
       return
     }
 
@@ -82,7 +143,7 @@ class VitalCoreReactNative: NSObject {
       let decoder = jsonDecoder()
       decoded = try decoder.decode(RNTimeSeriesData.self, from: jsonData)
     } catch let error {
-      reject("VitalPostError", "Failed to decode the provided JSON String: \(error)", error)
+      reject(errorKey, "Failed to decode the provided JSON String: \(error)", error)
       return
     }
 
@@ -96,7 +157,7 @@ class VitalCoreReactNative: NSObject {
         )
         resolve(())
       } catch let error {
-        reject("VitalPostError", error.localizedDescription, error)
+        reject(errorKey, error.localizedDescription, error)
       }
     }
   }
