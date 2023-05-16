@@ -129,6 +129,7 @@ repositories {
 }
 
 def kotlin_version = getExtOrDefault('kotlinVersion')
+def vital_sdk_version = '1.0.0-beta.15'
 
 dependencies {
     //noinspection GradleDynamicVersion
@@ -137,6 +138,9 @@ dependencies {
   api "com.squareup.moshi:moshi:1.13.0"
   api "com.squareup.moshi:moshi-kotlin:1.13.0"
   api "com.squareup.moshi:moshi-adapters:1.13.0"
+
+  implementation "com.github.tryVital.vital-android:VitalClient:$vital_sdk_version"
+
 // From node_modules
 }
 
