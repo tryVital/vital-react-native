@@ -17,7 +17,7 @@ RCT_EXTERN_METHOD(hasUserConnectedTo:(NSString *)provider
                   resolver:(RCTPromiseResolveBlock)resolve
                   rejecter:(RCTPromiseRejectBlock)reject)
 
-RCT_EXTERN_METHOD(userConnectedSourcesWithResolver:(RCTPromiseResolveBlock)resolve
+RCT_EXTERN_METHOD(userConnectedSources:(RCTPromiseResolveBlock)resolve
                   rejecter:(RCTPromiseRejectBlock)reject)
 
 RCT_EXTERN_METHOD(createConnectedSourceIfNotExist:(NSString *)provider
