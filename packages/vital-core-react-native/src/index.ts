@@ -43,9 +43,6 @@ export class VitalCore {
     );
   }
 
-  /**
-   * @deprecated Experiment API: Not yet implemented in Android
-   */
   static postTimeSeriesData(
     data: TimeSeriesData,
     provider: ManualProviderSlug,

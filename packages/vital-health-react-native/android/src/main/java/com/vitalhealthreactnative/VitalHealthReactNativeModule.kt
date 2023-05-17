@@ -5,10 +5,9 @@ import android.content.Intent
 import android.util.Log
 import androidx.activity.result.contract.ActivityResultContract
 import com.facebook.react.bridge.*
+import com.facebook.react.module.annotations.ReactModule
 import com.facebook.react.modules.core.DeviceEventManagerModule
-import io.tryvital.client.Environment
-import io.tryvital.client.Region
-import io.tryvital.client.VitalClient
+import com.vitalcorereactnative.VitalCoreReactNativeModule
 import io.tryvital.client.utils.VitalLogger
 import io.tryvital.vitalhealthconnect.VitalHealthConnectManager
 import io.tryvital.vitalhealthconnect.model.*
@@ -20,12 +19,15 @@ import java.time.Instant
 const val VITAL_HEALTH_ERROR = "VitalHealthError"
 const val VITAL_REQUEST_CODE = 1984
 
+@ReactModule(name = VitalHealthReactNativeModule.NAME)
 class VitalHealthReactNativeModule(reactContext: ReactApplicationContext) :
   ReactContextBaseJavaModule(reactContext), ActivityEventListener {
 
   private val logger = VitalLogger.getOrCreate()
 
-  private var vitalClient: VitalClient? = null
+  private val vitalCore: VitalCoreReactNativeModule by lazy {
+    reactContext.getNativeModule(VitalCoreReactNativeModule::class.java)!!
+  }
   private var vitalHealthConnectManager: VitalHealthConnectManager? = null
 
   private var askForPermission: AskForPermissionContinuation? = null
@@ -47,18 +49,15 @@ class VitalHealthReactNativeModule(reactContext: ReactApplicationContext) :
     enableLogs: Boolean,
     promise: Promise
   ) {
-    if (vitalClient == null) {
-      return promise.reject(
-        "VitalClient is not configured",
-        "VitalClient is not configured",
-      )
-    }
+    logger.enabled = enableLogs
+
+    val client = vitalCore.client ?: return promise.rejectCoreNotConfigured()
 
     val availability = VitalHealthConnectManager.isAvailable(reactApplicationContext)
 
     if (availability != HealthConnectAvailability.Installed) {
       return promise.reject(
-        "Health Connect is unavailable: $availability",
+        VITAL_HEALTH_ERROR,
         "Health Connect is unavailable: $availability",
       )
     }
@@ -67,9 +66,9 @@ class VitalHealthReactNativeModule(reactContext: ReactApplicationContext) :
 
     val manager = VitalHealthConnectManager.create(
       reactApplicationContext,
-      vitalClient!!.apiKey,
-      vitalClient!!.region,
-      vitalClient!!.environment
+      client.apiKey,
+      client.region,
+      client.environment
     )
 
     vitalHealthConnectManager = manager
@@ -92,6 +91,10 @@ class VitalHealthReactNativeModule(reactContext: ReactApplicationContext) :
   fun setUserId(userId: String, promise: Promise) {
     val manager = vitalHealthConnectManager ?: return promise.rejectHealthNotConfigured()
 
+    // TODO: VIT-2924 user ID management is misplaced.
+    // For now, copy the userID to VitalCore RN Module whenever we get a new value.
+    vitalCore.userId = userId
+
     mainScope.launch {
       manager.setUserId(userId)
       promise.resolve(null)
@@ -106,16 +109,8 @@ class VitalHealthReactNativeModule(reactContext: ReactApplicationContext) :
     enableLogs: Boolean,
     promise: Promise
   ) {
-    logger.enabled = enableLogs
-
-    vitalClient = VitalClient(
-      reactApplicationContext,
-      stringToRegion(region),
-      stringToEnvironment(environment),
-      apiKey
-    )
-
-    promise.resolve(null)
+    // [Backward Compatibility] Delegate to VitalCore.
+    vitalCore.configure(apiKey, environment, region, enableLogs, promise)
   }
 
   @ReactMethod
@@ -242,8 +237,8 @@ class VitalHealthReactNativeModule(reactContext: ReactApplicationContext) :
         promise.resolve(null)
       } catch (e: Exception) {
         promise.reject(
-          "Failed to write data",
-          e.message,
+          VITAL_HEALTH_ERROR,
+          "Failed to write data: ${e.message}",
           e
         )
       }
@@ -351,24 +346,8 @@ private data class AskForPermissionContinuation(
   val promise: Promise
 )
 
-private fun stringToRegion(region: String): Region {
-  when (region) {
-    "eu" -> return Region.EU
-    "us" -> return Region.US
-  }
-
-  throw Exception("Unsupported region $region")
-}
-
-private fun stringToEnvironment(environment: String): Environment {
-  when (environment) {
-    "production" -> return Environment.Production
-    "sandbox" -> return Environment.Sandbox
-    "dev" -> return Environment.Dev
-  }
-
-  throw Exception("Unsupported environment $environment")
-}
+private fun Promise.rejectCoreNotConfigured()
+  = reject(VITAL_HEALTH_ERROR, "VitalCore client has not been configured.")
 
 private fun Promise.rejectHealthNotConfigured()
   = reject(VITAL_HEALTH_ERROR, "VitalHealth client has not been configured.")

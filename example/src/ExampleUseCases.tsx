@@ -67,12 +67,10 @@ async function readScannedGlucoseMeter(
     console.log("@@@ Read " + samples.length + " samples from device: " + device.name + " (id = " + device.id + ")")
     console.log(samples)
 
-    if (Platform.OS == "ios") {
-        await VitalCore.postTimeSeriesData(
-            { "type": "glucose", "samples": samples },
-            ProviderSlug.AccuchekBLE
-        )
-    }
+    await VitalCore.postTimeSeriesData(
+        { "type": "glucose", "samples": samples },
+        ProviderSlug.AccuchekBLE
+    )
 
     return samples
 }
