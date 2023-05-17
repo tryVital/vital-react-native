@@ -68,7 +68,7 @@ class VitalCoreReactNative: NSObject {
     }
   }
 
-  @objc(userConnectedSourcesWithResolver:rejecter:)
+  @objc(userConnectedSources:rejecter:)
   func userConnectedSources(
     resolve: @escaping RCTPromiseResolveBlock,
     reject: @escaping RCTPromiseRejectBlock
@@ -100,6 +100,7 @@ class VitalCoreReactNative: NSObject {
     Task {
       do {
         try await VitalClient.shared.checkConnectedSource(for: slug)
+        resolve(())
       } catch let error {
         reject(errorKey, error.localizedDescription, error)
       }

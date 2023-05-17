@@ -66,9 +66,7 @@ class VitalHealthReactNativeModule(reactContext: ReactApplicationContext) :
 
     val manager = VitalHealthConnectManager.create(
       reactApplicationContext,
-      client.apiKey,
-      client.region,
-      client.environment
+      client
     )
 
     vitalHealthConnectManager = manager
@@ -89,16 +87,8 @@ class VitalHealthReactNativeModule(reactContext: ReactApplicationContext) :
 
   @ReactMethod
   fun setUserId(userId: String, promise: Promise) {
-    val manager = vitalHealthConnectManager ?: return promise.rejectHealthNotConfigured()
-
-    // TODO: VIT-2924 user ID management is misplaced.
-    // For now, copy the userID to VitalCore RN Module whenever we get a new value.
-    vitalCore.userId = userId
-
-    mainScope.launch {
-      manager.setUserId(userId)
-      promise.resolve(null)
-    }
+    // [Backward Compatibility] Delegate to VitalCore.
+    vitalCore.setUserId(userId, promise)
   }
 
   @ReactMethod
@@ -198,10 +188,19 @@ class VitalHealthReactNativeModule(reactContext: ReactApplicationContext) :
 
   @ReactMethod
   fun cleanUp(promise: Promise) {
-    reset()
-    promise.resolve(null)
+    val manager = vitalHealthConnectManager ?: return promise.rejectHealthNotConfigured()
+
+    mainScope.launch {
+      manager.cleanUp()
+      promise.resolve(null)
+    }
   }
 
+  /**
+   * Cancel the existing VitalHealthConnectManager and prepare for a new one to be recreated.
+   *
+   * TODO: To be removed after the Android SDK is singletonized.
+   */
   private fun reset() {
     mainScope.cancel()
     mainScope = MainScope()

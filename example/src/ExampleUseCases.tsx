@@ -1,7 +1,6 @@
-import { ProviderSlug, VitalCore } from "@tryvital/vital-core-react-native";
+import { ManualProviderSlug, VitalCore } from "@tryvital/vital-core-react-native";
 import { Brand, Cancellable, DeviceKind, ScannedDevice, VitalDevicesManager } from "@tryvital/vital-devices-react-native";
 import { VitalHealth, VitalResource } from "@tryvital/vital-health-react-native";
-import { Platform } from "react-native";
 import { PERMISSIONS, requestMultiple } from "react-native-permissions";
 
 // VitalHealth example use case: Sync Activity data
@@ -21,6 +20,19 @@ export async function syncActivityData() {
     } catch (error) {
         console.log(error);
     }
+}
+
+// VitalCore example use case: Inspect user connected sources
+export async function inspectUserConnectedSources() {
+    await VitalCore.createConnectedSourceIfNotExist(ManualProviderSlug.LibreBLE)
+
+    var sources = await VitalCore.userConnectedSources()
+    console.log("sources =", sources)
+
+    console.log("hasConnectedTo[freestyle_libre_ble] =", await VitalCore.hasUserConnectedTo(ManualProviderSlug.LibreBLE))
+    console.log("hasConnectedTo[omron_ble] =", await VitalCore.hasUserConnectedTo(ManualProviderSlug.OmronBLE))
+    console.log("hasConnectedTo[apple_health_kit] =", await VitalCore.hasUserConnectedTo(ManualProviderSlug.AppleHealthKit))
+    console.log("hasConnectedTo[health_connect] =", await VitalCore.hasUserConnectedTo(ManualProviderSlug.HealthConnect))
 }
 
 // VitalDevice example use case: Read BLE Glucose meter
