@@ -11,7 +11,7 @@ sealed class ReactNativeTimeSeriesData {
   data class BloodPressure(val samples: List<ReactNativeBloodPressureSample>): ReactNativeTimeSeriesData()
 
   companion object {
-    fun adapter() = PolymorphicJsonAdapterFactory
+    fun adapterFactory(): PolymorphicJsonAdapterFactory<ReactNativeTimeSeriesData> = PolymorphicJsonAdapterFactory
       .of(ReactNativeTimeSeriesData::class.java, "type")
       .withSubtype(Glucose::class.java, "glucose")
       .withSubtype(BloodPressure::class.java, "blood_pressure")

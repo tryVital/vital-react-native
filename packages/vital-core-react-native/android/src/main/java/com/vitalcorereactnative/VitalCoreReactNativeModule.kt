@@ -9,6 +9,8 @@ import com.facebook.react.bridge.WritableNativeMap
 import com.facebook.react.module.annotations.ReactModule
 import com.squareup.moshi.Moshi
 import com.squareup.moshi.adapter
+import com.squareup.moshi.adapters.Rfc3339DateJsonAdapter
+import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
 import io.tryvital.client.*
 import io.tryvital.client.services.data.ManualProviderSlug
 import io.tryvital.client.services.data.ProviderSlug
@@ -19,8 +21,17 @@ import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.launch
 import java.security.Provider
 import java.time.ZoneId
+import java.util.*
 
 const val VITAL_CORE_ERROR = "VitalCoreError"
+
+internal val moshi by lazy {
+  Moshi.Builder()
+    .add(ReactNativeTimeSeriesData.adapterFactory())
+    .add(Date::class.java, Rfc3339DateJsonAdapter())
+    .addLast(KotlinJsonAdapterFactory())
+    .build()
+}
 
 @ReactModule(name = VitalCoreReactNativeModule.NAME)
 class VitalCoreReactNativeModule(reactContext: ReactApplicationContext) :
@@ -147,7 +158,6 @@ class VitalCoreReactNativeModule(reactContext: ReactApplicationContext) :
       ZoneId.systemDefault()
     }
 
-    val moshi = Moshi.Builder().add(ReactNativeTimeSeriesData.adapter()).build()
     val adapter = moshi.adapter<ReactNativeTimeSeriesData>()
 
     val data = adapter.fromJson(jsonString)
