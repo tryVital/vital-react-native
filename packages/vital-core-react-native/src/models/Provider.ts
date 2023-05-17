@@ -8,3 +8,9 @@ export enum ManualProviderSlug {
     AppleHealthKit = "apple_health_kit",
     HealthConnect = "health_connect",
 }
+
+export interface Provider {
+    name: string
+    slug: ManualProviderSlug | string
+    logo?: string
+}

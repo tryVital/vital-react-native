@@ -13,6 +13,17 @@ RCT_EXTERN_METHOD(configure:(NSString *)apiKey
                   resolver:(RCTPromiseResolveBlock)resolve
                   rejecter:(RCTPromiseRejectBlock)reject)
 
+RCT_EXTERN_METHOD(hasUserConnectedTo:(NSString *)provider
+                  resolver:(RCTPromiseResolveBlock)resolve
+                  rejecter:(RCTPromiseRejectBlock)reject)
+
+RCT_EXTERN_METHOD(userConnectedSourcesWithResolver:(RCTPromiseResolveBlock)resolve
+                  rejecter:(RCTPromiseRejectBlock)reject)
+
+RCT_EXTERN_METHOD(createConnectedSourceIfNotExist:(NSString *)provider
+                  resolver:(RCTPromiseResolveBlock)resolve
+                  rejecter:(RCTPromiseRejectBlock)reject)
+
 RCT_EXTERN_METHOD(postTimeSeriesData:(NSString *)jsonString
                   provider:(NSString *)provider
                   timeZone:(NSString *)timeZone

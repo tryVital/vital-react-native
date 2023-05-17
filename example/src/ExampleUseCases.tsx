@@ -67,6 +67,7 @@ async function readScannedGlucoseMeter(
     console.log("@@@ Read " + samples.length + " samples from device: " + device.name + " (id = " + device.id + ")")
     console.log(samples)
 
+    await VitalCore.createConnectedSourceIfNotExist(ProviderSlug.OmronBLE)
     await VitalCore.postTimeSeriesData(
         { "type": "glucose", "samples": samples },
         ProviderSlug.AccuchekBLE
@@ -121,12 +122,11 @@ async function readScannedBloodPressureMeter(
     console.log("@@@ Read " + samples.length + " samples from device: " + device.name + " (id = " + device.id + ")")
     console.log(samples)
 
-    if (Platform.OS == "ios") {
-        await VitalCore.postTimeSeriesData(
-            { "type": "blood_pressure", "samples": samples },
-            ProviderSlug.OmronBLE
-        )
-    }
+    await VitalCore.createConnectedSourceIfNotExist(ProviderSlug.OmronBLE)
+    await VitalCore.postTimeSeriesData(
+        { "type": "blood_pressure", "samples": samples },
+        ProviderSlug.OmronBLE
+    )
 
     return samples
 }
