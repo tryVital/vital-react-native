@@ -29,10 +29,22 @@ export async function inspectUserConnectedSources() {
     var sources = await VitalCore.userConnectedSources()
     console.log("sources =", sources)
 
-    console.log("hasConnectedTo[freestyle_libre_ble] =", await VitalCore.hasUserConnectedTo(ManualProviderSlug.LibreBLE))
-    console.log("hasConnectedTo[omron_ble] =", await VitalCore.hasUserConnectedTo(ManualProviderSlug.OmronBLE))
-    console.log("hasConnectedTo[apple_health_kit] =", await VitalCore.hasUserConnectedTo(ManualProviderSlug.AppleHealthKit))
-    console.log("hasConnectedTo[health_connect] =", await VitalCore.hasUserConnectedTo(ManualProviderSlug.HealthConnect))
+    console.log(
+        "hasConnectedTo[freestyle_libre_ble] =",
+        await VitalCore.hasUserConnectedTo(ManualProviderSlug.LibreBLE)
+    )
+    console.log(
+        "hasConnectedTo[omron_ble] =",
+        await VitalCore.hasUserConnectedTo(ManualProviderSlug.OmronBLE)
+    )
+    console.log(
+        "hasConnectedTo[apple_health_kit] =",
+        await VitalCore.hasUserConnectedTo(ManualProviderSlug.AppleHealthKit)
+    )
+    console.log(
+        "hasConnectedTo[health_connect] =",
+        await VitalCore.hasUserConnectedTo(ManualProviderSlug.HealthConnect)
+    )
 }
 
 // VitalDevice example use case: Read BLE Glucose meter
