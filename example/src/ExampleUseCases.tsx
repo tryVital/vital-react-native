@@ -91,7 +91,7 @@ async function readScannedGlucoseMeter(
     console.log("@@@ Read " + samples.length + " samples from device: " + device.name + " (id = " + device.id + ")")
     console.log(samples)
 
-    await VitalCore.createConnectedSourceIfNotExist(ManualProviderSlug.OmronBLE)
+    await VitalCore.createConnectedSourceIfNotExist(ManualProviderSlug.AccuchekBLE)
     await VitalCore.postTimeSeriesData(
         { "type": "glucose", "samples": samples },
         ManualProviderSlug.AccuchekBLE
