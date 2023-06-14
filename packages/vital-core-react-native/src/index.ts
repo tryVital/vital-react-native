@@ -1,6 +1,6 @@
 import { NativeModules, Platform } from 'react-native';
 import type { TimeSeriesData } from './models/TimeSeriesData';
-import type { ManualProviderSlug, Provider } from './models/Provider';
+import type { ManualProviderSlug, Provider, ProviderSlug } from './models/Provider';
 
 export { default as QuantitySample } from './models/QuantitySample';
 export { default as BloodPressureSample } from './models/BloodPressureSample';
@@ -69,6 +69,10 @@ export class VitalCore {
       provider,
       timeZone
     );
+  }
+
+  static deregisterProvider(provider: ProviderSlug): Promise<void> {
+    return VitalCoreReactNative.deregisterProvider(provider);
   }
 
   static cleanUp(): Promise<void> {
