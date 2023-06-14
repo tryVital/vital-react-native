@@ -185,7 +185,7 @@ class VitalCoreReactNative: NSObject {
 
     Task {
       do {
-        try await VitalClient.shared.user.deregisterProvider(slug)
+        try await VitalClient.shared.user.deregisterProvider(provider: slug)
         resolve(())
       } catch let error {
         reject(errorKey, error.localizedDescription, error)
