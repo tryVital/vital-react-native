@@ -119,6 +119,28 @@ class VitalCoreReactNativeModule(reactContext: ReactApplicationContext) :
   }
 
   @ReactMethod
+  fun deregisterProvider(provider: String, promise: Promise) {
+    val client = client ?: return promise.rejectCoreNotConfigured()
+    val userId = client.currentUserId ?: return promise.rejectUserIDNotSet()
+
+    val slug = try { ProviderSlug.fromJsonName(provider) } catch (e: IllegalArgumentException) {
+      return promise.reject(VITAL_CORE_ERROR, "Unrecognized provider slug: $provider")
+    }
+
+    mainScope.launch {
+      try {
+        client.userService.deregisterProvider(
+          userId = userId,
+          providerSlug = slug
+        )
+        promise.resolve(null)
+      }
+      catch (e: Throwable) {
+        promise.reject(VITAL_CORE_ERROR, "Failed to deregister provider: ${e.message}", e)
+      }
+  }
+
+  @ReactMethod
   fun createConnectedSourceIfNotExist(provider: String, promise: Promise) {
     val client = client ?: return promise.rejectCoreNotConfigured()
     val userId = client.currentUserId ?: return promise.rejectUserIDNotSet()
