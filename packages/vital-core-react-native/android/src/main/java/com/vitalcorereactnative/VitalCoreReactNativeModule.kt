@@ -131,13 +131,13 @@ class VitalCoreReactNativeModule(reactContext: ReactApplicationContext) :
       try {
         client.userService.deregisterProvider(
           userId = userId,
-          providerSlug = slug
+          provider = slug
         )
         promise.resolve(null)
-      }
-      catch (e: Throwable) {
+      } catch (e: Throwable) {
         promise.reject(VITAL_CORE_ERROR, "Failed to deregister provider: ${e.message}", e)
       }
+    }
   }
 
   @ReactMethod
