@@ -171,6 +171,28 @@ class VitalCoreReactNative: NSObject {
     }
   }
 
+  @objc(deregisterProvider:resolver:rejecter:)
+  func deregisterProvider(
+    provider: String,
+    resolve: @escaping RCTPromiseResolveBlock,
+    reject: @escaping RCTPromiseRejectBlock
+  ) {
+
+    guard let slug = Provider.Slug(rawValue: provider) else {
+      reject(errorKey, "Unrecognized provider slug: \(provider)", nil)
+      return
+    }
+
+    Task {
+      do {
+        try await VitalClient.shared.user.deregisterProvider(provider: slug)
+        resolve(())
+      } catch let error {
+        reject(errorKey, error.localizedDescription, error)
+      }
+    }
+  }
+
   private func jsonDecoder() -> JSONDecoder {
     let decoder = JSONDecoder()
     let iso8601 = ISO8601DateFormatter()
