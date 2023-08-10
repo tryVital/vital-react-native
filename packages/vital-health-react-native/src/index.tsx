@@ -93,7 +93,7 @@ export class VitalHealth {
     return VitalHealthReactNative.hasAskedForPermission(resource);
   }
 
-  static syncData(resources: VitalResource[]): Promise<void> {
+  static syncData(resources: VitalResource[] = []): Promise<void> {
     return VitalHealthReactNative.syncData(resources);
   }
 

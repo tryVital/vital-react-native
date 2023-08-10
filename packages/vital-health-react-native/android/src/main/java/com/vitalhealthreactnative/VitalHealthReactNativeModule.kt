@@ -51,8 +51,6 @@ class VitalHealthReactNativeModule(reactContext: ReactApplicationContext) :
   ) {
     logger.enabled = enableLogs
 
-    val client = vitalCore.client ?: return promise.rejectCoreNotConfigured()
-
     val availability = VitalHealthConnectManager.isAvailable(reactApplicationContext)
 
     if (availability != HealthConnectAvailability.Installed) {
@@ -62,14 +60,9 @@ class VitalHealthReactNativeModule(reactContext: ReactApplicationContext) :
       )
     }
 
-    reset()
-
-    val manager = VitalHealthConnectManager.create(
-      reactApplicationContext,
-      client
-    )
-
+    val manager = VitalHealthConnectManager.getOrCreate(reactApplicationContext)
     vitalHealthConnectManager = manager
+
     // Start status observation before we do anything that can update it.
     manager.startStatusUpdate()
 
@@ -181,8 +174,13 @@ class VitalHealthReactNativeModule(reactContext: ReactApplicationContext) :
       .toSet()
 
     mainScope.launch {
-      manager.syncData(vitalResources)
-      promise.resolve(null)
+      // Treat empty set as "sync all" (resources = null)
+      try {
+        manager.syncData(resources = vitalResources.ifEmpty { null })
+        promise.resolve(null)
+      } catch (e: Throwable) {
+        promise.reject(e)
+      }
     }
   }
 
@@ -194,19 +192,6 @@ class VitalHealthReactNativeModule(reactContext: ReactApplicationContext) :
       manager.cleanUp()
       promise.resolve(null)
     }
-  }
-
-  /**
-   * Cancel the existing VitalHealthConnectManager and prepare for a new one to be recreated.
-   *
-   * TODO: To be removed after the Android SDK is singletonized.
-   */
-  private fun reset() {
-    mainScope.cancel()
-    mainScope = MainScope()
-
-    vitalHealthConnectManager?.close()
-    vitalHealthConnectManager = null
   }
 
   @ReactMethod

@@ -12,6 +12,8 @@ import com.squareup.moshi.adapter
 import com.squareup.moshi.adapters.Rfc3339DateJsonAdapter
 import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
 import io.tryvital.client.*
+import io.tryvital.client.services.data.DataStage
+import io.tryvital.client.services.data.IngestibleTimeseriesResource
 import io.tryvital.client.services.data.ManualProviderSlug
 import io.tryvital.client.services.data.ProviderSlug
 import io.tryvital.client.services.data.Source
@@ -38,7 +40,7 @@ class VitalCoreReactNativeModule(reactContext: ReactApplicationContext) :
   ReactContextBaseJavaModule(reactContext) {
 
   private val mainScope = MainScope()
-  var client: VitalClient? = null
+  val client: VitalClient get() = VitalClient.getOrCreate(reactApplicationContext)
 
   override fun getName(): String {
     return NAME
@@ -46,7 +48,9 @@ class VitalCoreReactNativeModule(reactContext: ReactApplicationContext) :
 
   @ReactMethod
   fun setUserId(userId: String, promise: Promise) {
-    val client = client ?: return promise.rejectCoreNotConfigured()
+    if (!client.isConfigured)
+      return promise.rejectCoreNotConfigured()
+
     client.setUserId(userId)
     promise.resolve(null)
   }
@@ -56,9 +60,7 @@ class VitalCoreReactNativeModule(reactContext: ReactApplicationContext) :
     try {
       VitalLogger.getOrCreate().enabled = enableLogs
 
-      client = VitalClient(
-        reactApplicationContext,
-        // TODO: Expose these as enum constants in the RN SDK
+      VitalClient.getOrCreate(reactApplicationContext).configure(
         region = Region.valueOf(region.uppercase()),
         environment = Environment.valueOf(environment.lowercase().replaceFirstChar { it.uppercase() }),
         apiKey = apiKey
@@ -72,7 +74,8 @@ class VitalCoreReactNativeModule(reactContext: ReactApplicationContext) :
 
   @ReactMethod
   fun cleanUp(promise: Promise) {
-    val client = client ?: return promise.rejectCoreNotConfigured()
+    if (!client.isConfigured)
+      return promise.rejectCoreNotConfigured()
 
     mainScope.launch {
       client.cleanUp()
@@ -82,7 +85,8 @@ class VitalCoreReactNativeModule(reactContext: ReactApplicationContext) :
 
   @ReactMethod
   fun hasUserConnectedTo(provider: String, promise: Promise) {
-    val client = client ?: return promise.rejectCoreNotConfigured()
+    if (!client.isConfigured)
+      return promise.rejectCoreNotConfigured()
 
     val slug = try { ProviderSlug.fromJsonName(provider) } catch (e: IllegalArgumentException) {
       return promise.reject(VITAL_CORE_ERROR, "Unrecognized provider slug: $provider")
@@ -93,7 +97,9 @@ class VitalCoreReactNativeModule(reactContext: ReactApplicationContext) :
 
   @ReactMethod
   fun userConnectedSources(promise: Promise) {
-    val client = client ?: return promise.rejectCoreNotConfigured()
+    if (!client.isConfigured)
+      return promise.rejectCoreNotConfigured()
+
     val userId = client.currentUserId ?: return promise.rejectUserIDNotSet()
 
     mainScope.launch {
@@ -120,7 +126,9 @@ class VitalCoreReactNativeModule(reactContext: ReactApplicationContext) :
 
   @ReactMethod
   fun deregisterProvider(provider: String, promise: Promise) {
-    val client = client ?: return promise.rejectCoreNotConfigured()
+    if (!client.isConfigured)
+      return promise.rejectCoreNotConfigured()
+
     val userId = client.currentUserId ?: return promise.rejectUserIDNotSet()
 
     val slug = try { ProviderSlug.fromJsonName(provider) } catch (e: IllegalArgumentException) {
@@ -142,7 +150,9 @@ class VitalCoreReactNativeModule(reactContext: ReactApplicationContext) :
 
   @ReactMethod
   fun createConnectedSourceIfNotExist(provider: String, promise: Promise) {
-    val client = client ?: return promise.rejectCoreNotConfigured()
+    if (!client.isConfigured)
+      return promise.rejectCoreNotConfigured()
+
     val userId = client.currentUserId ?: return promise.rejectUserIDNotSet()
 
     val slug = try { ManualProviderSlug.fromJsonName(provider) } catch (e: IllegalArgumentException) {
@@ -162,7 +172,9 @@ class VitalCoreReactNativeModule(reactContext: ReactApplicationContext) :
   @ReactMethod
   @OptIn(ExperimentalStdlibApi::class)
   fun postTimeSeriesData(jsonString: String, provider: String, timeZoneString: String?, promise: Promise) {
-    val client = client ?: return promise.rejectCoreNotConfigured()
+    if (!client.isConfigured)
+      return promise.rejectCoreNotConfigured()
+
     val userId = client.currentUserId ?: return promise.rejectUserIDNotSet()
 
     val slug = try { ManualProviderSlug.fromJsonName(provider) } catch (e: IllegalArgumentException) {
@@ -189,7 +201,7 @@ class VitalCoreReactNativeModule(reactContext: ReactApplicationContext) :
     }
 
     fun <T> makeTimeseriesPayload(data: T) = TimeseriesPayload(
-      stage = "daily",
+      stage = DataStage.Daily,
       provider = slug,
       startDate = null,
       endDate = null,
@@ -201,9 +213,10 @@ class VitalCoreReactNativeModule(reactContext: ReactApplicationContext) :
       try {
         when (data) {
           is ReactNativeTimeSeriesData.Glucose ->
-            client.vitalsService.sendGlucose(
+            client.vitalsService.sendQuantitySamples(
               userId = userId,
-              glucosePayloads = makeTimeseriesPayload(
+              resource = IngestibleTimeseriesResource.BloodGlucose,
+              timeseriesPayload = makeTimeseriesPayload(
                 data.samples.map { it.payload }
               )
             )

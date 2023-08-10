@@ -8,12 +8,12 @@ export async function syncActivityData() {
     try {
 
         // [1] Request permissions for activity
-        await VitalHealth.askForResources([VitalResource.Activity])
+        await VitalHealth.askForResources([VitalResource.Activity, VitalResource.Workout])
 
         console.log('Requested permissions for resources');
 
         // [2] Manually initiate a sync of activity data
-        VitalHealth.syncData([VitalResource.Activity])
+        await VitalHealth.syncData([VitalResource.Activity, VitalResource.Workout])
 
         console.log('Completed activity data sync');
 
