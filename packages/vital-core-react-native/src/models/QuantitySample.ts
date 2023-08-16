@@ -6,5 +6,6 @@ export default interface QuantitySample {
     sourceBundle: string | null,
     productType: string | null,
     type: string | null,
-    unit: string
+    unit: string,
+    metadata: Record<string, any> | null
 }
