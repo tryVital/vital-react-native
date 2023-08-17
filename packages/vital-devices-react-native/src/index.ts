@@ -77,8 +77,15 @@ export class VitalDevicesManager {
   }
 
   async readLibre1(readingMessage: string, errorMessage: string, completionMessage: string): Promise<Libre1Read> {
+    if (Platform.OS == "android") {
+      throw new Error("readLibre1 does not support Android at this time")
+    }
 
-    let response: Libre1Read = await NativeModules.VitalDevicesReactNative.readLibre1(readingMessage, errorMessage, completionMessage)
+    let response: Libre1Read = await NativeModules.VitalDevicesReactNative.readLibre1WithReadingMessage(
+      readingMessage,
+      errorMessage,
+      completionMessage
+    )
 
     return response
   }
