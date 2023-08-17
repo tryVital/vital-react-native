@@ -76,8 +76,11 @@ export class VitalDevicesManager {
     return cancellable;
   }
 
-  async readLibre1(scannedDeviceId: string): Promise<Libre1Read> {
+  async readLibre1(readingMessage: string, errorMessage: string, completionMessage: string): Promise<Libre1Read> {
 
+    let response: Libre1Read = await NativeModules.VitalDevicesReactNative.readLibre1(readingMessage, errorMessage, completionMessage)
+
+    return response
   }
 
   async pairDevice(scannedDeviceId: string): Promise<void> {
