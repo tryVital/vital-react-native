@@ -41,7 +41,7 @@ class VitalDevicesReactNative: RCTEventEmitter {
                 queue: DispatchQueue.main
             )
             do {
-                let read = await libre1.read()
+                let read = try await libre1.read()
 
                 let mappedSamples = read.samples.map { $0.toDictionary() }
                 resolve(
@@ -252,7 +252,7 @@ extension QuantitySample {
             "startDate": startDate.timeIntervalSince1970 * 1000,
             "endDate": endDate.timeIntervalSince1970 * 1000,
             "type": type,
-            "metadata": metadata.dictionary
+            "metadata": metadata?.dictionary
         ]
     }
 }
