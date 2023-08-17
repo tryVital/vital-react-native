@@ -6,6 +6,7 @@ import { checkMultiple, PERMISSIONS } from 'react-native-permissions';
 
 import type { BloodPressureSample, QuantitySample } from '@tryvital/vital-core-react-native';
 import type { ScannedDevice } from './model/scanned_device';
+import type Libre1Read from './model/scanned_device';
 
 export * from './model/device_model';
 export * from './model/brand';
@@ -73,6 +74,13 @@ export class VitalDevicesManager {
     });
 
     return cancellable;
+  }
+
+  async readLibre1(readingMessage: string, errorMessage: string, completionMessage: string): Promise<Libre1Read> {
+
+    let response: Libre1Read = await NativeModules.VitalDevicesReactNative.readLibre1(readingMessage, errorMessage, completionMessage)
+
+    return response
   }
 
   async pairDevice(scannedDeviceId: string): Promise<void> {

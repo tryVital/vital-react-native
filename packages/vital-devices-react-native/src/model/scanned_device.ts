@@ -1,7 +1,22 @@
 import type { DeviceModel } from './device_model';
+import type { QuantitySample } from '@tryvital/vital-core-react-native';
 
 export interface ScannedDevice {
   id: string;
   name: string;
   deviceModel: DeviceModel;
+}
+
+export type Libre1SensorState = "unknown" | "not_activated" | "warming_up" | "active" | "expired" | "shutdown" | "failure";
+
+export default interface Libre1Sensor {
+  serial: string,
+  maxLife: number,
+  age: number,
+  state: Libre1SensorState
+}
+
+export default interface Libre1Read {
+  samples: QuantitySample[],
+  sensor: Libre1Sensor
 }

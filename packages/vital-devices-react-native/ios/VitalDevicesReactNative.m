@@ -3,6 +3,12 @@
 
 @interface RCT_EXTERN_MODULE(VitalDevicesReactNative, NSObject)
 
+RCT_EXTERN_METHOD(readLibre1WithReadingMessage:(NSString *)readingMessage
+                  errorMessage:(NSString *)errorMessage
+                  completionMessage:(NSString *)completionMessage
+                  resolver:(RCTPromiseResolveBlock)resolve
+                  rejecter:(RCTPromiseRejectBlock)reject)
+
 RCT_EXTERN_METHOD(startScanForDevice:(NSString *)id
                   name:(NSString *)name
                   brand:(NSString *)brand

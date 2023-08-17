@@ -25,6 +25,38 @@ class VitalDevicesReactNative: RCTEventEmitter {
         pairCancellable?.cancel()
     }
 
+    @objc(readLibre1WithReadingMessage:errorMessage:completionMessage:resolver:rejecter:)
+    func readLibre1(
+        readingMessage: String,
+        errorMessage: String,
+        completionMessage: String,
+        resolve: @escaping RCTPromiseResolveBlock,
+        reject: @escaping RCTPromiseRejectBlock
+    ) {
+        Task {
+            let libre1 = Libre1Reader(
+                readingMessage: readingMessage,
+                errorMessage: errorMessage,
+                completionMessage: completionMessage,
+                queue: DispatchQueue.main
+            )
+            do {
+                let read = await libre1.read()
+
+                let mappedSamples = read.samples.map { $0.toDictionary() }
+                resolve(
+                    [
+                        "samples": mappedSamples,
+                        "sensor": read.sensor.toDictionary()
+                    ]
+                )
+            }
+            catch let error {
+                reject(nil, error.localizedDescription, nil)
+            }
+        }
+    }
+
     @objc(startScanForDevice:name:brand:kind:resolver:rejecter:)
     func startScanForDevice(
         _ id:String,
@@ -43,7 +75,7 @@ class VitalDevicesReactNative: RCTEventEmitter {
             )
 
             scannerResultCancellable?.cancel()
-            scannerResultCancellable =  deviceManager
+            scannerResultCancellable = deviceManager
                 .search(for: deviceModel)
                 .receive(on: DispatchQueue.main)
                 .sink { [weak self] value in
@@ -219,7 +251,19 @@ extension QuantitySample {
             // JS interop expects epoch millisecond
             "startDate": startDate.timeIntervalSince1970 * 1000,
             "endDate": endDate.timeIntervalSince1970 * 1000,
-            "type": type
+            "type": type,
+            "metadata": metadata.dictionary
+        ]
+    }
+}
+
+extension Libre1Sensor {
+    func toDictionary() -> [String: Any?] {
+        [
+            "serial": serial,
+            "maxLife": maxLife,
+            "age": age,
+            "state": state.rawValue,
         ]
     }
 }
