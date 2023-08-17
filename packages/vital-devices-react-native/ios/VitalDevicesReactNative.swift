@@ -25,7 +25,7 @@ class VitalDevicesReactNative: RCTEventEmitter {
         pairCancellable?.cancel()
     }
 
-    @objc(readLibre1:readingMessage:errorMessage:completionMessage:resolver:rejecter:)
+    @objc(readLibre1WithReadingMessage:errorMessage:completionMessage:resolver:rejecter:)
     func readLibre1(
         readingMessage: String,
         errorMessage: String,
