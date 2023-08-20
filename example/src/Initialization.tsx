@@ -10,7 +10,7 @@ import { VitalCore } from "@tryvital/vital-core-react-native";
 export async function initializeVitalSDK() {
     await VitalHealth.configureClient(
         VITAL_API_KEY,
-        VITAL_ENVIRONMENT,
+        VITAL_ENVIRONMENT == "development" ? "dev" : VITAL_ENVIRONMENT,
         VITAL_REGION,
         true,
     )

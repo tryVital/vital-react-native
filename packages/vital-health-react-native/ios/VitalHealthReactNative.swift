@@ -150,7 +150,15 @@ class VitalHealthReactNative: RCTEventEmitter {
     reject: RCTPromiseRejectBlock
   ) {
     do {
-      try VitalHealthKitClient.shared.syncData(for: resources.map { try mapResourceToReadableVitalResource($0) })
+      let vitalResources: [VitalResource]
+      if resources.isEmpty {
+        // Treat empty set as "sync all".
+        vitalResources = VitalResource.all
+      } else {
+        vitalResources = try resources.map { try mapResourceToReadableVitalResource($0) }
+      }
+
+      VitalHealthKitClient.shared.syncData(for: vitalResources)
       resolve(())
     } catch VitalError.UnsupportedResource(let errorMessage) {
       reject("UnsupportedResource", errorMessage, nil)
