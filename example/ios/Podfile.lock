@@ -387,21 +387,21 @@ PODS:
   - RNVectorIcons (9.2.0):
     - React-Core
   - SocketRocket (0.6.0)
-  - vital-core-react-native (1.7.1):
+  - vital-core-react-native (1.9.0):
     - React-Core
-    - VitalCore (~> 0.9.8)
-  - vital-devices-react-native (1.7.1):
+    - VitalCore (~> 0.9.10)
+  - vital-devices-react-native (1.9.0):
     - React-Core
-    - VitalDevices (~> 0.9.9)
-  - vital-health-react-native (1.7.1):
+    - VitalDevices (~> 0.9.10)
+  - vital-health-react-native (1.9.0):
     - React-Core
-    - VitalHealthKit (~> 0.9.9)
-  - VitalCore (0.9.9)
-  - VitalDevices (0.9.9):
+    - VitalHealthKit (~> 0.9.10)
+  - VitalCore (0.9.10)
+  - VitalDevices (0.9.10):
     - CombineCoreBluetooth (~> 0.3.1)
-    - VitalCore (~> 0.9.8)
-  - VitalHealthKit (0.9.9):
-    - VitalCore (~> 0.9.8)
+    - VitalCore (~> 0.9.10)
+  - VitalHealthKit (0.9.10):
+    - VitalCore (~> 0.9.10)
   - Yoga (1.14.0)
   - YogaKit (1.18.1):
     - Yoga (~> 1.14)
@@ -649,15 +649,15 @@ SPEC CHECKSUMS:
   RNSVG: d7d7bc8229af3842c9cfc3a723c815a52cdd1105
   RNVectorIcons: fcc2f6cb32f5735b586e66d14103a74ce6ad61f8
   SocketRocket: fccef3f9c5cedea1353a9ef6ada904fde10d6608
-  vital-core-react-native: ee2de3778006e8c8eed0472600703732dd432032
-  vital-devices-react-native: f98c07a623911df2eb4086ab002915ac34549371
-  vital-health-react-native: 1f899bf2c9f9a7d333f2d5e667b12bc9ffac9fec
-  VitalCore: f0482400b1f405d1a1a38784743e75fed6fd61e4
-  VitalDevices: 33592e7ca82e2b9e7001e67c46d8aec8868594e0
-  VitalHealthKit: 982331c13b835863f80239d6033832612664a2a0
+  vital-core-react-native: b79a316640641d8e7b2a4e203973253f3059cf17
+  vital-devices-react-native: 026023b0e467162e86a4820d47577b5140890202
+  vital-health-react-native: e9206b8d336129b906acd41c3c2466205964360d
+  VitalCore: 77e1f3dc207043c0207755f3480adb99503c451e
+  VitalDevices: e8799f5b991013dc3316d52d19eb0c37090cd4c5
+  VitalHealthKit: 261f381e1a8722d4f73fda2070d1d649f8c0cc3a
   Yoga: 99caf8d5ab45e9d637ee6e0174ec16fbbb01bcfc
   YogaKit: f782866e155069a2cca2517aafea43200b01fd5a
 
 PODFILE CHECKSUM: f45d9964f1dec4e94040e9451db17c89e5128185
 
-COCOAPODS: 1.11.3
+COCOAPODS: 1.12.1
