@@ -48,7 +48,7 @@ struct RNQuantitySample: Decodable {
       endDate: endDate,
       sourceBundle: sourceBundle,
       productType: productType,
-      type: type,
+      type: type.flatMap(SourceType.init(rawValue:)),
       unit: unit,
       metadata: nil
     )
