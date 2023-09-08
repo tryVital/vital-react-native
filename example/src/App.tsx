@@ -15,14 +15,14 @@ import {
 } from '@tryvital/vital-devices-react-native';
 import {NativeEventEmitter} from 'react-native';
 import {VITAL_API_KEY, VITAL_ENVIRONMENT, VITAL_REGION} from './Environment';
-import {syncWearableData, readBLEGlucoseMeter, readBLEBloodPressureMeter, inspectUserConnectedSources} from './ExampleUseCases';
+import {syncWearableData, readBLEGlucoseMeter, readBLEBloodPressureMeter, inspectUserConnectedSources, readLibre1} from './ExampleUseCases';
 import { initializeVitalSDK } from './Initialization';
 
 // Configuring Vital client SDK for making API calls on client side
 // Recommended way is to do this on the backend but for the sake of an example
 // You can do it on the client side
 export const vitalNodeClient = new VitalClient({
-  environment: VITAL_ENVIRONMENT,
+  environment: VITAL_ENVIRONMENT == "dev" ? "development" : VITAL_ENVIRONMENT,
   api_key: VITAL_API_KEY,
   region: VITAL_REGION,
 });
@@ -52,7 +52,10 @@ const App = () => {
       await syncWearableData()
 
       // Example: Read BLE Glucose Meter
-      await readBLEGlucoseMeter(vitalDevicesManager)
+      // await readBLEGlucoseMeter(vitalDevicesManager)
+
+      // Example: Read Freestyle Libre 1 via NFC
+      await readLibre1(vitalDevicesManager)
 
       // Example: Read BLE Blood Pressure
       // await readBLEBloodPressureMeter(vitalDevicesManager)

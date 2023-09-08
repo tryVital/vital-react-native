@@ -1,6 +1,7 @@
 import { ManualProviderSlug, VitalCore } from "@tryvital/vital-core-react-native";
 import { Brand, Cancellable, DeviceKind, ScannedDevice, VitalDevicesManager } from "@tryvital/vital-devices-react-native";
 import { VitalHealth, VitalResource } from "@tryvital/vital-health-react-native";
+import { Platform } from "react-native";
 import { PERMISSIONS, requestMultiple } from "react-native-permissions";
 
 // VitalHealth example use case: Sync Wearable data
@@ -98,6 +99,27 @@ async function readScannedGlucoseMeter(
     )
 
     return samples
+}
+
+// VitalDevice example use case: Read BLE Glucose meter
+export async function readLibre1(
+    deviceManager: VitalDevicesManager
+) {
+    // NOTE: Your Android app manifest should have requested NFC permissions:
+    // <uses-permission android:name="android.permission.NFC" />
+
+    console.log("@@@ Start scanning for Libre1")
+
+    let result = await deviceManager.readLibre1("reading", "errored", "completed")
+    console.log(`@@@ Did read Libre1: ${JSON.stringify(result, null, 2)}`)
+
+    await VitalCore.createConnectedSourceIfNotExist(ManualProviderSlug.LibreBLE)
+    await VitalCore.postTimeSeriesData(
+        { "type": "glucose", "samples": result.samples },
+        ManualProviderSlug.LibreBLE
+    )
+
+    console.log("@@@ Did post Libre1 timeseries data")
 }
 
 // VitalDevice example use case: Read BLE Blood Pressure meter
