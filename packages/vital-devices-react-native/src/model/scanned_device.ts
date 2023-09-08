@@ -7,7 +7,7 @@ export interface ScannedDevice {
   deviceModel: DeviceModel;
 }
 
-export type Libre1SensorState = "unknown" | "not_activated" | "warming_up" | "active" | "expired" | "shutdown" | "failure";
+export type Libre1SensorState = "unknown" | "notActivated" | "warmingUp" | "active" | "expired" | "shutdown" | "failure";
 
 export default interface Libre1Sensor {
   serial: string,

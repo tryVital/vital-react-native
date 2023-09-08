@@ -5,6 +5,7 @@ import com.facebook.react.bridge.*
 import com.facebook.react.modules.core.DeviceEventManagerModule
 import io.tryvital.client.services.data.QuantitySamplePayload
 import io.tryvital.vitaldevices.*
+import io.tryvital.vitaldevices.devices.Libre1Reader
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
 
@@ -91,6 +92,36 @@ class VitalDevicesReactNativeModule(reactContext: ReactApplicationContext) :
         promise.resolve(null)
       } catch (e: Throwable) {
         promise.reject("PairError", e.message, e)
+      }
+    }
+  }
+
+  @ReactMethod
+  private fun readLibre1(promise: Promise) {
+    mainScope.launch {
+      val activity = currentActivity ?: return@launch promise.reject("ReadError", "No active Android Activity")
+      try {
+        val reader = Libre1Reader.create(activity)
+        val libre1 = reader.read()
+
+        promise.resolve(WritableNativeMap().apply {
+          putArray("samples", WritableNativeArray().apply {
+            libre1.samples.forEach {
+              pushMap(WritableNativeMap().apply {
+                mapSample(it)
+              })
+            }
+          })
+          putMap("sensor", WritableNativeMap().apply {
+            putString("serial", libre1.sensor.serial)
+            putInt("age", libre1.sensor.age)
+            putInt("maxLife", libre1.sensor.maxLife)
+            // lowerCamelCase to match iOS
+            putString("state", libre1.sensor.state.toString().replaceFirstChar { it.lowercaseChar() })
+          })
+        })
+      } catch (e: Throwable) {
+        promise.reject("ReadError", e.message, e)
       }
     }
   }
