@@ -6,7 +6,7 @@ import { checkMultiple, PERMISSIONS } from 'react-native-permissions';
 
 import type { BloodPressureSample, QuantitySample } from '@tryvital/vital-core-react-native';
 import type { ScannedDevice } from './model/scanned_device';
-import type Libre1Read from './model/scanned_device';
+import type { Libre1Read } from './model/scanned_device';
 
 export * from './model/device_model';
 export * from './model/brand';
@@ -91,7 +91,10 @@ export class VitalDevicesManager {
       throw Error(`Libre1 is not supported on ${Platform.OS}`)
     }
 
-    return response
+    return {
+      samples: response.samples.map(fix_quantity_sample),
+      sensor: response.sensor,
+    }
   }
 
   async pairDevice(scannedDeviceId: string): Promise<void> {

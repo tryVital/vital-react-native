@@ -9,14 +9,14 @@ export interface ScannedDevice {
 
 export type Libre1SensorState = "unknown" | "notActivated" | "warmingUp" | "active" | "expired" | "shutdown" | "failure";
 
-export default interface Libre1Sensor {
+export interface Libre1Sensor {
   serial: string,
   maxLife: number,
   age: number,
   state: Libre1SensorState
 }
 
-export default interface Libre1Read {
+export interface Libre1Read {
   samples: QuantitySample[],
   sensor: Libre1Sensor
 }
