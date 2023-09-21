@@ -55,7 +55,7 @@ const App = () => {
       // await readBLEGlucoseMeter(vitalDevicesManager)
 
       // Example: Read Freestyle Libre 1 via NFC
-      await readLibre1(vitalDevicesManager)
+      // await readLibre1(vitalDevicesManager)
 
       // Example: Read BLE Blood Pressure
       // await readBLEBloodPressureMeter(vitalDevicesManager)

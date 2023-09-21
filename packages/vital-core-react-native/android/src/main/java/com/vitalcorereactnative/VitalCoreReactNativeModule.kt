@@ -48,11 +48,12 @@ class VitalCoreReactNativeModule(reactContext: ReactApplicationContext) :
 
   @ReactMethod
   fun setUserId(userId: String, promise: Promise) {
-    if (!client.isConfigured)
-      return promise.rejectCoreNotConfigured()
-
-    client.setUserId(userId)
-    promise.resolve(null)
+    try {
+      VitalClient.setUserId(reactApplicationContext, userId)
+      promise.resolve(null)
+    } catch (e: Throwable) {
+      promise.reject(VITAL_CORE_ERROR, e.message, e)
+    }
   }
 
   @ReactMethod
@@ -67,27 +68,25 @@ class VitalCoreReactNativeModule(reactContext: ReactApplicationContext) :
       )
 
       promise.resolve(null)
-    } catch (e: IllegalArgumentException) {
+    } catch (e: Throwable) {
       promise.reject(VITAL_CORE_ERROR, e.message, e)
     }
   }
 
   @ReactMethod
   fun cleanUp(promise: Promise) {
-    if (!client.isConfigured)
-      return promise.rejectCoreNotConfigured()
-
     mainScope.launch {
-      client.cleanUp()
-      promise.resolve(null)
+      try {
+        client.cleanUp()
+        promise.resolve(null)
+      } catch (e: Throwable) {
+        promise.reject(VITAL_CORE_ERROR, e.message, e)
+      }
     }
   }
 
   @ReactMethod
   fun hasUserConnectedTo(provider: String, promise: Promise) {
-    if (!client.isConfigured)
-      return promise.rejectCoreNotConfigured()
-
     val slug = try { ProviderSlug.fromJsonName(provider) } catch (e: IllegalArgumentException) {
       return promise.reject(VITAL_CORE_ERROR, "Unrecognized provider slug: $provider")
     }
@@ -97,10 +96,7 @@ class VitalCoreReactNativeModule(reactContext: ReactApplicationContext) :
 
   @ReactMethod
   fun userConnectedSources(promise: Promise) {
-    if (!client.isConfigured)
-      return promise.rejectCoreNotConfigured()
-
-    val userId = client.currentUserId ?: return promise.rejectUserIDNotSet()
+    val userId = VitalClient.currentUserId ?: return promise.rejectUserIDNotSet()
 
     mainScope.launch {
       try {
@@ -126,10 +122,7 @@ class VitalCoreReactNativeModule(reactContext: ReactApplicationContext) :
 
   @ReactMethod
   fun deregisterProvider(provider: String, promise: Promise) {
-    if (!client.isConfigured)
-      return promise.rejectCoreNotConfigured()
-
-    val userId = client.currentUserId ?: return promise.rejectUserIDNotSet()
+    val userId = VitalClient.currentUserId ?: return promise.rejectUserIDNotSet()
 
     val slug = try { ProviderSlug.fromJsonName(provider) } catch (e: IllegalArgumentException) {
       return promise.reject(VITAL_CORE_ERROR, "Unrecognized provider slug: $provider")
@@ -150,10 +143,7 @@ class VitalCoreReactNativeModule(reactContext: ReactApplicationContext) :
 
   @ReactMethod
   fun createConnectedSourceIfNotExist(provider: String, promise: Promise) {
-    if (!client.isConfigured)
-      return promise.rejectCoreNotConfigured()
-
-    val userId = client.currentUserId ?: return promise.rejectUserIDNotSet()
+    val userId = VitalClient.currentUserId ?: return promise.rejectUserIDNotSet()
 
     val slug = try { ManualProviderSlug.fromJsonName(provider) } catch (e: IllegalArgumentException) {
       return promise.reject(VITAL_CORE_ERROR, "Unrecognized manual provider: $provider")
@@ -172,10 +162,7 @@ class VitalCoreReactNativeModule(reactContext: ReactApplicationContext) :
   @ReactMethod
   @OptIn(ExperimentalStdlibApi::class)
   fun postTimeSeriesData(jsonString: String, provider: String, timeZoneString: String?, promise: Promise) {
-    if (!client.isConfigured)
-      return promise.rejectCoreNotConfigured()
-
-    val userId = client.currentUserId ?: return promise.rejectUserIDNotSet()
+    val userId = VitalClient.currentUserId ?: return promise.rejectUserIDNotSet()
 
     val slug = try { ManualProviderSlug.fromJsonName(provider) } catch (e: IllegalArgumentException) {
       return promise.reject(VITAL_CORE_ERROR, "Unrecognized manual provider: $provider")
