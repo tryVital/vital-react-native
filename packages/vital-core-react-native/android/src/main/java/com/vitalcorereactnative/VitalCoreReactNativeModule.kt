@@ -1,5 +1,6 @@
 package com.vitalcorereactnative
 
+import com.facebook.react.bridge.NativeArray
 import com.facebook.react.bridge.ReactApplicationContext
 import com.facebook.react.bridge.ReactContextBaseJavaModule
 import com.facebook.react.bridge.ReactMethod
@@ -7,6 +8,7 @@ import com.facebook.react.bridge.Promise
 import com.facebook.react.bridge.WritableNativeArray
 import com.facebook.react.bridge.WritableNativeMap
 import com.facebook.react.module.annotations.ReactModule
+import com.facebook.react.modules.core.DeviceEventManagerModule
 import com.squareup.moshi.Moshi
 import com.squareup.moshi.adapter
 import com.squareup.moshi.adapters.Rfc3339DateJsonAdapter
@@ -19,7 +21,10 @@ import io.tryvital.client.services.data.ProviderSlug
 import io.tryvital.client.services.data.Source
 import io.tryvital.client.services.data.TimeseriesPayload
 import io.tryvital.client.utils.VitalLogger
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.MainScope
+import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 import java.security.Provider
 import java.time.ZoneId
@@ -41,9 +46,62 @@ class VitalCoreReactNativeModule(reactContext: ReactApplicationContext) :
 
   private val mainScope = MainScope()
   val client: VitalClient get() = VitalClient.getOrCreate(reactApplicationContext)
+  private var listenerCount = 0
+  private var statusObserver: Job? = null
 
   override fun getName(): String {
     return NAME
+  }
+
+  @ReactMethod
+  fun addListener(eventName: String) {
+    if (listenerCount == 0) {
+      statusObserver = mainScope.launch {
+        VitalClient.statuses(reactApplicationContext)
+          .onEach { eventEmitter().emit(STATUS_EVENT_KEY, it.toReactNativeStrings()) }
+          .collect()
+      }
+    }
+
+    listenerCount += 1
+  }
+
+  @ReactMethod
+  fun removeListeners(count: Int) {
+    listenerCount -= count
+    if (listenerCount == 0) {
+      statusObserver?.cancel()
+      statusObserver = null
+    }
+  }
+
+  @ReactMethod
+  fun signIn(token: String, promise: Promise) {
+    mainScope.launch {
+      try {
+        VitalClient.signIn(reactApplicationContext, token)
+        promise.resolve(null)
+      } catch (e: Throwable) {
+        promise.reject(e)
+      }
+    }
+  }
+
+  @ReactMethod
+  fun status(promise: Promise) {
+    // Ensure that the SDK is initialized.
+    VitalClient.getOrCreate(reactApplicationContext)
+
+    // NOTE: lowerCamelCase to be consistent with iOS RN interop.
+    promise.resolve(VitalClient.status.toReactNativeStrings())
+  }
+
+  @ReactMethod
+  fun currentUserId(promise: Promise) {
+    // Ensure that the SDK is initialized.
+    VitalClient.getOrCreate(reactApplicationContext)
+
+    promise.resolve(VitalClient.currentUserId)
   }
 
   @ReactMethod
@@ -61,7 +119,8 @@ class VitalCoreReactNativeModule(reactContext: ReactApplicationContext) :
     try {
       VitalLogger.getOrCreate().enabled = enableLogs
 
-      VitalClient.getOrCreate(reactApplicationContext).configure(
+      VitalClient.configure(
+        context = reactApplicationContext,
         region = Region.valueOf(region.uppercase()),
         environment = Environment.valueOf(environment.lowercase().replaceFirstChar { it.uppercase() }),
         apiKey = apiKey
@@ -213,14 +272,20 @@ class VitalCoreReactNativeModule(reactContext: ReactApplicationContext) :
         }
 
         promise.resolve(null)
-      } catch (e: Exception) {
+      } catch (e: Throwable) {
         promise.reject(VITAL_CORE_ERROR, "${(e::class.simpleName ?: "")}: ${e.message}", e)
       }
     }
   }
 
+  private fun eventEmitter() = reactApplicationContext
+    .getJSModule(DeviceEventManagerModule.RCTDeviceEventEmitter::class.java)
+
   companion object {
     const val NAME = "VitalCoreReactNative"
+
+    // NOTE: Must be consistent with iOS RN Interop.
+    const val STATUS_EVENT_KEY = "VitalClientStatus"
   }
 }
 
@@ -235,3 +300,7 @@ private fun ManualProviderSlug.Companion.fromJsonName(name: String): ManualProvi
 
 private fun ProviderSlug.Companion.fromJsonName(name: String): ProviderSlug
   = jsonAdapter.fromJsonValue(name) ?: throw java.lang.IllegalArgumentException("Unrecognized provider slug: $name")
+
+private fun Set<VitalClient.Status>.toReactNativeStrings(): NativeArray = WritableNativeArray().apply {
+  forEach { status -> pushString(status.name.replaceFirstChar { it.lowercase() }) }
+}

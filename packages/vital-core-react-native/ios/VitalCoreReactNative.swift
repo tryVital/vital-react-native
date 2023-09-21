@@ -1,12 +1,53 @@
 import VitalCore
 
 private let errorKey = "VitalCoreError"
+private let statusEventKey = "VitalClientStatus"
 
 @objc(VitalCoreReactNative)
-class VitalCoreReactNative: NSObject {
+class VitalCoreReactNative: RCTEventEmitter {
+  private var statusObservation: Task<Void, Never>?
+
+  override func supportedEvents() -> [String]! {
+    [statusEventKey]
+  }
+
+  override func startObserving() {
+    statusObservation = Task {
+      for await status in VitalClient.statuses {
+        sendEvent(withName: statusEventKey, body: status.strings())
+      }
+    }
+  }
+
+  override func stopObserving() {
+    statusObservation?.cancel()
+    statusObservation = nil
+  }
+
+  @objc(status:rejecter:)
+  func status(resolve: @escaping RCTPromiseResolveBlock, reject: @escaping RCTPromiseRejectBlock) {
+    resolve(VitalClient.status.strings())
+  }
+
+  @objc(currentUserId:rejecter:)
+  func currentUserId(resolve: @escaping RCTPromiseResolveBlock, reject: @escaping RCTPromiseRejectBlock) {
+    resolve(VitalClient.currentUserId)
+  }
+
+  @objc(signIn:resolver:rejecter:)
+  func signIn(withToken token: String, resolve: @escaping RCTPromiseResolveBlock, reject: @escaping RCTPromiseRejectBlock) {
+    Task {
+      do {
+        try await VitalClient.signIn(withRawToken: token)
+        resolve(())
+      } catch let error {
+        reject("VitalCoreError", "failed to sign-in", error)
+      }
+    }
+  }
 
   @objc(setUserId:resolver:rejecter:)
-  func setUserId(_ userId: String, resolve: @escaping RCTPromiseResolveBlock, reject:RCTPromiseRejectBlock) {
+  func setUserId(_ userId: String, resolve: @escaping RCTPromiseResolveBlock, reject: RCTPromiseRejectBlock) {
     guard let userId = UUID.init(uuidString: userId) else {
       reject(nil, "userId must be an UUID", nil)
       return
@@ -213,5 +254,30 @@ class VitalCoreReactNative: NSObject {
       return date
     }
     return decoder
+  }
+}
+
+extension VitalClient.Status {
+  func strings() -> [String] {
+    var strings = [String]()
+
+    // Should be kept consistent with Android interop
+    if contains(.signedIn) {
+      strings.append("signedIn")
+    }
+    if contains(.configured) {
+      strings.append("configured")
+    }
+    if contains(.useSignInToken) {
+      strings.append("useSignInToken")
+    }
+    if contains(.useApiKey) {
+      strings.append("useApiKey")
+    }
+    if contains(.pendingReauthentication) {
+      strings.append("pendingReauthentication")
+    }
+
+    return strings
   }
 }

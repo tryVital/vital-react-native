@@ -1,7 +1,9 @@
-import { NativeModules, Platform } from 'react-native';
+import { NativeEventEmitter, NativeModules, Platform } from 'react-native';
 import type { TimeSeriesData } from './models/TimeSeriesData';
 import type { ManualProviderSlug, Provider, ProviderSlug } from './models/Provider';
+import type { VitalCoreStatus } from './models/VitalCoreStatus';
 
+export { VitalCoreStatus } from './models/VitalCoreStatus';
 export { default as QuantitySample } from './models/QuantitySample';
 export { default as BloodPressureSample } from './models/BloodPressureSample';
 export * from './models/TimeSeriesData';
@@ -24,7 +26,45 @@ const VitalCoreReactNative = NativeModules.VitalCoreReactNative
       }
     );
 
+export interface Subscription {
+  remove: () => void
+}
+
 export class VitalCore {
+  private static eventEmitter = new NativeEventEmitter(NativeModules.VitalCoreReactNative);
+
+  static setEventEmitter(emitter: NativeEventEmitter) {
+    this.eventEmitter = emitter;
+  }
+
+  static currentUserId(): Promise<string | null> {
+    return VitalCoreReactNative.currentUserId();
+  }
+
+  static status(): Promise<VitalCoreStatus[]> {
+    return VitalCoreReactNative.status();
+  }
+
+  static signIn(token: string): Promise<void> {
+    return VitalCoreReactNative.signIn(token);
+  }
+
+  static observeStatusChange(listener: (status: VitalCoreStatus[]) => void): Subscription {
+    var isCancelled = false
+    var subscription = { remove: () => { isCancelled = true } };
+
+    this.status().then((initialStatus) => {
+      if (!isCancelled) {
+        listener(initialStatus);
+
+        let emitterSub = this.eventEmitter.addListener("VitalClientStatus", listener)
+        subscription.remove = () => { emitterSub.remove() }
+      }
+    });
+
+    return subscription
+  }
+
   static setUserId(userId: string): Promise<void> {
     return VitalCoreReactNative.setUserId(userId);
   }

@@ -28,7 +28,8 @@ class VitalHealthReactNativeModule(reactContext: ReactApplicationContext) :
   private val vitalCore: VitalCoreReactNativeModule by lazy {
     reactContext.getNativeModule(VitalCoreReactNativeModule::class.java)!!
   }
-  private var vitalHealthConnectManager: VitalHealthConnectManager? = null
+  private val vitalHealthConnectManager: VitalHealthConnectManager
+    get() = VitalHealthConnectManager.getOrCreate(reactApplicationContext)
 
   private var askForPermission: AskForPermissionContinuation? = null
 
@@ -60,8 +61,7 @@ class VitalHealthReactNativeModule(reactContext: ReactApplicationContext) :
       )
     }
 
-    val manager = VitalHealthConnectManager.getOrCreate(reactApplicationContext)
-    vitalHealthConnectManager = manager
+    val manager = vitalHealthConnectManager
 
     // Start status observation before we do anything that can update it.
     manager.startStatusUpdate()
@@ -110,7 +110,7 @@ class VitalHealthReactNativeModule(reactContext: ReactApplicationContext) :
     writeResources: ReadableArray?,
     promise: Promise
   ) {
-    val manager = vitalHealthConnectManager ?: return promise.rejectHealthNotConfigured()
+    val manager = vitalHealthConnectManager
     if (synchronized(this) { this.askForPermission != null }) {
       return promise.reject(
         VITAL_HEALTH_ERROR,
@@ -150,7 +150,7 @@ class VitalHealthReactNativeModule(reactContext: ReactApplicationContext) :
 
   @ReactMethod
   fun hasAskedForPermission(resource: String, promise: Promise) {
-    val manager = vitalHealthConnectManager ?: return promise.rejectHealthNotConfigured()
+    val manager = vitalHealthConnectManager
     val vitalResource = try {
       VitalResource.valueOf(resource)
     } catch (e: IllegalArgumentException) {
@@ -162,7 +162,7 @@ class VitalHealthReactNativeModule(reactContext: ReactApplicationContext) :
 
   @ReactMethod
   fun syncData(resources: ReadableArray, promise: Promise) {
-    val manager = vitalHealthConnectManager ?: return promise.rejectHealthNotConfigured()
+    val manager = vitalHealthConnectManager
 
     val vitalResources = resources.toArrayList().toList()
       .mapNotNull {
@@ -188,10 +188,8 @@ class VitalHealthReactNativeModule(reactContext: ReactApplicationContext) :
 
   @ReactMethod
   fun cleanUp(promise: Promise) {
-    val manager = vitalHealthConnectManager ?: return promise.rejectHealthNotConfigured()
-
     mainScope.launch {
-      manager.cleanUp()
+      vitalHealthConnectManager.cleanUp()
       promise.resolve(null)
     }
   }
@@ -204,7 +202,7 @@ class VitalHealthReactNativeModule(reactContext: ReactApplicationContext) :
     value: Double,
     promise: Promise
   ) {
-    val manager = vitalHealthConnectManager ?: return promise.rejectHealthNotConfigured()
+    val manager = vitalHealthConnectManager
 
     val writableResource = try {
       WritableVitalResource.valueOf(resource)
@@ -332,9 +330,3 @@ private data class AskForPermissionContinuation(
   val contract: ActivityResultContract<Unit, Deferred<PermissionOutcome>>,
   val promise: Promise
 )
-
-private fun Promise.rejectCoreNotConfigured()
-  = reject(VITAL_HEALTH_ERROR, "VitalCore client has not been configured.")
-
-private fun Promise.rejectHealthNotConfigured()
-  = reject(VITAL_HEALTH_ERROR, "VitalHealth client has not been configured.")
