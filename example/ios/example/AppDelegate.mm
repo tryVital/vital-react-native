@@ -57,8 +57,6 @@ static NSString *const kRNConcurrentRoot = @"concurrentRoot";
   }
   
   [VitalHealthKitConfiguration automaticConfiguration];
-  [VitalHealthKitConfiguration configureWithBackgroundDeliveryEnabled:true numberOfDaysToBackFill:90 enableLogs:true];
-
 
   self.window = [[UIWindow alloc] initWithFrame:[UIScreen mainScreen].bounds];
   UIViewController *rootViewController = [UIViewController new];

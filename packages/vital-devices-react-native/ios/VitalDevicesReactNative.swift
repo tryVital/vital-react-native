@@ -232,16 +232,6 @@ private func mapStringToKind(_ kindId: String) throws -> DeviceModel.Kind  {
     }
 }
 
-private func mapBrandToString(_ brand: Brand) -> String {
-    switch brand {
-    case .omron: return "omron"
-    case .accuChek: return "accuChek"
-    case .contour: return "contour"
-    case .beurer: return "beurer"
-    case .libre: return "libre"
-    }
-}
-
 extension QuantitySample {
     func toDictionary() -> [String: Any?] {
         [

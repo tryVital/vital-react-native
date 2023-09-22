@@ -1,6 +1,6 @@
 export class HealthConfig {
   logsEnabled = true;
-  numberOfDaysToBackFill = 90;
+  numberOfDaysToBackFill = 30;
   androidConfig = new AndroidHealthConfig();
   iOSConfig = new IOSHealthConfig();
 }
