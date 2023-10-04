@@ -4,25 +4,6 @@ import { VitalHealth, VitalResource } from "@tryvital/vital-health-react-native"
 import { Platform } from "react-native";
 import { PERMISSIONS, requestMultiple } from "react-native-permissions";
 
-// VitalHealth example use case: Sync Wearable data
-export async function syncWearableData() {
-    try {
-
-        // [1] Request permissions for wearable data
-        await VitalHealth.askForResources([VitalResource.Activity, VitalResource.Workout, VitalResource.Sleep])
-
-        console.log('Requested permissions for resources');
-
-        // [2] Manually initiate a sync of wearable data
-        await VitalHealth.syncData([VitalResource.Activity, VitalResource.Workout, VitalResource.Sleep])
-
-        console.log('Completed wearable data sync');
-
-    } catch (error) {
-        console.log(error);
-    }
-}
-
 // VitalCore example use case: Inspect user connected sources
 export async function inspectUserConnectedSources() {
     await VitalCore.createConnectedSourceIfNotExist(ManualProviderSlug.LibreBLE)

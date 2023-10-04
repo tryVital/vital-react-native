@@ -111,7 +111,7 @@ class VitalHealthReactNativeModule(reactContext: ReactApplicationContext) :
     promise: Promise
   ) {
     val manager = vitalHealthConnectManager ?: return promise.rejectHealthNotConfigured()
-    if (askForPermission != null) {
+    if (synchronized(this) { this.askForPermission != null }) {
       return promise.reject(
         VITAL_HEALTH_ERROR,
         "Another ask for permission call is already in progress."
@@ -140,7 +140,9 @@ class VitalHealthReactNativeModule(reactContext: ReactApplicationContext) :
       readResources = read, writeResources = write
     )
 
-    askForPermission = AskForPermissionContinuation(contract, promise)
+    synchronized(this) {
+      askForPermission = AskForPermissionContinuation(contract, promise)
+    }
 
     val intent = contract.createIntent(reactApplicationContext, Unit)
     activity.startActivityForResult(intent, VITAL_REQUEST_CODE)
@@ -301,7 +303,7 @@ class VitalHealthReactNativeModule(reactContext: ReactApplicationContext) :
     // p1: request code
     // p2: result code
     if (p1 == VITAL_REQUEST_CODE) {
-      val continuation = askForPermission ?: return
+      val continuation = synchronized(this) { askForPermission } ?: return
 
       val resultAsync = continuation.contract.parseResult(p2, p3)
       val job = mainScope.launch {
@@ -312,6 +314,7 @@ class VitalHealthReactNativeModule(reactContext: ReactApplicationContext) :
         if (it != null) {
           continuation.promise.reject(VITAL_HEALTH_ERROR, "ask for permission has encountered an error", it)
         }
+        synchronized(this) { this.askForPermission = null }
       }
     }
   }

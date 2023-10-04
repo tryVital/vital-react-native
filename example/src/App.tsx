@@ -48,9 +48,6 @@ const App = () => {
       // Example: Inspect user connected sources
       await inspectUserConnectedSources()
 
-      // Example: Sync Activity Data
-      await syncWearableData()
-
       // Example: Read BLE Glucose Meter
       // await readBLEGlucoseMeter(vitalDevicesManager)
 
@@ -63,11 +60,7 @@ const App = () => {
 
     initialize()
 
-    return () => {
-      VitalHealth.cleanUp().then(() =>  {
-        console.log("VitalHealth SDK cleanup")
-      })
-    }
+    return () => {}
   })
 
   return (

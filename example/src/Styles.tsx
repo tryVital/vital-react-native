@@ -9,7 +9,8 @@ const styles = StyleSheet.create({
     item: {
       padding: 10,
       fontSize: 18,
-      height: 44,
+      color: 'black',
+      flexShrink: 1,
     },
     iconButton: {
       fontSize: 24,
