@@ -1,12 +1,13 @@
 import {ClientFacingUser} from '@tryvital/vital-node/client/models/user_models';
-import {FlatList, StyleSheet, Text, TextInput, View} from 'react-native';
+import {FlatList, Platform, StyleSheet, Text, TextInput, View} from 'react-native';
 import React, {useEffect, useState} from 'react';
 import {vitalNodeClient} from '../App';
 import { VITAL_ENVIRONMENT, VITAL_REGION } from '../Environment';
-import {HStack, VStack, Box} from 'native-base';
+import {HStack, VStack, Box, Button} from 'native-base';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import Dialog from 'react-native-dialog';
 import styles from '../Styles';
+import { VitalResource, VitalHealth } from '@tryvital/vital-health-react-native';
 
 const DeleteButton = ({onPress}) => (
   <Icon
@@ -39,7 +40,33 @@ const HomeScreen = ({navigation}) => {
   const [getUsers, setUsers] = useState({ status: ResourceStatus.Loading } as ResourceState<ClientFacingUser[]>);
   const [isLoading, setLoading] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
+  const [permissionAsked, setPermissionAsked] = useState<VitalResource[]>([])
   const textInput = React.useRef<TextInput>(null);
+
+  const refreshPermissionAsked = () => {
+    Promise.all([
+      VitalHealth.hasAskedForPermission(VitalResource.Activity),
+      VitalHealth.hasAskedForPermission(VitalResource.Workout),
+      VitalHealth.hasAskedForPermission(VitalResource.Sleep),
+    ]).then(([activityAsked, workoutAsked, sleepAsked]) => {
+      let resources = new Set<VitalResource>();
+      
+      if (activityAsked) {
+        resources.add(VitalResource.Activity)
+      }
+
+      if (workoutAsked) {
+        resources.add(VitalResource.Workout)
+      }
+
+      if (sleepAsked) {
+        resources.add(VitalResource.Sleep)
+      }
+
+      let sortedResources = (new Array(...resources.values())).sort((lhs, rhs) => lhs.localeCompare(rhs))
+      setPermissionAsked(sortedResources);
+    });
+  }
 
   useEffect(() => {
     setLoading(true);
@@ -65,7 +92,23 @@ const HomeScreen = ({navigation}) => {
         />
       ),
     });
+
+    refreshPermissionAsked();
+
   }, [navigation]);
+
+  const handleAskForPermission = () => {
+    // [1] Request permissions for wearable data
+    VitalHealth.askForResources([VitalResource.Activity, VitalResource.Workout, VitalResource.Sleep])
+      .then(() => {
+        console.log("finished asking for permission")
+
+        refreshPermissionAsked();
+      })
+      .catch((err) => console.error("errored when asking for permission", err))
+    
+    // [2] The SDK would automatically begin sync on resources with read permission granted.
+  }
 
   const handleCreateUser = () => {
     setIsOpen(false);
@@ -136,9 +179,7 @@ const HomeScreen = ({navigation}) => {
               py={2}
               borderBottomColor={'gray.100'}
               borderBottomWidth={1}>
-              <Box>
-                <Text style={styles.item}>{item.client_user_id}</Text>
-              </Box>
+              <Text style={styles.item}>{item.client_user_id}</Text>
               <HStack>
                 <LinkButton
                   onPress={() => handlePressOnConnectDevice(item.user_id)}
@@ -156,8 +197,35 @@ const HomeScreen = ({navigation}) => {
     }
   };
 
+  const HealthSDKCard = () => {
+    return (
+      <Box margin="4" padding="4" borderColor="#333333" borderWidth="1">
+        <Text style={{color: 'black', fontSize: 20, paddingBottom: 16}}>
+          {Platform.OS == 'android' ? 'Health Connect' : 'HealthKit'}
+        </Text>
+
+        {permissionAsked.length == 0 &&
+          <Text style={{color: 'black', fontSize: 16, paddingBottom: 16}}>
+            No permission was asked previously
+          </Text>
+        }
+
+        {permissionAsked.length > 0 &&
+          <Text style={{color: 'black', fontSize: 16, paddingBottom: 16}}>
+            Asked permission: {permissionAsked.join(", ")}
+          </Text>
+        }
+
+        <Button onPress={() => handleAskForPermission()}>
+          Ask for permission
+        </Button>
+      </Box>
+    )
+  }
+
   return (
     <View style={styles.container}>
+      <HealthSDKCard />
       <UserList state={getUsers} />
       <View>
         <Dialog.Container visible={isOpen}>
