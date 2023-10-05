@@ -96,11 +96,9 @@ class VitalCoreReactNativeModule(reactContext: ReactApplicationContext) :
 
   @ReactMethod
   fun userConnectedSources(promise: Promise) {
-    val userId = VitalClient.currentUserId ?: return promise.rejectUserIDNotSet()
-
     mainScope.launch {
       try {
-        val sources = client.userConnectedSources(userId)
+        val sources = client.userConnectedSources()
         promise.resolve(
           WritableNativeArray().apply {
             for (source in sources) {
@@ -143,15 +141,13 @@ class VitalCoreReactNativeModule(reactContext: ReactApplicationContext) :
 
   @ReactMethod
   fun createConnectedSourceIfNotExist(provider: String, promise: Promise) {
-    val userId = VitalClient.currentUserId ?: return promise.rejectUserIDNotSet()
-
     val slug = try { ManualProviderSlug.fromJsonName(provider) } catch (e: IllegalArgumentException) {
       return promise.reject(VITAL_CORE_ERROR, "Unrecognized manual provider: $provider")
     }
 
     mainScope.launch {
       try {
-        client.createConnectedSourceIfNotExist(slug, userId)
+        client.createConnectedSourceIfNotExist(slug)
         promise.resolve(null)
       } catch (e: Throwable) {
         promise.reject(VITAL_CORE_ERROR, "Failed to create connected source for $provider: ${e.message}", e)
