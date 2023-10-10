@@ -5,18 +5,19 @@ import {createNativeStackNavigator} from '@react-navigation/native-stack';
 import {VitalClient} from '@tryvital/vital-node';
 import HomeScreen from './screens/HomeScreen';
 import {ConnectSource} from './screens/ConnectScreen';
+import {UserScreen} from './screens/UserScreen';
 import {
-  VitalHealth,
   VitalHealthEvents,
   VitalHealthReactNativeModule,
 } from '@tryvital/vital-health-react-native';
 import {
   VitalDevicesManager,
 } from '@tryvital/vital-devices-react-native';
-import {NativeEventEmitter} from 'react-native';
+import {NativeEventEmitter, NativeModules} from 'react-native';
 import {VITAL_API_KEY, VITAL_ENVIRONMENT, VITAL_REGION} from './Environment';
-import {syncWearableData, readBLEGlucoseMeter, readBLEBloodPressureMeter, inspectUserConnectedSources, readLibre1} from './ExampleUseCases';
+import {readBLEGlucoseMeter, readBLEBloodPressureMeter, inspectUserConnectedSources, readLibre1} from './ExampleUseCases';
 import { initializeVitalSDK } from './Initialization';
+import { VitalCore } from '@tryvital/vital-core-react-native';
 
 // Configuring Vital client SDK for making API calls on client side
 // Recommended way is to do this on the backend but for the sake of an example
@@ -40,13 +41,10 @@ const Stack = createNativeStackNavigator();
 
 const App = () => {
   useEffect(() => {
+    VitalCore.setEventEmitter(new NativeEventEmitter(NativeModules.VitalCoreReactNative));
+
     const initialize = async () => {
       console.log("Starting to initialize App")
-
-      await initializeVitalSDK()
-
-      // Example: Inspect user connected sources
-      await inspectUserConnectedSources()
 
       // Example: Read BLE Glucose Meter
       // await readBLEGlucoseMeter(vitalDevicesManager)
@@ -61,7 +59,7 @@ const App = () => {
     initialize()
 
     return () => {}
-  })
+  });
 
   return (
     <NativeBaseProvider>
@@ -74,6 +72,14 @@ const App = () => {
               options={() => ({
                 title: 'Users'
               })}
+            />
+          </Stack.Group>
+
+          <Stack.Group>
+            <Stack.Screen
+              name="User"
+              component={UserScreen}
+              options={() => ({ title: 'User' })}
             />
           </Stack.Group>
 
