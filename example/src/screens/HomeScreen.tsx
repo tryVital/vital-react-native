@@ -1,13 +1,13 @@
 import {ClientFacingUser} from '@tryvital/vital-node/client/models/user_models';
-import {FlatList, Platform, StyleSheet, Text, TextInput, View} from 'react-native';
+import {FlatList, Text, TextInput, TouchableOpacity, View} from 'react-native';
 import React, {useEffect, useState} from 'react';
 import {vitalNodeClient} from '../App';
 import { VITAL_ENVIRONMENT, VITAL_REGION } from '../Environment';
-import {HStack, VStack, Box, Button} from 'native-base';
+import {HStack, VStack} from 'native-base';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import Dialog from 'react-native-dialog';
 import styles from '../Styles';
-import { VitalResource, VitalHealth } from '@tryvital/vital-health-react-native';
+import { VitalCore } from '@tryvital/vital-core-react-native';
 
 const DeleteButton = ({onPress}) => (
   <Icon
@@ -40,33 +40,25 @@ const HomeScreen = ({navigation}) => {
   const [getUsers, setUsers] = useState({ status: ResourceStatus.Loading } as ResourceState<ClientFacingUser[]>);
   const [isLoading, setLoading] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
-  const [permissionAsked, setPermissionAsked] = useState<VitalResource[]>([])
   const textInput = React.useRef<TextInput>(null);
 
-  const refreshPermissionAsked = () => {
-    Promise.all([
-      VitalHealth.hasAskedForPermission(VitalResource.Activity),
-      VitalHealth.hasAskedForPermission(VitalResource.Workout),
-      VitalHealth.hasAskedForPermission(VitalResource.Sleep),
-    ]).then(([activityAsked, workoutAsked, sleepAsked]) => {
-      let resources = new Set<VitalResource>();
-      
-      if (activityAsked) {
-        resources.add(VitalResource.Activity)
-      }
+  const [isSDKConfigured, setIsSDKConfigured] = useState(false);
+  const [sdkCurrentUserId, setSDKCurrentUserId] = useState<string | null>(null);
 
-      if (workoutAsked) {
-        resources.add(VitalResource.Workout)
-      }
+  // Observe Vital Core SDK Status
+  useEffect(() => {
+    const subscription = VitalCore.observeStatusChange((status) => {
+      console.log("Vital Core SDK status:", status)
+      setIsSDKConfigured(status.includes("configured"));
 
-      if (sleepAsked) {
-        resources.add(VitalResource.Sleep)
-      }
-
-      let sortedResources = (new Array(...resources.values())).sort((lhs, rhs) => lhs.localeCompare(rhs))
-      setPermissionAsked(sortedResources);
+      VitalCore.currentUserId().then((userId) => {
+        console.log("Vital Current User ID:", userId)
+        setSDKCurrentUserId(userId);
+      });
     });
-  }
+
+    return () => subscription.remove();
+  });
 
   useEffect(() => {
     setLoading(true);
@@ -93,22 +85,7 @@ const HomeScreen = ({navigation}) => {
       ),
     });
 
-    refreshPermissionAsked();
-
   }, [navigation]);
-
-  const handleAskForPermission = () => {
-    // [1] Request permissions for wearable data
-    VitalHealth.askForResources([VitalResource.Activity, VitalResource.Workout, VitalResource.Sleep])
-      .then(() => {
-        console.log("finished asking for permission")
-
-        refreshPermissionAsked();
-      })
-      .catch((err) => console.error("errored when asking for permission", err))
-    
-    // [2] The SDK would automatically begin sync on resources with read permission granted.
-  }
 
   const handleCreateUser = () => {
     setIsOpen(false);
@@ -156,6 +133,7 @@ const HomeScreen = ({navigation}) => {
 
   type UserListProps = {
     state: ResourceState<ClientFacingUser[]>
+    sdkCurrentUserId: string | null
   };
   const UserList = (props: UserListProps) => {
     switch (props.state.status) {
@@ -173,60 +151,50 @@ const HomeScreen = ({navigation}) => {
         <FlatList
           data={props.state.users}
           renderItem={({item}) => (
-            <HStack
-              justifyContent={'space-between'}
-              px={2}
-              py={2}
-              borderBottomColor={'gray.100'}
-              borderBottomWidth={1}>
-              <Text style={styles.item}>{item.client_user_id}</Text>
-              <HStack>
-                <LinkButton
-                  onPress={() => handlePressOnConnectDevice(item.user_id)}
-                  isLoading={isLoading}
-                />
-                <DeleteButton
-                  name="trash"
-                  onPress={() => handlePressDeleteUser(item.user_id)}
-                />
+            <TouchableOpacity
+              onPress={() => navigation.navigate('User', {user: item})}
+            >
+              <HStack
+                justifyContent={'space-between'}
+                px={4}
+                py={2}
+                borderBottomColor={'gray.100'}
+                borderBottomWidth={1}
+              >
+                <VStack flexShrink={1}>
+                  <Text style={styles.itemTitle}>{item.client_user_id}</Text>
+                  {
+                    item.user_id.toLowerCase() == sdkCurrentUserId?.toLowerCase() &&
+                    <HStack alignItems={"center"}>
+                      <Icon name="arrow-up" size={14} color={"green"} />
+                      <Text style={styles.itemSubtitle}>Current SDK User</Text>
+                    </HStack>
+                  }
+                </VStack>
+                <HStack alignItems={"center"}>
+                  <Icon name="chevron-right" size={14} color={"grey"} style={{marginLeft: 4}} />
+                  {
+                    item.user_id.toLowerCase() == sdkCurrentUserId?.toLowerCase() &&
+                    <LinkButton
+                      onPress={() => handlePressOnConnectDevice(item.user_id)}
+                      isLoading={isLoading}
+                    />
+                  }
+                  <DeleteButton
+                    onPress={() => handlePressDeleteUser(item.user_id)}
+                  />
+                </HStack>
               </HStack>
-            </HStack>
+            </TouchableOpacity>
           )}
         />
       );
     }
   };
 
-  const HealthSDKCard = () => {
-    return (
-      <Box margin="4" padding="4" borderColor="#333333" borderWidth="1">
-        <Text style={{color: 'black', fontSize: 20, paddingBottom: 16}}>
-          {Platform.OS == 'android' ? 'Health Connect' : 'HealthKit'}
-        </Text>
-
-        {permissionAsked.length == 0 &&
-          <Text style={{color: 'black', fontSize: 16, paddingBottom: 16}}>
-            No permission was asked previously
-          </Text>
-        }
-
-        {permissionAsked.length > 0 &&
-          <Text style={{color: 'black', fontSize: 16, paddingBottom: 16}}>
-            Asked permission: {permissionAsked.join(", ")}
-          </Text>
-        }
-
-        <Button onPress={() => handleAskForPermission()}>
-          Ask for permission
-        </Button>
-      </Box>
-    )
-  }
-
   return (
     <View style={styles.container}>
-      <HealthSDKCard />
-      <UserList state={getUsers} />
+      <UserList state={getUsers} sdkCurrentUserId={sdkCurrentUserId} />
       <View>
         <Dialog.Container visible={isOpen}>
           <Dialog.Title>Create User</Dialog.Title>

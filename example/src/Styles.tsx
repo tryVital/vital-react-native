@@ -6,9 +6,14 @@ const styles = StyleSheet.create({
       paddingTop: 22,
       backgroundColor: 'white',
     },
-    item: {
-      padding: 10,
+    itemTitle: {
       fontSize: 18,
+      color: 'black',
+      flexShrink: 1,
+    },
+    itemSubtitle: {
+      padding: 4,
+      fontSize: 13,
       color: 'black',
       flexShrink: 1,
     },
