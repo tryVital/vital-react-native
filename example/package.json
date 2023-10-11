@@ -1,9 +1,8 @@
 {
   "name": "example",
   "version": "0.0.1",
-  "private": true,
   "scripts": {
-    "build": "rn-nodeify --install \"crypto,events,randombytes,stream\" &> /dev/null",
+    "build": "npx rn-nodeify@10.3.0 --install \"crypto,events,randombytes,stream\" &> /dev/null",
     "clean": "yarn clean:metro && yarn clean:mobile",
     "clean:metro": "yarn react-native clean --include metro,watchman",
     "clean:mobile": "yarn react-native clean --include cocoapods,android",
@@ -15,18 +14,13 @@
     "test": "jest",
     "lint": "eslint . --ext .js,.jsx,.ts,.tsx"
   },
-  "workspaces": {
-    "nohoist": [
-      "**"
-    ]
-  },
   "dependencies": {
     "@react-navigation/native": "^6.0.16",
     "@react-navigation/native-stack": "^6.9.4",
-    "@tryvital/vital-core-react-native": "link:../packages/vital-core-react-native",
-    "@tryvital/vital-devices-react-native": "link:../packages/vital-devices-react-native",
-    "@tryvital/vital-health-react-native": "link:../packages/vital-health-react-native",
-    "@tryvital/vital-node": "^2.1.6",
+    "@tryvital/vital-core-react-native": "file:../packages/vital-core-react-native",
+    "@tryvital/vital-devices-react-native": "file:../packages/vital-devices-react-native",
+    "@tryvital/vital-health-react-native": "file:../packages/vital-health-react-native",
+    "@tryvital/vital-node": "^2.1.20",
     "@types/react-native-vector-icons": "^6.4.13",
     "events": "^1.1.1",
     "native-base": "3.4.23",
@@ -66,7 +60,6 @@
     "react-native-monorepo-tools": "^1.2.1",
     "react-native-permissions": "^3.6.1",
     "react-test-renderer": "18.1.0",
-    "rn-nodeify": "^10.3.0",
     "typescript": "^4.8.3"
   },
   "jest": {

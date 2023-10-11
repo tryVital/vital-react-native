@@ -35,14 +35,12 @@ healthEventEmitter.addListener(VitalHealthEvents.statusEvent, (event: any) => {
   console.log(VitalHealthEvents.statusEvent, event);
 });
 
-const vitalDevicesManager = new VitalDevicesManager((module) => new NativeEventEmitter(module));
+const vitalDevicesManager = new VitalDevicesManager();
 
 const Stack = createNativeStackNavigator();
 
 const App = () => {
   useEffect(() => {
-    VitalCore.setEventEmitter(new NativeEventEmitter(NativeModules.VitalCoreReactNative));
-
     const initialize = async () => {
       console.log("Starting to initialize App")
 

@@ -37,3 +37,7 @@ yarn run example:build:android
 yarn run example:start:ios
 yarn run example:start:android
 ```
+
+### Local troubleshooting
+
+Use `yarn link-packages` to link the Example app with the package sources in `packages/**`.

@@ -35,10 +35,13 @@ export class Cancellable {
 }
 
 export class VitalDevicesManager {
+
+  static yolo = "123"
   eventEmitter: NativeEventEmitter
-  
-  constructor(eventEmitter: (module: NativeModule) => NativeEventEmitter) {
-    this.eventEmitter = eventEmitter(NativeModules.VitalDevicesReactNative)
+
+  constructor(eventEmitter: ((module: NativeModule) => NativeEventEmitter) | undefined = undefined) {
+    this.eventEmitter = eventEmitter && eventEmitter(NativeModules.VitalDevicesReactNative)
+      || new NativeEventEmitter(NativeModules.VitalDevicesReactNative);
   }
 
   scanForDevice(deviceModel: DeviceModel, listener: { onDiscovered: (device: ScannedDevice) => void, onError: (error: Error) => void }): Cancellable {
