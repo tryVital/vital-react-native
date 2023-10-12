@@ -5,6 +5,7 @@ import { Button, VStack, HStack, Box } from "native-base";
 import { useEffect, useState } from "react";
 import { Platform, Text } from "react-native";
 import { VITAL_API_KEY, VITAL_ENVIRONMENT, VITAL_REGION } from "../Environment";
+import { vitalNodeClient } from "../App";
 
 export const UserScreen = ({route, navigation}) => {
     const user: ClientFacingUser = route.params.user;
@@ -69,7 +70,16 @@ export const UserScreen = ({route, navigation}) => {
     };
 
     const handleSignInWithJWTDemoMode = async () => {
-        await VitalCore.signIn("");
+        // IMPORTANT:
+        //
+        // Calling `POST /v2/user/{id}/sign_in_token` from example app is ONLY
+        // for illustration purpose. In practice, this should be called by
+        // your backend service on behalf of your consumer apps, so that your
+        // Vital API Key is kept strictly as a server-side secret.
+        //
+        const response = await vitalNodeClient.User.createSignInToken(user.user_id)
+
+        await VitalCore.signIn(response.sign_in_token);
     };
 
     const handleSignInWithAPIKeyMode = async () => {
