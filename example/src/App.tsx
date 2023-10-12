@@ -34,24 +34,13 @@ healthEventEmitter.addListener(VitalHealthEvents.statusEvent, (event: any) => {
   console.log(VitalHealthEvents.statusEvent, event);
 });
 
-// NOTE:
-// This is a workaround to issues caused by these Vital packages being locally linked into the example app.
-// If you use the packages through the npm registry, you can initialize without any parameter.
-//
+
 const vitalDevicesManager = new VitalDevicesManager();
-//
-// const vitalDevicesManager = new VitalDevicesManager((module) => new NativeEventEmitter(module));
 
 const Stack = createNativeStackNavigator();
 
 const App = () => {
   useEffect(() => {
-    // NOTE:
-    // This is a workaround to issues caused by these Vital packages being locally linked into the example app.
-    // If you use the packages through the npm registry, you need not call `setEventEmitter`.
-    //
-    // VitalCore.setEventEmitter(new NativeEventEmitter(NativeModules.VitalCoreReactNative));
-
     const initialize = async () => {
       console.log("Starting to initialize App")
 
