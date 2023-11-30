@@ -76,9 +76,9 @@ The plugin provides props for extra customization. Every time you change the pro
 {
   "expo": {
     "plugins": [
-      "vital-core-react-native",
+      "@tryvital/vital-core-react-native",
       [
-        "vital-health-react-native",
+        "@tryvital/vital-health-react-native",
         {
           "healthSharePermission": "Custom health share permission"
         }
