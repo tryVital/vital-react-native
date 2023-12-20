@@ -15,4 +15,5 @@ jobs:
           registry-url: 'https://registry.npmjs.org'
       - name: build
         run: |
+         corepack enable &&
          yarn install && yarn build
