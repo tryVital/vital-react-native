@@ -15,4 +15,4 @@ jobs:
           registry-url: 'https://registry.npmjs.org'
       - name: build
         run: |
-         npm install && npm build
+         yarn install && yarn build
