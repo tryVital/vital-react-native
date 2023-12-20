@@ -15,4 +15,5 @@ jobs:
           registry-url: 'https://registry.npmjs.org'
       - name: build
         run: |
+         rm -rf yarn.lock &&
          yarn install && yarn build
