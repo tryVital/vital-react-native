@@ -15,9 +15,7 @@ jobs:
       - name: ci
         run: |
           cd packages/vital-health-react-native
-          npm install
-          npm ci
-          npm run typescript
+          yarn install && yarn build
       - name: publish
         run: |
           cd packages/vital-health-react-native
