@@ -16,5 +16,4 @@ jobs:
       - name: build
         run: |
          corepack enable &&
-         rm -rf yarn.lock &&
          yarn install && yarn build
