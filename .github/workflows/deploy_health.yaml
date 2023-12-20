@@ -15,6 +15,7 @@ jobs:
       - name: ci
         run: |
           cd packages/vital-health-react-native
+          corepack enable
           yarn install && yarn build
       - name: publish
         run: |

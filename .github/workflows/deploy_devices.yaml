@@ -15,6 +15,7 @@ jobs:
       - name: ci
         run: |
           cd packages/vital-devices-react-native
+          corepack enable
           yarn install && yarn build
       - name: publish
         run: |
