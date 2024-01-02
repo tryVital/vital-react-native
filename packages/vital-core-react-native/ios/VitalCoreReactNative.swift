@@ -212,6 +212,30 @@ class VitalCoreReactNative: RCTEventEmitter {
     }
   }
 
+  @objc(getAccessToken:rejecter:)
+  func getAccessToken(resolve: @escaping RCTPromiseResolveBlock, reject: @escaping RCTPromiseRejectBlock) {
+    Task {
+      do {
+        let accessToken = try await VitalClient.getAccessToken()
+        resolve(accessToken)
+      } catch let error {
+        reject(errorKey, error.localizedDescription, error)
+      }
+    }
+  }
+
+  @objc(refreshToken:rejecter:)
+  func refreshToken(resolve: @escaping RCTPromiseResolveBlock, reject: @escaping RCTPromiseRejectBlock) {
+    Task {
+      do {
+        try await VitalClient.refreshToken()
+        resolve(())
+      } catch let error {
+        reject(errorKey, error.localizedDescription, error)
+      }
+    }
+  }
+
   @objc(deregisterProvider:resolver:rejecter:)
   func deregisterProvider(
     provider: String,
