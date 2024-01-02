@@ -15,5 +15,5 @@
         "example:start:ios": "yarn workspace example start:ios",
         "example:start:android": "yarn workspace example start:android"
     },
-    "version": "2.0.1"
+    "version": "2.0.2"
 }
