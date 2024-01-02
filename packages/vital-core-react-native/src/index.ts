@@ -115,6 +115,14 @@ export class VitalCore {
     return VitalCoreReactNative.deregisterProvider(provider);
   }
 
+  static getAccessToken(): Promise<string> {
+    return VitalCoreReactNative.getAccessToken();
+  }
+
+  static refreshToken(): Promise<void> {
+    return VitalCoreReactNative.refreshToken();
+  }
+
   static cleanUp(): Promise<void> {
     return VitalCoreReactNative.cleanUp();
   }

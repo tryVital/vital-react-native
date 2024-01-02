@@ -278,6 +278,30 @@ class VitalCoreReactNativeModule(reactContext: ReactApplicationContext) :
     }
   }
 
+  @ReactMethod
+  fun getAccessToken(promise: Promise) {
+    mainScope.launch {
+      try {
+        val accessToken = VitalClient.getAccessToken(reactApplicationContext)
+        promise.resolve(accessToken)
+      } catch (e: Throwable) {
+        promise.reject(VITAL_CORE_ERROR, e.message, e)
+      }
+    }
+  }
+
+  @ReactMethod
+  fun refreshToken(promise: Promise) {
+    mainScope.launch {
+      try {
+        VitalClient.refreshToken(reactApplicationContext)
+        promise.resolve(null)
+      } catch (e: Throwable) {
+        promise.reject(VITAL_CORE_ERROR, e.message, e)
+      }
+    }
+  }
+
   private fun eventEmitter() = reactApplicationContext
     .getJSModule(DeviceEventManagerModule.RCTDeviceEventEmitter::class.java)
 
