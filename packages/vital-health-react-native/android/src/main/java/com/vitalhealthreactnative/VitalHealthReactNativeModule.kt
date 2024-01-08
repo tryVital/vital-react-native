@@ -46,7 +46,7 @@ class VitalHealthReactNativeModule(reactContext: ReactApplicationContext) :
   @ReactMethod
   fun isAvailable(promise: Promise) {
     val availability = VitalHealthConnectManager.isAvailable(reactApplicationContext)
-    promise.resolve(availability != HealthConnectAvailability.Installed)
+    promise.resolve(availability == HealthConnectAvailability.Installed)
   }
 
   @ReactMethod
@@ -75,8 +75,7 @@ class VitalHealthReactNativeModule(reactContext: ReactApplicationContext) :
     mainScope.launch {
       manager.configureHealthConnectClient(
         logsEnabled = enableLogs,
-        // This key is intended for VitalHealthAutoStarter, which is not used by the RN SDK.
-        syncOnAppStart = false,
+        syncOnAppStart = syncOnAppStart,
         numberOfDaysToBackFill = numberOfDaysToBackFill,
       )
 
