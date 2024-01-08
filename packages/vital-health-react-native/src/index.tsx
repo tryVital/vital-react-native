@@ -30,6 +30,14 @@ export const VitalHealthEvents = {
 export class VitalHealth {
   static status = new NativeEventEmitter(VitalHealthReactNative);
 
+  static isAvailable(): Promise<boolean> {
+    if (Platform.OS === 'android') {
+      return VitalHealthReactNative.isAvailable();
+    } else {
+      return Promise.resolve(true);
+    }
+  }
+
   static configure(healthConfig: HealthConfig): Promise<void> {
     if (Platform.OS === 'android') {
       return VitalHealthReactNative.configure(

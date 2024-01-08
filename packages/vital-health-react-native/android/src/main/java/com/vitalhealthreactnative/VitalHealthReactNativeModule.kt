@@ -44,6 +44,12 @@ class VitalHealthReactNativeModule(reactContext: ReactApplicationContext) :
   }
 
   @ReactMethod
+  fun isAvailable(promise: Promise) {
+    val availability = VitalHealthConnectManager.isAvailable(reactApplicationContext)
+    promise.resolve(availability != HealthConnectAvailability.Installed)
+  }
+
+  @ReactMethod
   fun configure(
     syncOnAppStart: Boolean,
     numberOfDaysToBackFill: Int,
