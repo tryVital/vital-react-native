@@ -18,9 +18,9 @@
   "dependencies": {
     "@react-navigation/native": "^6.1.7",
     "@react-navigation/native-stack": "^6.9.17",
-    "@tryvital/vital-core-react-native": "^2.0.2",
-    "@tryvital/vital-devices-react-native": "^2.0.2",
-    "@tryvital/vital-health-react-native": "^2.0.2",
+    "@tryvital/vital-core-react-native": "link:../packages/vital-core-react-native",
+    "@tryvital/vital-devices-react-native": "link:../packages/vital-devices-react-native",
+    "@tryvital/vital-health-react-native": "link:../packages/vital-health-react-native",
     "@tryvital/vital-node": "^2.1.20",
     "@types/react-native-vector-icons": "^6.4.13",
     "events": "^1.1.1",

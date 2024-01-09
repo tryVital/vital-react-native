@@ -14,6 +14,8 @@
     <uses-permission android:name="android.permission.BLUETOOTH_ADMIN" android:maxSdkVersion="30"/>
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" android:maxSdkVersion="30"/>
 
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+
     <!-- BEGIN: Health Connect permissions -->
     <uses-permission android:name="android.permission.health.READ_ACTIVE_CALORIES_BURNED" />
     <uses-permission android:name="android.permission.health.READ_BASAL_METABOLIC_RATE" />
@@ -61,12 +63,42 @@
                 <action android:name="android.intent.action.MAIN"/>
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
+        </activity>
 
-            <!-- TODO create a rational page for the privacy policy-->
+
+        <!-- BEGIN: Mandatory for Health Connect permission flow -->
+        <activity
+            android:name=".PermissionsRationaleActivity"
+            android:exported="true">
             <intent-filter>
-                <action android:name="androidx.health.ACTION_SHOW_PERMISSIONS_RATIONALE"/>
+                <action android:name="androidx.health.ACTION_SHOW_PERMISSIONS_RATIONALE" />
             </intent-filter>
         </activity>
 
+        <!-- For versions starting Android 14, create an activity alias to show the rationale
+             of Health Connect permissions once users click the privacy policy link. -->
+        <activity-alias
+            android:name="ViewPermissionUsageActivity"
+            android:exported="true"
+            android:targetActivity=".MainActivity"
+            android:permission="android.permission.START_VIEW_PERMISSION_USAGE">
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW_PERMISSION_USAGE" />
+                <category android:name="android.intent.category.HEALTH_PERMISSIONS" />
+            </intent-filter>
+        </activity-alias>
+        <!-- END: Mandatory for Health Connect permission flow -->
+
+        <!-- BEGIN: Mandatory for running Health Connect as foreground service on Android 14+ -->
+        <service
+            android:name="androidx.work.impl.foreground.SystemForegroundService"
+            android:foregroundServiceType="shortService"
+            android:exported="false">
+        </service>
+        <!-- END: Mandatory for running Health Connect as foreground service on Android 14+ -->
     </application>
+
+    <queries>
+        <package android:name="com.google.android.apps.healthdata" />
+    </queries>
 </manifest>
