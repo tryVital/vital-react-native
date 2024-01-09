@@ -2966,30 +2966,21 @@
   resolved "https://registry.yarnpkg.com/@trysound/sax/-/sax-0.2.0.tgz#cccaab758af56761eb7bf37af6f03f326dd798ad"
   integrity sha512-L7z9BgrNEcYyUYtF+HaEfiS5ebkh9jXqbszz7pC0hRBPaatV0XjSD3+eHrpqFemQfgwiFF0QPIarnIihIDn7OA==
 
-"@tryvital/vital-core-react-native@^1.3.0":
-  version "1.13.1"
-  resolved "https://registry.yarnpkg.com/@tryvital/vital-core-react-native/-/vital-core-react-native-1.13.1.tgz#14a1ec9fc9ffc459eeda4941e6d3d1252b8c0313"
-  integrity sha512-LbQMCu4zX/JYgstgT+KjJU7tiYmswxDUIxyp9ZnEN096OBYRj1H8c1yDOEmJeoFk+7vfK4ktrgfxXr0expGseQ==
+"@tryvital/vital-core-react-native@^3.0.1":
+  version "0.0.0"
+  uid ""
 
-"@tryvital/vital-core-react-native@^2.0.2":
-  version "2.0.2"
-  resolved "https://registry.yarnpkg.com/@tryvital/vital-core-react-native/-/vital-core-react-native-2.0.2.tgz#8f3816c219c6457ee0a005bc9e313266678db642"
-  integrity sha512-87N6CgsCJCmndanvilYObMG1hzny4bmgWx3GscBMLwwWqxcJz/t8bbJNADqOBUvIYm66O/SMup5M8j4q5qCiBA==
+"@tryvital/vital-core-react-native@link:../packages/vital-core-react-native":
+  version "0.0.0"
+  uid ""
 
-"@tryvital/vital-devices-react-native@^2.0.2":
-  version "2.0.2"
-  resolved "https://registry.yarnpkg.com/@tryvital/vital-devices-react-native/-/vital-devices-react-native-2.0.2.tgz#0e412a7f1ac5d87b0085f6230f9ba852bc2f0540"
-  integrity sha512-lkBGjJxbj2dp4LvfSQTClsFrMzF3Oepxi7M5MG9DKOkawFsurmUtBtDyCXDLekge2/3VETbcbLW0NaYVBUGBMg==
-  dependencies:
-    "@tryvital/vital-core-react-native" "^1.3.0"
-    react-native-permissions "^3.6.1"
+"@tryvital/vital-devices-react-native@link:../packages/vital-devices-react-native":
+  version "0.0.0"
+  uid ""
 
-"@tryvital/vital-health-react-native@^2.0.2":
-  version "2.0.2"
-  resolved "https://registry.yarnpkg.com/@tryvital/vital-health-react-native/-/vital-health-react-native-2.0.2.tgz#6e6efd1eea873c010295a1d3c2e58c9c81a784a3"
-  integrity sha512-J2Dwu/9THyOEk81gGkVLQH6FbVW6D3UuNZ515KOgrmN9Mric2WtzHQNc/EgY6voZROR3lKpt9QcwrzqDrqazHw==
-  dependencies:
-    "@tryvital/vital-core-react-native" "^1.3.0"
+"@tryvital/vital-health-react-native@link:../packages/vital-health-react-native":
+  version "0.0.0"
+  uid ""
 
 "@tryvital/vital-node@^2.1.20":
   version "2.1.20"
