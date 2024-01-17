@@ -123,6 +123,27 @@ export class VitalCore {
     return VitalCoreReactNative.refreshToken();
   }
 
+  static async getVitalAPIHeaders(): Promise<Record<string, string>> {
+    const [accessToken, sdkVersion] = await Promise.all([this.getAccessToken(), this.sdkVersion()]);
+    let versionKey: string
+
+    if (Platform.OS == "android") {
+      versionKey = "X-Vital-Android-SDK-Version"
+    } else if (Platform.OS == "ios" || Platform.OS == "macos") {
+      versionKey = "X-Vital-iOS-SDK-Version"
+    } else {
+      throw Error(`Unsupported React Native platform: ${Platform.OS}`)
+    }
+
+    let headers: Record<string, string> = {"Authorization": `Bearer ${accessToken}`}
+    headers[versionKey] = sdkVersion;
+    return headers
+  }
+
+  static sdkVersion(): Promise<string> {
+    return VitalCoreReactNative.sdkVersion();
+  }
+
   static cleanUp(): Promise<void> {
     return VitalCoreReactNative.cleanUp();
   }

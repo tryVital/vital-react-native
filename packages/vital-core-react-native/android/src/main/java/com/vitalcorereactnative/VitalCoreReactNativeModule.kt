@@ -279,6 +279,11 @@ class VitalCoreReactNativeModule(reactContext: ReactApplicationContext) :
   }
 
   @ReactMethod
+  fun sdkVersion(promise: Promise) {
+    promise.resolve(VitalClient.sdkVersion)
+  }
+
+  @ReactMethod
   fun getAccessToken(promise: Promise) {
     mainScope.launch {
       try {

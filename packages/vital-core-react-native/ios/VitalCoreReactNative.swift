@@ -212,6 +212,11 @@ class VitalCoreReactNative: RCTEventEmitter {
     }
   }
 
+  @objc(sdkVersion:rejecter:)
+  func sdkVersion(resolve:@escaping RCTPromiseResolveBlock, reject:RCTPromiseRejectBlock) {
+    resolve(VitalClient.sdkVersion)
+  }
+
   @objc(getAccessToken:rejecter:)
   func getAccessToken(resolve: @escaping RCTPromiseResolveBlock, reject: @escaping RCTPromiseRejectBlock) {
     Task {
