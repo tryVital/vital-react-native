@@ -41,7 +41,7 @@ class VitalCoreReactNative: RCTEventEmitter {
         try await VitalClient.signIn(withRawToken: token)
         resolve(())
       } catch let error {
-        reject("VitalCoreError", "failed to sign-in", error)
+        reject("VitalCoreError", "\(error)", error)
       }
     }
   }
@@ -104,7 +104,7 @@ class VitalCoreReactNative: RCTEventEmitter {
         let result = try await VitalClient.shared.isUserConnected(to: slug)
         resolve(result)
       } catch let error {
-        reject(errorKey, error.localizedDescription, error)
+        reject(errorKey, "\(error)", error)
       }
     }
   }
@@ -122,7 +122,7 @@ class VitalCoreReactNative: RCTEventEmitter {
         }
         resolve(jsonObjects)
       } catch let error {
-        reject(errorKey, error.localizedDescription, error)
+        reject(errorKey, "\(error)", error)
       }
     }
   }
@@ -143,7 +143,7 @@ class VitalCoreReactNative: RCTEventEmitter {
         try await VitalClient.shared.checkConnectedSource(for: slug)
         resolve(())
       } catch let error {
-        reject(errorKey, error.localizedDescription, error)
+        reject(errorKey, "\(error)", error)
       }
     }
   }
@@ -199,7 +199,7 @@ class VitalCoreReactNative: RCTEventEmitter {
         )
         resolve(())
       } catch let error {
-        reject(errorKey, error.localizedDescription, error)
+        reject(errorKey, "\(error)", error)
       }
     }
   }
@@ -219,7 +219,7 @@ class VitalCoreReactNative: RCTEventEmitter {
         let accessToken = try await VitalClient.getAccessToken()
         resolve(accessToken)
       } catch let error {
-        reject(errorKey, error.localizedDescription, error)
+        reject(errorKey, "\(error)", error)
       }
     }
   }
@@ -231,7 +231,7 @@ class VitalCoreReactNative: RCTEventEmitter {
         try await VitalClient.refreshToken()
         resolve(())
       } catch let error {
-        reject(errorKey, error.localizedDescription, error)
+        reject(errorKey, "\(error)", error)
       }
     }
   }
@@ -253,7 +253,7 @@ class VitalCoreReactNative: RCTEventEmitter {
         try await VitalClient.shared.user.deregisterProvider(provider: slug)
         resolve(())
       } catch let error {
-        reject(errorKey, error.localizedDescription, error)
+        reject(errorKey, "\(error)", error)
       }
     }
   }

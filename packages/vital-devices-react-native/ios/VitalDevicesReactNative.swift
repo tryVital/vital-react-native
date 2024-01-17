@@ -52,7 +52,7 @@ class VitalDevicesReactNative: RCTEventEmitter {
                 )
             }
             catch let error {
-                reject(nil, error.localizedDescription, nil)
+                reject(nil, "\(error)", nil)
             }
         }
     }
@@ -101,7 +101,7 @@ class VitalDevicesReactNative: RCTEventEmitter {
         } catch VitalError.UnsupportedKind(let errorMessage) {
             reject("UnsupportedKind", errorMessage, nil)
         } catch let error {
-            reject("Unknown", error.localizedDescription, error)
+            reject("Unknown", "\(error)", error)
         }
     }
 
@@ -142,7 +142,7 @@ class VitalDevicesReactNative: RCTEventEmitter {
                 case .finished:
                     resolve(())
                 case let .failure(error):
-                    reject("PairError", error.localizedDescription, error)
+                    reject("PairError", "\(error)", error)
                 }
             } receiveValue: { _ in }
     }
