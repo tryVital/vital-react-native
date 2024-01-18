@@ -95,7 +95,7 @@ def enableSeparateBuildPerCPUArchitecture = false
 /**
  * Run Proguard to shrink the Java bytecode in release builds.
  */
-def enableProguardInReleaseBuilds = false
+def enableProguardInReleaseBuilds = true
 
 /**
  * The preferred build flavor of JavaScriptCore.
@@ -306,4 +306,16 @@ def isNewArchitectureEnabled() {
     // - Invoke gradle with `-newArchEnabled=true`
     // - Set an environment variable `ORG_GRADLE_PROJECT_newArchEnabled=true`
     return project.hasProperty("newArchEnabled") && project.newArchEnabled == "true"
+}
+
+afterEvaluate {
+    android.applicationVariants.configureEach { def variant ->
+        def variantName = variant.name.capitalize()
+        def fontCopyTask = tasks.named("copyReactNativeVectorIconFonts")
+
+        try {
+            def lintVitalReportModelTask = tasks.named("generate${variantName}LintVitalReportModel")
+            lintVitalReportModelTask.get().dependsOn(fontCopyTask.get())
+        } catch (UnknownTaskException ignored) {}
+    }
 }
