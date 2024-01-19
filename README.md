@@ -40,21 +40,6 @@ yarn run example:start:android
 
 # Android Gradle setting notes
 
-In your root project Gradle file, ensure that your Kotlin Gradle Plugin version is in sync with the Kotlin version.
-
-```diff
- buildscript {
-   ext {
-     kotlinVersion = "1.8.0"
-   }
-
-   dependencies {
--    classpath("org.jetbrains.kotlin:kotlin-gradle-plugin")
--    classpath("org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlinVersion")
-   }
- }
-```
-
 In your root project Gradle file (`./build.gradle`), ensure that your Kotlin Gradle Plugin version is in sync with the Kotlin version.
 
 ```diff
