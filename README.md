@@ -45,12 +45,12 @@ In your root project Gradle file (`./build.gradle`), ensure that your Kotlin Gra
 ```diff
  buildscript {
    ext {
-     kotlinVersion = "1.8.0"
+     kotlinVersion = "1.8.22"
    }
 
    dependencies {
 -    classpath("org.jetbrains.kotlin:kotlin-gradle-plugin")
--    classpath("org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlinVersion")
++    classpath("org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlinVersion")
    }
  }
 ```
