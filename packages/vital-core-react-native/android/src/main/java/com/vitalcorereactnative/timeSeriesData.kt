@@ -1,13 +1,17 @@
 package com.vitalcorereactnative
 
+import com.squareup.moshi.JsonClass
 import com.squareup.moshi.adapters.PolymorphicJsonAdapterFactory
 import io.tryvital.client.services.data.BloodPressureSamplePayload
 import io.tryvital.client.services.data.QuantitySamplePayload
 import java.util.*
 
 
+@JsonClass(generateAdapter = false)
 sealed class ReactNativeTimeSeriesData {
+  @JsonClass(generateAdapter = true)
   data class Glucose(val samples: List<ReactNativeQuantitySample>): ReactNativeTimeSeriesData()
+  @JsonClass(generateAdapter = true)
   data class BloodPressure(val samples: List<ReactNativeBloodPressureSample>): ReactNativeTimeSeriesData()
 
   companion object {
@@ -18,6 +22,7 @@ sealed class ReactNativeTimeSeriesData {
   }
 }
 
+@JsonClass(generateAdapter = true)
 data class ReactNativeQuantitySample(
   val id: String?,
   val value: Double,
@@ -42,6 +47,7 @@ data class ReactNativeQuantitySample(
   )
 }
 
+@JsonClass(generateAdapter = true)
 data class ReactNativeBloodPressureSample(
   val systolic: ReactNativeQuantitySample,
   val diastolic: ReactNativeQuantitySample,
