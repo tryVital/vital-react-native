@@ -204,10 +204,10 @@ class VitalCoreReactNative: RCTEventEmitter {
     }
   }
 
-  @objc(cleanUp:rejecter:)
-  func cleanUp(resolve:@escaping RCTPromiseResolveBlock, reject:RCTPromiseRejectBlock) {
+  @objc(signOut:rejecter:)
+  func signOut(resolve:@escaping RCTPromiseResolveBlock, reject:RCTPromiseRejectBlock) {
     Task {
-      await VitalClient.shared.cleanUp()
+      await VitalClient.shared.signOut()
       resolve(())
     }
   }

@@ -1,5 +1,6 @@
 import { NativeEventEmitter, NativeModules, Platform } from 'react-native';
 import type { HealthConfig } from './health_config';
+import { VitalCore } from '@tryvital/vital-core-react-native';
 
 // Reexports
 export * from './health_config';
@@ -105,8 +106,12 @@ export class VitalHealth {
     return VitalHealthReactNative.syncData(resources);
   }
 
+  /**
+   * @deprecated Use `VitalCore.signOut()`, which now resets both the Vital Core
+   * and Health SDKs.
+   */
   static cleanUp(): Promise<void> {
-    return VitalHealthReactNative.cleanUp();
+    return VitalCore.signOut();
   }
 }
 

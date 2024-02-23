@@ -130,10 +130,10 @@ class VitalCoreReactNativeModule(reactContext: ReactApplicationContext) :
   }
 
   @ReactMethod
-  fun cleanUp(promise: Promise) {
+  fun signOut(promise: Promise) {
     mainScope.launch {
       try {
-        client.cleanUp()
+        client.signOut()
         promise.resolve(null)
       } catch (e: Throwable) {
         promise.reject(VITAL_CORE_ERROR, e.message, e)
