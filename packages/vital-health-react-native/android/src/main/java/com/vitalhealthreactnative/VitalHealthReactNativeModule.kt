@@ -222,14 +222,6 @@ class VitalHealthReactNativeModule(reactContext: ReactApplicationContext) :
   }
 
   @ReactMethod
-  fun cleanUp(promise: Promise) {
-    mainScope.launch {
-      vitalHealthConnectManager.cleanUp()
-      promise.resolve(null)
-    }
-  }
-
-  @ReactMethod
   private fun writeHealthData(
     resource: String,
     startDate: Long,

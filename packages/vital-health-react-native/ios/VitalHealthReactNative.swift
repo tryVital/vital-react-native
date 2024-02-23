@@ -167,14 +167,6 @@ class VitalHealthReactNative: RCTEventEmitter {
     }
   }
 
-  @objc(cleanUp:rejecter:)
-  func cleanUp(_ resolve: @escaping RCTPromiseResolveBlock, reject:RCTPromiseRejectBlock) {
-    Task {
-      await VitalHealthKitClient.shared.cleanUp()
-      resolve(())
-    }
-  }
-
   @objc(hasAskedForPermission:resolver:rejecter:)
   func hasAskedForPermission(_ resource: String, resolve: RCTPromiseResolveBlock, reject: RCTPromiseRejectBlock) {
     do {

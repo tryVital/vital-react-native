@@ -144,7 +144,14 @@ export class VitalCore {
     return VitalCoreReactNative.sdkVersion();
   }
 
+  static signOut(): Promise<void> {
+    return VitalCoreReactNative.signOut();
+  }
+
+  /**
+   * @deprecated Renamed to `signOut()`.
+   */
   static cleanUp(): Promise<void> {
-    return VitalCoreReactNative.cleanUp();
+    return this.signOut();
   }
 }
