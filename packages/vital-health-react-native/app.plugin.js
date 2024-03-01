@@ -3,6 +3,7 @@ const {
   withInfoPlist,
   withAndroidManifest,
 } = require('@expo/config-plugins');
+const { withPlugins } = require('@expo/config-plugins');
 
 const HEALTH_SHARE = 'Allow $(PRODUCT_NAME) to check health info';
 
@@ -32,7 +33,7 @@ const withHealthKit = (config, { healthSharePermission } = {}) => {
   return config;
 };
 
-const withHealthConnect = function androidManifestPlugin(config, { healthSharePermission } = {}) {
+const withHealthConnect = function androidManifestPlugin(config) {
   return withAndroidManifest(config, async (config) => {
     let androidManifest = config.modResults.manifest;
 
@@ -50,4 +51,5 @@ const withHealthConnect = function androidManifestPlugin(config, { healthSharePe
   });
 };
 
-module.exports = withHealthConnect(withHealthKit);
+module.exports = ({ config }) =>
+  withPlugins(config, [[withHealthKit], [withHealthConnect]]);
