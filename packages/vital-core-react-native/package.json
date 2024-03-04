@@ -1,6 +1,6 @@
 {
   "name": "@tryvital/vital-core-react-native",
-  "version": "3.0.8",
+  "version": "3.0.9",
   "description": "test",
   "main": "lib/commonjs/index.js",
   "module": "lib/module/index.js",
