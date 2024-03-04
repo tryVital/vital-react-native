@@ -252,6 +252,8 @@ private func mapResourceToReadableVitalResource(_ name: String) throws -> VitalR
       return .individual(.distanceWalkingRunning)
     case "vo2Max":
       return .individual(.vo2Max)
+    case "exerciseTime":
+      return .individual(.exerciseTime)
     case "weight":
       return .individual(.weight)
     case "bodyFat":
