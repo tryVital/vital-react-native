@@ -3,7 +3,7 @@ import { VitalHealth, VitalResource } from "@tryvital/vital-health-react-native"
 import { ClientFacingUser } from "@tryvital/vital-node/client/models/user_models";
 import { Button, VStack, HStack, Box } from "native-base";
 import { useEffect, useState } from "react";
-import { Platform, Text } from "react-native";
+import { ActivityIndicator, Platform, Switch, Text } from "react-native";
 import { VITAL_API_KEY, VITAL_ENVIRONMENT, VITAL_REGION } from "../Environment";
 import { vitalNodeClient } from "../App";
 
@@ -13,7 +13,9 @@ export const UserScreen = ({route, navigation}) => {
     const [isCurrentSDKUser, setIsCurrentSDKUser] = useState(false);
     const [isSDKConfigured, setIsSDKConfigured] = useState(false);
 
-    const [permissionAsked, setPermissionAsked] = useState<VitalResource[]>([])
+    const [permissionAsked, setPermissionAsked] = useState<VitalResource[]>([]);
+    const [isBackgroundSyncEnabled, setBackgroundSyncEnabled] = useState<boolean | undefined>(undefined);
+    const [isUpdatingBackgroundSync, setUpdatingBackgroundSync] = useState<boolean>(true);
 
     // Observe Vital Core SDK Status
     useEffect(() => {
@@ -54,6 +56,11 @@ export const UserScreen = ({route, navigation}) => {
 
     useEffect(() => {
         refreshPermissionAsked();
+
+        VitalHealth.isBackgroundSyncEnabled
+            .then((enabled) => setBackgroundSyncEnabled(enabled))
+            .then((enabled) => setUpdatingBackgroundSync(false));
+
     }, [navigation]);
     
     const handleAskForPermission = () => {
@@ -92,6 +99,29 @@ export const UserScreen = ({route, navigation}) => {
         await VitalCore.setUserId(user.user_id);
     };
 
+    const handleBackgroundSync = () => {
+        if (isBackgroundSyncEnabled === undefined) {
+            console.log("LOL");
+            return;
+        }
+
+        setUpdatingBackgroundSync(true);
+
+        if (isBackgroundSyncEnabled) {
+            VitalHealth.disableBackgroundSync()
+                .then(() => setBackgroundSyncEnabled(false))
+                .then(() => setUpdatingBackgroundSync(false));
+        } else {
+            VitalHealth.enableBackgroundSync()
+                .then((x) => {
+                    console.log(x);
+                    return x;
+                })
+                .then((success) => setBackgroundSyncEnabled(success))
+                .then(() => setUpdatingBackgroundSync(false));
+        }
+    };
+
     const HealthSDKCard = () => {
         return (
         <Box padding="4" borderColor="#333333" borderWidth="1">
@@ -119,6 +149,22 @@ export const UserScreen = ({route, navigation}) => {
                 <Text style={{flexGrow: 1}}>Force Sync</Text>
                 <Button onPress={() => VitalHealth.syncData()}>Sync</Button>
             </HStack>
+
+            {!VitalHealth.canEnableBackgroundSyncNoninteractively && (
+                <HStack alignItems={'center'} style={{marginTop: 8}}>
+                    <Text style={{flexGrow: 1}}>Background Sync (Experimental)</Text>
+                    {isBackgroundSyncEnabled !== undefined && (
+                        <Switch 
+                            value={isBackgroundSyncEnabled}
+                            disabled={isUpdatingBackgroundSync}
+                            onChange={handleBackgroundSync}
+                        />
+                    )}
+                    {isBackgroundSyncEnabled === undefined && (
+                        <ActivityIndicator />
+                    )}
+                </HStack>
+            )}
         </Box>
         )
     };

@@ -429,6 +429,11 @@ class VitalHealthReactNativeModule(reactContext: ReactApplicationContext) :
   companion object {
     const val NAME = "VitalHealthReactNative"
 
+    @JvmStatic
+    fun enableDebugLogging() {
+      VitalLogger.getOrCreate().enabled = true
+    }
+
     /**
      * This method is a workaround which manually dispatches request permission results back to
      * where the Health Connect activity contract expects it.
