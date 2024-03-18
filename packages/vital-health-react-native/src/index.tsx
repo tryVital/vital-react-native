@@ -28,8 +28,43 @@ export const VitalHealthEvents = {
   statusEvent: 'Status',
 };
 
+export interface SyncNotificationContent {
+  notificationTitle: string;
+  notificationContent: string;
+  channelName: string;
+  channelDescription: string;
+}
+
 export class VitalHealth {
   static status = new NativeEventEmitter(VitalHealthReactNative);
+
+  static get canEnableBackgroundSyncNoninteractively(): boolean {
+    return Platform.OS !== 'android';
+  }
+
+  /**
+   * Whether health data sync is paused at the moment.
+   */
+  static get pauseSynchronization(): Promise<boolean> {
+    return VitalHealthReactNative.getPauseSynchronization();
+  }
+
+  /**
+   * [Android ONLY][Experimental API]
+   * On iOS, this property always returns `true`. iOS HealthKit Background Delivery is
+   * an app-level entitlement, and does not require explicit user consent.
+   * 
+   * ## Overview
+   * 
+   * Whether Background Sync on Android is enabled at the moment.
+   */
+  static get isBackgroundSyncEnabled(): Promise<boolean> {
+    if (Platform.OS !== 'android') {
+      return Promise.resolve(true);
+    }
+
+    return VitalHealthReactNative.isBackgroundSyncEnabled();
+  }
 
   static isAvailable(): Promise<boolean> {
     if (Platform.OS === 'android') {
@@ -71,6 +106,105 @@ export class VitalHealth {
       region,
       enableLogs
     );
+  }
+
+  /**
+   * [Android ONLY][Experimental API]
+   * On iOS, this method is a no-op returning `true`. iOS HealthKit Background Delivery is an app-level
+   * entitlement, and does not require explicit user consent.
+   * 
+   * If you intend to pause or unpause synchronization, use `pauseSynchronization`
+   * and `setPauseSynchronization(_:)` instead.
+   * 
+   * ## Overview
+   * 
+   * Enable background sync on Android. This includes requesting permissions from the end user whenever necessary.
+   *
+   * Vital SDK achieves automatic data sync through Android [AlarmManager] exact alarms.
+   *
+   * Refer to the [Vital Health Connect guide for full context and setup instructions](https://docs.tryvital.io/wearables/guides/android_health_connect).
+   *
+   * ## Gist on Exact Alarms
+   *
+   * "Exact Alarm" here refers to the Android Exact Alarm mechanism. The Vital SDK would propose
+   * to the Android OS to fire the next data sync with a T+60min wall clock target. The Android OS
+   * may fulfill the request exactly as proposed, e.g., when the user happens to be actively using
+   * the device. However, it may also choose to defer it arbitrarily, under the influence of
+   * power-saving policies like [Doze mode](https://developer.android.com/training/monitoring-device-state/doze-standby#understand_doze).
+   *
+   * On Android 12 (API Level 31) or above, this contract would automatically initiate the OS-required
+   * user consent flow for Exact Alarm usage. If the permission has been granted prior, this activity
+   * contract shall return synchronously.
+   *
+   * On Android 13 (API Level 33) or above, you have the option to use (with platform policy caveats)
+   * the [android.Manifest.permission.USE_EXACT_ALARM] permission instead, which does not require an
+   * explicit consent flow. This contract would return synchronously in this scenario.
+   *
+   * Regardless of API Level, your App Manifest must declare [android.Manifest.permission.RECEIVE_BOOT_COMPLETED].
+   * Otherwise, background sync stops once the phone encounters a cold reboot or a quick restart.
+   *
+   * @return `true` if the background sync has been enabled successfully. `false` otherwise.
+   */
+  static async enableBackgroundSync(): Promise<boolean> {
+    if (Platform.OS !== "android") {
+      // iOS background delivery does not require user explicit consent.
+      // It requires only the app-level HealthKit Bgnd. Delivery entitlement.
+      return true;
+    }
+    
+    return await VitalHealthReactNative.enableBackgroundSync();
+  }
+
+  /**
+   * [Android ONLY][Experimental API]
+   * On iOS, this method is a no-op. iOS HealthKit Background Delivery is an app-level
+   * entitlement, and does not require explicit user consent.
+   * 
+   * If you intend to pause or unpause synchronization, use `pauseSynchronization`
+   * and `setPauseSynchronization(_:)` instead.
+   * 
+   * ## Overview
+   *
+   * Disable background sync on Android.
+   */
+  static async disableBackgroundSync(): Promise<void> {
+    if (Platform.OS !== "android") {
+      // iOS background delivery does not require user explicit consent.
+      // It requires only the app-level HealthKit Bgnd. Delivery entitlement.
+      return;
+    }
+
+    return await VitalHealthReactNative.disableBackgroundSync();
+  }
+
+  /**
+   * [Android ONLY][Experimental API]
+   * On iOS, this method is a no-op. iOS does not require apps to show a user-visible
+   * notification when performing extended work in background.
+   * 
+   * ## Overview
+   * Set the text content related to the Sync Notification. The OS has full discretion to present
+   * this notification to the user, when any data sync work in background is taking longer than expected.
+   * 
+   * Refer to the [Vital Health Connect guide for full context and setup instructions](https://docs.tryvital.io/wearables/guides/android_health_connect).
+   */
+  static async setSyncNotificationContent(content: SyncNotificationContent): Promise<void> {
+    if (Platform.OS !== "android") {
+      // iOS background delivery does not require user explicit consent.
+      // It requires only the app-level HealthKit Bgnd. Delivery entitlement.
+      return;
+    }
+
+    return await VitalHealthReactNative.setSyncNotificationContent(
+      JSON.stringify(content)
+    );
+  }
+
+  /**
+   * Pause or unpause health data sync.
+   */
+  static async setPauseSynchronization(paused: boolean) {
+    return await VitalHealthReactNative.setPauseSynchronization(paused);
   }
 
   static askForResources(resources: VitalResource[]): Promise<void> {
