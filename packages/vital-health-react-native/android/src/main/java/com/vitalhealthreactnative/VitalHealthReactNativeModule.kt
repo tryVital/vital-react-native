@@ -2,6 +2,7 @@ package com.vitalhealthreactnative
 
 import android.annotation.SuppressLint
 import android.content.Intent
+import android.util.JsonReader
 import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.result.ActivityResultCallback
@@ -15,11 +16,23 @@ import com.facebook.react.module.annotations.ReactModule
 import com.facebook.react.modules.core.DeviceEventManagerModule
 import com.vitalcorereactnative.VitalCoreReactNativeModule
 import io.tryvital.client.utils.VitalLogger
+import io.tryvital.vitalhealthconnect.DefaultSyncNotificationBuilder
+import io.tryvital.vitalhealthconnect.DefaultSyncNotificationContent
+import io.tryvital.vitalhealthconnect.ExperimentalVitalApi
 import io.tryvital.vitalhealthconnect.VitalHealthConnectManager
+import io.tryvital.vitalhealthconnect.disableBackgroundSync
+import io.tryvital.vitalhealthconnect.enableBackgroundSyncContract
 import io.tryvital.vitalhealthconnect.model.*
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
+import kotlinx.serialization.decodeFromString
+import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.JsonElement
+import kotlinx.serialization.json.JsonObject
+import kotlinx.serialization.json.jsonObject
+import kotlinx.serialization.json.jsonPrimitive
+import java.io.StringReader
 import java.time.Instant
 import java.util.concurrent.atomic.AtomicReference
 
@@ -39,6 +52,7 @@ class VitalHealthReactNativeModule(reactContext: ReactApplicationContext) :
     get() = VitalHealthConnectManager.getOrCreate(reactApplicationContext)
 
   private var askForPermission: AskForPermissionContinuation? = null
+  private var enableBackgroundSync: EnableBackgroundSyncContinuation? = null
 
   private var mainScope = MainScope()
 
@@ -256,6 +270,98 @@ class VitalHealthReactNativeModule(reactContext: ReactApplicationContext) :
     }
   }
 
+  @OptIn(ExperimentalVitalApi::class)
+  @ReactMethod
+  fun enableBackgroundSync(promise: Promise) {
+    val manager = vitalHealthConnectManager
+    if (synchronized(this) { this.enableBackgroundSync != null }) {
+      return promise.reject(
+        VITAL_HEALTH_ERROR,
+        "Another enableBackgroundSync call is already in progress."
+      )
+    }
+
+    val activity = currentActivity ?: return promise.reject(
+      VITAL_HEALTH_ERROR,
+      "Cannot find the current ReactNative Activity"
+    )
+
+    if (activity !is ComponentActivity) {
+      return promise.reject(
+        VITAL_HEALTH_ERROR,
+        "The Android Activity class of your React Native host app must be a androidx.activity.ComponentActivity subclass for the permission request flow to function properly."
+      )
+    }
+
+    val contract = manager.enableBackgroundSyncContract()
+
+    synchronized(this) {
+      enableBackgroundSync = EnableBackgroundSyncContinuation(contract, promise)
+    }
+
+    val registry = activity.activityResultRegistry
+    val launcherRef = AtomicReference<ActivityResultLauncher<*>>(null)
+    val launcher = registry.register("io.tryvital.health.enableBackgroundSync", contract) { success ->
+      val continuation = synchronized(this) {
+        val currentValue = enableBackgroundSync
+        enableBackgroundSync = null
+        return@synchronized currentValue
+      }
+
+      val launcher = launcherRef.getAndSet(null)
+      launcher?.unregister()
+
+      if (continuation != null) {
+        mainScope.launch {
+          continuation.promise.resolve(success)
+        }
+      }
+    }
+    launcherRef.set(launcher)
+    launcher.launch(Unit)
+  }
+
+  @OptIn(ExperimentalVitalApi::class)
+  @ReactMethod
+  fun disableBackgroundSync(promise: Promise) {
+    vitalHealthConnectManager.disableBackgroundSync()
+    promise.resolve(null)
+  }
+
+  @ReactMethod
+  fun setSyncNotificationContent(content: String, promise: Promise) {
+    val builder = vitalHealthConnectManager.syncNotificationBuilder as? DefaultSyncNotificationBuilder
+      ?: return promise.resolve(null)
+
+    try {
+      val payload = Json.decodeFromString<JsonObject>(content).let {
+        DefaultSyncNotificationContent(
+          notificationTitle = it["notificationTitle"]!!.jsonPrimitive.toString(),
+          notificationContent = it["notificationContent"]!!.jsonPrimitive.toString(),
+          channelName = it["channelName"]!!.jsonPrimitive.toString(),
+          channelDescription = it["channelDescription"]!!.jsonPrimitive.toString(),
+        )
+      }
+
+      builder.setContentOverride(payload)
+      promise.resolve(null)
+    } catch (e: Exception) {
+      promise.reject(VITAL_HEALTH_ERROR, "Failed to decode the supplied notification content", e)
+      return
+    }
+  }
+
+  @ReactMethod
+  fun setPauseSynchronization(paused: Boolean, promise: Promise) {
+    vitalHealthConnectManager.pauseSynchronization = paused
+    promise.resolve(null)
+  }
+
+  @ReactMethod
+  fun getPauseSynchronization(promise: Promise) {
+    promise.resolve(vitalHealthConnectManager.pauseSynchronization)
+  }
+
   @ReactMethod
   fun addListener(eventName: String?) {
     // Keep: Required for RN built in Event Emitter Calls.
@@ -363,5 +469,10 @@ class VitalHealthReactNativeModule(reactContext: ReactApplicationContext) :
 
 private data class AskForPermissionContinuation(
   val contract: ActivityResultContract<Unit, Deferred<PermissionOutcome>>,
+  val promise: Promise
+)
+
+private data class EnableBackgroundSyncContinuation(
+  val contract: ActivityResultContract<Unit, Boolean>,
   val promise: Promise
 )

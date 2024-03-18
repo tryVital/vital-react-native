@@ -218,6 +218,18 @@ class VitalHealthReactNative: RCTEventEmitter {
       }
     }
 
+
+  @objc(getPauseSynchronization:rejecter:)
+  func getPauseSynchronization(_ resolve: RCTPromiseResolveBlock, reject: RCTPromiseRejectBlock) {
+    resolve(VitalHealthKitClient.shared.pauseSynchronization)
+  }
+
+  @objc(setPauseSynchronization:resolver:rejecter:)
+  func setPauseSynchronization(_ paused: Bool, resolve: RCTPromiseResolveBlock, reject: RCTPromiseRejectBlock) {
+    VitalHealthKitClient.shared.pauseSynchronization = paused
+    resolve(())
+  }
+
 }
 
 private func mapResourceToReadableVitalResource(_ name: String) throws -> VitalResource {

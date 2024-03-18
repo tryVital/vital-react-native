@@ -43,6 +43,13 @@ RCT_EXTERN_METHOD(syncData:(NSArray<NSString *> *)resources
                   resolver:(RCTPromiseResolveBlock)resolve
                   rejecter:(RCTPromiseRejectBlock)reject)
 
+RCT_EXTERN_METHOD(getPauseSynchronization:(RCTPromiseResolveBlock)resolve
+                  rejecter:(RCTPromiseRejectBlock)reject)
+
+RCT_EXTERN_METHOD(setPauseSynchronization:(BOOL)resource
+                  resolver:(RCTPromiseResolveBlock)resolve
+                  rejecter:(RCTPromiseRejectBlock)reject)
+
 RCT_EXTERN_METHOD(status)
 
 + (BOOL)requiresMainQueueSetup
