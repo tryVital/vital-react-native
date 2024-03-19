@@ -131,7 +131,7 @@ repositories {
 }
 
 def kotlin_version = getExtOrDefault('kotlinVersion')
-def vital_sdk_version = '2.0.0-beta.3'
+def vital_sdk_version = '2.0.0-beta.4'
 
 dependencies {
   ksp "com.squareup.moshi:moshi-kotlin-codegen:1.13.0"
