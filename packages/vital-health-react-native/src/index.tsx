@@ -66,6 +66,30 @@ export class VitalHealth {
     return VitalHealthReactNative.isBackgroundSyncEnabled();
   }
 
+  /**
+   * [Android ONLY][Experimental API]
+   * On iOS, this property always returns `3_600_000`.
+   */
+  static get backgroundSyncMinimumInterval(): Promise<number> {
+    if (Platform.OS !== 'android') {
+      return Promise.resolve(3_600_000);
+    }
+
+    return VitalHealthReactNative.backgroundSyncMinimumInterval();
+  }
+
+  /**
+   * [Android ONLY][Experimental API]
+   * On iOS, this property always returns `0`.
+   */
+  static get autoSyncThrottle(): Promise<number> {
+    if (Platform.OS !== 'android') {
+      return Promise.resolve(0);
+    }
+
+    return VitalHealthReactNative.autoSyncThrottle();
+  }
+
   static isAvailable(): Promise<boolean> {
     if (Platform.OS === 'android') {
       return VitalHealthReactNative.isAvailable();
@@ -198,6 +222,34 @@ export class VitalHealth {
     return await VitalHealthReactNative.setSyncNotificationContent(
       JSON.stringify(content)
     );
+  }
+
+  /**
+   * [Android ONLY][Experimental API]
+   * On iOS, this method is a no-op.
+   * 
+   * A throttling threshold below 5 seconds is ignored.
+   */
+  static async setAutoSyncThrottle(thresholdInMilliseconds: number): Promise<void> {
+    if (Platform.OS !== "android") {
+      return;
+    }
+
+    return await VitalHealthReactNative.setAutoSyncThrottle(thresholdInMilliseconds);
+  }
+
+  /**
+   * [Android ONLY][Experimental API]
+   * On iOS, this method is a no-op.
+   * 
+   * A minimum interval below 3600 seconds is ignored.
+   */
+  static async setBackgroundSyncMinimumInterval(intervalInMilliseconds: number): Promise<void> {
+    if (Platform.OS !== "android") {
+      return;
+    }
+
+    return await VitalHealthReactNative.setBackgroundSyncMinimumInterval(intervalInMilliseconds);
   }
 
   /**
