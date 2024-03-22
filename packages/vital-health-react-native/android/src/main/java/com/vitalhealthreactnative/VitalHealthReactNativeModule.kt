@@ -19,6 +19,8 @@ import io.tryvital.vitalhealthconnect.DefaultSyncNotificationBuilder
 import io.tryvital.vitalhealthconnect.DefaultSyncNotificationContent
 import io.tryvital.vitalhealthconnect.ExperimentalVitalApi
 import io.tryvital.vitalhealthconnect.VitalHealthConnectManager
+import io.tryvital.vitalhealthconnect.autoSyncThrottle
+import io.tryvital.vitalhealthconnect.backgroundSyncMinimumInterval
 import io.tryvital.vitalhealthconnect.disableBackgroundSync
 import io.tryvital.vitalhealthconnect.enableBackgroundSyncContract
 import io.tryvital.vitalhealthconnect.isBackgroundSyncEnabled
@@ -32,6 +34,7 @@ import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.jsonPrimitive
 import java.time.Instant
 import java.util.concurrent.atomic.AtomicReference
+import kotlin.time.Duration.Companion.milliseconds
 
 const val VITAL_HEALTH_ERROR = "VitalHealthError"
 const val VITAL_REQUEST_CODE = 1984
@@ -231,8 +234,8 @@ class VitalHealthReactNativeModule(reactContext: ReactApplicationContext) :
   @ReactMethod
   private fun writeHealthData(
     resource: String,
-    startDate: Long,
-    endDate: Long,
+    startDate: Double,
+    endDate: Double,
     value: Double,
     promise: Promise
   ) = runOnMain {
@@ -247,8 +250,8 @@ class VitalHealthReactNativeModule(reactContext: ReactApplicationContext) :
     try {
       manager.writeRecord(
         writableResource,
-        startDate = Instant.ofEpochMilli(startDate),
-        endDate = Instant.ofEpochMilli(endDate),
+        startDate = Instant.ofEpochMilli(startDate.toLong()),
+        endDate = Instant.ofEpochMilli(endDate.toLong()),
         value = value,
       )
       promise.resolve(null)
@@ -356,6 +359,32 @@ class VitalHealthReactNativeModule(reactContext: ReactApplicationContext) :
   @ReactMethod
   fun isBackgroundSyncEnabled(promise: Promise) = runOnMain {
     promise.resolve(vitalHealthConnectManager.isBackgroundSyncEnabled)
+  }
+
+  @OptIn(ExperimentalVitalApi::class)
+  @ReactMethod
+  fun autoSyncThrottle(promise: Promise) = runOnMain {
+    promise.resolve(vitalHealthConnectManager.autoSyncThrottle.inWholeMilliseconds.toDouble())
+  }
+
+  @OptIn(ExperimentalVitalApi::class)
+  @ReactMethod
+  fun backgroundSyncMinimumInterval(promise: Promise) = runOnMain {
+    promise.resolve(vitalHealthConnectManager.backgroundSyncMinimumInterval.inWholeMilliseconds.toDouble())
+  }
+
+  @OptIn(ExperimentalVitalApi::class)
+  @ReactMethod
+  fun setBackgroundSyncMinimumInterval(intervalInMilliseconds: Double, promise: Promise) = runOnMain {
+    vitalHealthConnectManager.backgroundSyncMinimumInterval = intervalInMilliseconds.milliseconds
+    promise.resolve(null)
+  }
+
+  @OptIn(ExperimentalVitalApi::class)
+  @ReactMethod
+  fun setAutoSyncThrottle(thresholdInMilliseconds: Double, promise: Promise) = runOnMain {
+    vitalHealthConnectManager.autoSyncThrottle = thresholdInMilliseconds.milliseconds
+    promise.resolve(null)
   }
 
   @ReactMethod
