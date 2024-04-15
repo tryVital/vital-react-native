@@ -1133,21 +1133,21 @@ PODS:
     - RCT-Folly (= 2022.05.16.00)
     - React-Core
   - SocketRocket (0.6.1)
-  - vital-core-react-native (3.0.9):
+  - vital-core-react-native (3.1.0-beta.5):
     - React-Core
-    - VitalCore (~> 0.11.5)
-  - vital-devices-react-native (3.0.9):
+    - VitalCore (~> 0.11.6)
+  - vital-devices-react-native (3.1.0-beta.5):
     - React-Core
-    - VitalDevices (~> 0.11.5)
-  - vital-health-react-native (3.0.9):
+    - VitalDevices (~> 0.11.6)
+  - vital-health-react-native (3.1.0-beta.5):
     - React-Core
-    - VitalHealthKit (~> 0.11.5)
-  - VitalCore (0.11.5)
-  - VitalDevices (0.11.5):
+    - VitalHealthKit (~> 0.11.6)
+  - VitalCore (0.11.6)
+  - VitalDevices (0.11.6):
     - CombineCoreBluetooth (~> 0.3.1)
-    - VitalCore (~> 0.11.5)
-  - VitalHealthKit (0.11.5):
-    - VitalCore (~> 0.11.5)
+    - VitalCore (~> 0.11.6)
+  - VitalHealthKit (0.11.6):
+    - VitalCore (~> 0.11.6)
   - Yoga (1.14.0)
 
 DEPENDENCIES:
@@ -1447,12 +1447,12 @@ SPEC CHECKSUMS:
   RNSVG: ba3e7232f45e34b7b47e74472386cf4e1a676d0a
   RNVectorIcons: 210f910e834e3485af40693ad4615c1ec22fc02b
   SocketRocket: f32cd54efbe0f095c4d7594881e52619cfe80b17
-  vital-core-react-native: fe5f76c8b5682ee8e1426adf682e047c1a30e7b6
-  vital-devices-react-native: 678c60b33078b1be80f2e83e74b89f757239d326
-  vital-health-react-native: 359103067565c32dceb57de9e24e4694baefbab9
-  VitalCore: 15b20fde8d76669d10b4a9097b7b27e30512e81f
-  VitalDevices: 03a0629e159a940821e2e23ff4f460dc9b0d477d
-  VitalHealthKit: 9f589b369a6e12a67d37e488e723a6e4624472e6
+  vital-core-react-native: 454c39d9f96ce1921807bdd79bc3524090cc2593
+  vital-devices-react-native: 70fdcfa4c46a6c14b86b54ad5de8f9ded9f7b9a6
+  vital-health-react-native: 1da64e84b9fad62847ceeff870c51e873953d28c
+  VitalCore: 9c03ec79ff09cfb4b7b72aee06b17e60e3fdf081
+  VitalDevices: 200ffdcd00bb55eceb09699aeff26dc956ae5bdf
+  VitalHealthKit: de4ec52dc9d661241ade035cefc5b2f07fd54844
   Yoga: 2b33a7ac96c58cdaa7b810948fc6a2a76ed2d108
 
 PODFILE CHECKSUM: 2a537c5b3fef93a43656a06053f42e15c4747741
