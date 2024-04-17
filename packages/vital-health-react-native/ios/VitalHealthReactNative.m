@@ -58,3 +58,4 @@ RCT_EXTERN_METHOD(status)
 }
 
 @end
+
