@@ -1,6 +1,4 @@
 #import "AppDelegate.h"
-#import "VitalHealthKitConfiguration.h"
-#import "VitalCoreConfiguration.h"
 
 #import <React/RCTBundleURLProvider.h>
 
