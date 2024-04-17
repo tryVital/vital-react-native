@@ -34,7 +34,8 @@ export const UserScreen = ({route, navigation}) => {
         VitalHealth.hasAskedForPermission(VitalResource.Activity),
         VitalHealth.hasAskedForPermission(VitalResource.Workout),
         VitalHealth.hasAskedForPermission(VitalResource.Sleep),
-        ]).then(([activityAsked, workoutAsked, sleepAsked]) => {
+        VitalHealth.hasAskedForPermission(VitalResource.HeartRate),
+        ]).then(([activityAsked, workoutAsked, sleepAsked, heartRateAsked]) => {
         let resources = new Set<VitalResource>();
         
         if (activityAsked) {
@@ -47,6 +48,10 @@ export const UserScreen = ({route, navigation}) => {
 
         if (sleepAsked) {
             resources.add(VitalResource.Sleep)
+        }
+
+        if (heartRateAsked) {
+            resources.add(VitalResource.HeartRate)
         }
 
         let sortedResources = (new Array(...resources.values())).sort((lhs, rhs) => lhs.localeCompare(rhs))
@@ -65,7 +70,7 @@ export const UserScreen = ({route, navigation}) => {
     
     const handleAskForPermission = () => {
         // [1] Request permissions for wearable data
-        VitalHealth.askForResources([VitalResource.Activity, VitalResource.Workout, VitalResource.Sleep])
+        VitalHealth.ask([VitalResource.Activity, VitalResource.Workout, VitalResource.Sleep, VitalResource.HeartRate], [])
         .then(() => {
             console.log("finished asking for permission")
 

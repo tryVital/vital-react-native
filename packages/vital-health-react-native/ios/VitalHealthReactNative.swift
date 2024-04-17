@@ -249,7 +249,7 @@ private func mapResourceToReadableVitalResource(_ name: String) throws -> VitalR
     case "bloodPressure":
       return .vitals(.bloodPressure)
     case "heartRate":
-      return .vitals(.hearthRate)
+      return .vitals(.heartRate)
     case "mindfulSession":
       return .vitals(.mindfulSession)
     case "steps":
