@@ -230,6 +230,13 @@ class VitalHealthReactNative: RCTEventEmitter {
     resolve(())
   }
 
+  @objc(openPlatformHealthApp:rejecter:)
+  func openPlatformHealthApp(_ resolve: @escaping RCTPromiseResolveBlock, reject: RCTPromiseRejectBlock) {
+    Task { @MainActor in
+      await UIApplication.shared.open(URL(string: "x-apple-health://")!)
+      resolve(())
+    }
+  }
 }
 
 private func mapResourceToReadableVitalResource(_ name: String) throws -> VitalResource {
