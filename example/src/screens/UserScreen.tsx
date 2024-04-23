@@ -71,9 +71,8 @@ export const UserScreen = ({route, navigation}) => {
     const handleAskForPermission = () => {
         // [1] Request permissions for wearable data
         VitalHealth.ask([VitalResource.Activity, VitalResource.Workout, VitalResource.Sleep, VitalResource.HeartRate], [])
-        .then(() => {
-            console.log("finished asking for permission")
-
+        .then((outcome) => {
+            console.log(`finished asking for permission: ${outcome}`);
             refreshPermissionAsked();
         })
         .catch((err) => console.error("errored when asking for permission", err))

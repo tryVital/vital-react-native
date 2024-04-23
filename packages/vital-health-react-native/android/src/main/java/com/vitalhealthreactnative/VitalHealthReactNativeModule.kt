@@ -186,8 +186,17 @@ class VitalHealthReactNativeModule(reactContext: ReactApplicationContext) :
 
       if (continuation != null) {
         mainScope.launch {
-          result.await()
-          continuation.promise.resolve(null)
+          val outcome = result.await()
+
+          continuation.promise.resolve(
+            when (outcome) {
+              is PermissionOutcome.Success -> "success"
+              is PermissionOutcome.HealthConnectUnavailable -> "healthDataUnavailable"
+              is PermissionOutcome.Cancelled -> "cancelled"
+              is PermissionOutcome.NotPrompted -> "notPrompted"
+              is PermissionOutcome.UnknownError -> "unknownError"
+            }
+          )
         }
       }
     })

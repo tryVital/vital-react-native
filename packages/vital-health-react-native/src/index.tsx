@@ -259,15 +259,21 @@ export class VitalHealth {
     return await VitalHealthReactNative.setPauseSynchronization(paused);
   }
 
-  static askForResources(resources: VitalResource[]): Promise<void> {
-    return VitalHealthReactNative.ask(resources, []);
+  static askForResources(resources: VitalResource[]): Promise<PermissionOutcome> {
+    return this.ask(resources, []);
   }
 
-  static ask(
+  static async ask(
     readResources: VitalResource[],
     writeResources: VitalWriteResource[]
-  ): Promise<void> {
-    return VitalHealthReactNative.ask(readResources, writeResources);
+  ): Promise<PermissionOutcome> {
+    const result = await VitalHealthReactNative.ask(readResources, writeResources);
+
+    if (Platform.OS !== "android") {
+      return "success";
+    } else {
+      return result as PermissionOutcome;
+    }
   }
 
   static writeHealthData(
@@ -324,3 +330,5 @@ export enum VitalWriteResource {
   Caffeine = 'caffeine', // iOS only
   MindfulSession = 'mindfulSession', // iOS only, value is ignored
 }
+
+export type PermissionOutcome = 'success' | 'cancelled' | 'unknownError' | 'notPrompted' | 'healthDataUnavailable';
