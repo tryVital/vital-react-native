@@ -298,6 +298,10 @@ export class VitalHealth {
     return VitalHealthReactNative.syncData(resources);
   }
 
+  static openPlatformHealthApp(): Promise<void> {
+    return VitalHealthReactNative.openPlatformHealthApp();
+  }
+
   /**
    * @deprecated Use `VitalCore.signOut()`, which now resets both the Vital Core
    * and Health SDKs.

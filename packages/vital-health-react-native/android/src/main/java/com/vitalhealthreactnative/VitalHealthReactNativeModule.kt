@@ -397,6 +397,22 @@ class VitalHealthReactNativeModule(reactContext: ReactApplicationContext) :
   }
 
   @ReactMethod
+  fun openPlatformHealthApp(promise: Promise) = runOnMain {
+    val activity = currentActivity ?: return@runOnMain promise.reject(
+      VITAL_HEALTH_ERROR,
+      "No active Android Activity"
+    )
+
+    VitalHealthConnectManager
+      .openHealthConnectIntent(reactApplicationContext)
+      ?.let {
+        activity.startActivity(it)
+      }
+
+    promise.resolve(null)
+  }
+
+  @ReactMethod
   fun addListener(eventName: String?) {
     // Keep: Required for RN built in Event Emitter Calls.
   }

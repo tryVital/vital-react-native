@@ -149,6 +149,12 @@ export const UserScreen = ({route, navigation}) => {
             Ask for permission
             </Button>
 
+            <Box h={2} />
+
+            <Button onPress={() => VitalHealth.openPlatformHealthApp()}>
+            Open Platform Health App
+            </Button>
+
             <HStack alignItems={'center'} style={{marginTop: 8}}>
                 <Text style={{flexGrow: 1}}>Force Sync</Text>
                 <Button onPress={() => VitalHealth.syncData()}>Sync</Button>

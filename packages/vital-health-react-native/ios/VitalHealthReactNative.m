@@ -50,6 +50,9 @@ RCT_EXTERN_METHOD(setPauseSynchronization:(BOOL)resource
                   resolver:(RCTPromiseResolveBlock)resolve
                   rejecter:(RCTPromiseRejectBlock)reject)
 
+RCT_EXTERN_METHOD(openPlatformHealthApp:(RCTPromiseResolveBlock)resolve
+                  rejecter:(RCTPromiseRejectBlock)reject)
+
 RCT_EXTERN_METHOD(status)
 
 + (BOOL)requiresMainQueueSetup
