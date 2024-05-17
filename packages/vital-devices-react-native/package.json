@@ -1,6 +1,6 @@
 {
   "name": "@tryvital/vital-devices-react-native",
-  "version": "3.2.2",
+  "version": "3.2.3",
   "description": "Client to access Vital's Endpoints",
   "main": "lib/commonjs/index.js",
   "module": "lib/module/index.js",
