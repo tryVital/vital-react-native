@@ -135,11 +135,4 @@ export class VitalCore {
   static signOut(): Promise<void> {
     return VitalCoreReactNative.signOut();
   }
-
-  /**
-   * @deprecated Renamed to `signOut()`.
-   */
-  static cleanUp(): Promise<void> {
-    return this.signOut();
-  }
 }

@@ -1,6 +1,5 @@
 import { NativeEventEmitter, NativeModules, Platform } from 'react-native';
 import type { HealthConfig } from './health_config';
-import { VitalCore } from '@tryvital/vital-core-react-native';
 
 // Reexports
 export * from './health_config';
@@ -112,24 +111,6 @@ export class VitalHealth {
         healthConfig.logsEnabled
       );
     }
-  }
-
-  static setUserId(userId: string): Promise<void> {
-    return VitalHealthReactNative.setUserId(userId);
-  }
-
-  static configureClient(
-    apiKey: string,
-    environment: string,
-    region: string,
-    enableLogs: boolean
-  ): Promise<void> {
-    return VitalHealthReactNative.configureClient(
-      apiKey,
-      environment,
-      region,
-      enableLogs
-    );
   }
 
   /**
@@ -300,14 +281,6 @@ export class VitalHealth {
 
   static openPlatformHealthApp(): Promise<void> {
     return VitalHealthReactNative.openPlatformHealthApp();
-  }
-
-  /**
-   * @deprecated Use `VitalCore.signOut()`, which now resets both the Vital Core
-   * and Health SDKs.
-   */
-  static cleanUp(): Promise<void> {
-    return VitalCore.signOut();
   }
 }
 
