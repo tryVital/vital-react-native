@@ -232,10 +232,9 @@ private func mapStringToKind(_ kindId: String) throws -> DeviceModel.Kind  {
     }
 }
 
-extension QuantitySample {
+extension LocalQuantitySample {
     func toDictionary() -> [String: Any?] {
         [
-            "id": id,
             "value": value,
             "unit": unit,
             // JS interop expects epoch millisecond

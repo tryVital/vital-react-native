@@ -27,17 +27,7 @@ RCT_EXTERN_METHOD(hasUserConnectedTo:(NSString *)provider
                   resolver:(RCTPromiseResolveBlock)resolve
                   rejecter:(RCTPromiseRejectBlock)reject)
 
-RCT_EXTERN_METHOD(userConnectedSources:(RCTPromiseResolveBlock)resolve
-                  rejecter:(RCTPromiseRejectBlock)reject)
-
-RCT_EXTERN_METHOD(createConnectedSourceIfNotExist:(NSString *)provider
-                  resolver:(RCTPromiseResolveBlock)resolve
-                  rejecter:(RCTPromiseRejectBlock)reject)
-
-RCT_EXTERN_METHOD(postTimeSeriesData:(NSString *)jsonString
-                  provider:(NSString *)provider
-                  timeZone:(NSString *)timeZone
-                  resolver:(RCTPromiseResolveBlock)resolve
+RCT_EXTERN_METHOD(userConnections:(RCTPromiseResolveBlock)resolve
                   rejecter:(RCTPromiseRejectBlock)reject)
 
 RCT_EXTERN_METHOD(deregisterProvider:(NSString *)provider

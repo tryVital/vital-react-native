@@ -40,8 +40,8 @@ struct RNQuantitySample: Decodable {
   let type: String?
   let unit: String
 
-  var vitalCoreSample: QuantitySample {
-    QuantitySample(
+  var vitalCoreSample: LocalQuantitySample {
+    LocalQuantitySample(
       id: id,
       value: value,
       startDate: startDate,
@@ -60,8 +60,8 @@ struct RNBloodPressureSample: Decodable {
   let diastolic: RNQuantitySample
   let pulse: RNQuantitySample?
 
-  var vitalCoreSample: BloodPressureSample {
-    BloodPressureSample(
+  var vitalCoreSample: LocalBloodPressureSample {
+    LocalBloodPressureSample(
       systolic: systolic.vitalCoreSample,
       diastolic: diastolic.vitalCoreSample,
       pulse: pulse?.vitalCoreSample

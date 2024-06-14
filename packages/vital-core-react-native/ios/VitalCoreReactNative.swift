@@ -109,95 +109,45 @@ class VitalCoreReactNative: RCTEventEmitter {
     }
   }
 
-  @objc(userConnectedSources:rejecter:)
-  func userConnectedSources(
+  @objc(userConnections:rejecter:)
+  func userConnections(
     resolve: @escaping RCTPromiseResolveBlock,
     reject: @escaping RCTPromiseRejectBlock
   ) {
     Task {
       do {
-        let sources = try await VitalClient.shared.user.userConnectedSources()
-        let jsonObjects = sources.map { source -> [String: String?] in
-          ["name": source.name, "slug": source.slug.rawValue, "logo": source.logo]
+        let connections = try await VitalClient.shared.user.userConnections()
+        let jsonObjects = connections.map { source -> [String: Any] in
+          [
+            "name": source.name,
+            "slug": source.slug.rawValue,
+            "logo": source.logo,
+            "status": source.status.rawValue,
+            "resourceAvailability": Dictionary(
+              uniqueKeysWithValues: source.resourceAvailability.map { key, value in
+                (
+                  key.rawValue,
+                  [
+                    "status": value.status.rawValue,
+                    "scopeRequirements": value.scopeRequirements.map { req in
+                      [
+                        "userGranted": [
+                          "required": req.userGranted.required,
+                          "optional": req.userGranted.optional,
+                        ],
+                        "userDenied": [
+                          "required": req.userDenied.required,
+                          "optional": req.userDenied.optional,
+                        ],
+                      ]
+                    } as Any
+                  ]
+                )
+              }
+            )
+          ]
         }
         resolve(jsonObjects)
-      } catch let error {
-        reject(errorKey, "\(error)", error)
-      }
-    }
-  }
-
-  @objc(createConnectedSourceIfNotExist:resolver:rejecter:)
-  func createConnectedSourceIfNotExist(
-    for provider: String,
-    resolve: @escaping RCTPromiseResolveBlock,
-    reject: @escaping RCTPromiseRejectBlock
-  ) {
-    guard let slug = Provider.Slug(rawValue: provider) else {
-      reject(errorKey, "Unrecognized provider slug: \(provider)", nil)
-      return
-    }
-
-    Task {
-      do {
-        try await VitalClient.shared.checkConnectedSource(for: slug)
-        resolve(())
-      } catch let error {
-        reject(errorKey, "\(error)", error)
-      }
-    }
-  }
-
-  @objc(postTimeSeriesData:provider:timeZone:resolver:rejecter:)
-  func postTimeSeriesData(
-    _ jsonString: String,
-    provider: String,
-    timeZoneString: String?,
-    resolve: @escaping RCTPromiseResolveBlock,
-    reject: @escaping RCTPromiseRejectBlock
-  ) {
-    let timeZone: TimeZone
-
-    if let name = timeZoneString {
-      guard let namedTimeZone = TimeZone(identifier: name) else {
-        reject(errorKey, "Unrecognized named time zone: \(name)", nil)
-        return
-      }
-
-      timeZone = namedTimeZone
-    } else {
-      timeZone = .current
-    }
-
-    guard let jsonData = jsonString.data(using: .utf8) else {
-      reject(errorKey, "Failed to coerce the provided JSON String as UTF-8 data", nil)
-      return
-    }
-
-    guard let slug = Provider.Slug(rawValue: provider) else {
-      reject(errorKey, "Unrecognized provider slug: \(provider)", nil)
-      return
-    }
-
-    let decoded: RNTimeSeriesData
-
-    do {
-      let decoder = jsonDecoder()
-      decoded = try decoder.decode(RNTimeSeriesData.self, from: jsonData)
-    } catch let error {
-      reject(errorKey, "Failed to decode the provided JSON String: \(error)", error)
-      return
-    }
-
-    Task {
-      do {
-        try await VitalClient.shared.timeSeries.post(
-          decoded.data,
-          stage: .daily,
-          provider: slug,
-          timeZone: timeZone
-        )
-        resolve(())
       } catch let error {
         reject(errorKey, "\(error)", error)
       }
