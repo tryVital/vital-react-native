@@ -1133,23 +1133,23 @@ PODS:
     - RCT-Folly (= 2022.05.16.00)
     - React-Core
   - SocketRocket (0.6.1)
-  - vital-core-react-native (3.2.4):
+  - vital-core-react-native (4.0.0-beta.1):
     - React-Core
-    - VitalCore (~> 1.0.0-rc.1)
-  - vital-devices-react-native (3.2.4):
+    - VitalCore (~> 1.0.0-rc.2)
+  - vital-devices-react-native (4.0.0-beta.1):
     - React-Core
-    - VitalDevices (~> 1.0.0-rc.1)
-  - vital-health-react-native (3.2.4):
+    - VitalDevices (~> 1.0.0-rc.2)
+  - vital-health-react-native (4.0.0-beta.1):
     - React-Core
-    - VitalHealthKit (~> 1.0.0-rc.1)
-  - VitalCore (1.0.0-rc.1):
-    - VitalLogging (~> 1.0.0-rc.1)
-  - VitalDevices (1.0.0-rc.1):
+    - VitalHealthKit (~> 1.0.0-rc.2)
+  - VitalCore (1.0.0-rc.2):
+    - VitalLogging (~> 1.0.0-rc.2)
+  - VitalDevices (1.0.0-rc.2):
     - CombineCoreBluetooth (~> 0.3.1)
-    - VitalCore (~> 1.0.0-rc.1)
-  - VitalHealthKit (1.0.0-rc.1):
-    - VitalCore (~> 1.0.0-rc.1)
-  - VitalLogging (1.0.0-rc.1)
+    - VitalCore (~> 1.0.0-rc.2)
+  - VitalHealthKit (1.0.0-rc.2):
+    - VitalCore (~> 1.0.0-rc.2)
+  - VitalLogging (1.0.0-rc.2)
   - Yoga (1.14.0)
 
 DEPENDENCIES:
@@ -1396,7 +1396,7 @@ SPEC CHECKSUMS:
   Flipper-PeerTalk: 116d8f857dc6ef55c7a5a75ea3ceaafe878aadc9
   FlipperKit: 37525a5d056ef9b93d1578e04bc3ea1de940094f
   fmt: ff9d55029c625d3757ed641535fd4a75fedc7ce9
-  glog: 035f1e36e53b355cf70f6434d161b36e7d21fecd
+  glog: c5d68082e772fa1c511173d6b30a9de2c05a69a2
   hermes-engine: 34df9d5034e90bd9bf1505e1ca198760373935af
   libevent: 4049cae6c81cdb3654a443be001fb9bdceff7913
   OpenSSL-Universal: ebc357f1e6bc71fa463ccb2fe676756aff50e88c
@@ -1450,13 +1450,13 @@ SPEC CHECKSUMS:
   RNSVG: ba3e7232f45e34b7b47e74472386cf4e1a676d0a
   RNVectorIcons: 210f910e834e3485af40693ad4615c1ec22fc02b
   SocketRocket: f32cd54efbe0f095c4d7594881e52619cfe80b17
-  vital-core-react-native: 160660fef457fb688702d607b423db96efdb2f8e
-  vital-devices-react-native: 3bdba24d3e4d6ea5c3d1cb8600d77620575acda0
-  vital-health-react-native: a936c2aff4436af53f788e1ef88c0c35f2e51685
-  VitalCore: 60d8eae907f5592de227748c31226edb8a43eca1
-  VitalDevices: fc8eee603fea64987e58a06410f472b3bb3c9fdc
-  VitalHealthKit: 4d2ec12411003647b217500565c06a008ee8f0c8
-  VitalLogging: 4898276deea341cff51fefc7b2671fd2d1e98e08
+  vital-core-react-native: 80c155620e2b23b5eb08fb16dc56f3850f439006
+  vital-devices-react-native: 1eea018f4538b63944727dfb7f82ffb7e4bc7b7c
+  vital-health-react-native: b3df527fb491876e4631be70be14e71f13f2abf5
+  VitalCore: cc0347e55f5a2510c51d31b12e3e83035cc42c05
+  VitalDevices: ce5edcd4dd5e9e5a655616033ad61e078517b1ae
+  VitalHealthKit: 9843921908239233e1d3cd9def95c05e0241218e
+  VitalLogging: 535fc1579ba752598f9c1b213077f2e972dac231
   Yoga: 2b33a7ac96c58cdaa7b810948fc6a2a76ed2d108
 
 PODFILE CHECKSUM: 2a537c5b3fef93a43656a06053f42e15c4747741
