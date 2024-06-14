@@ -32,7 +32,6 @@ const val VITAL_CORE_ERROR = "VitalCoreError"
 
 internal val moshi by lazy {
   Moshi.Builder()
-    .add(ReactNativeTimeSeriesData.adapterFactory())
     .add(Date::class.java, Rfc3339DateJsonAdapter())
     .build()
 }
@@ -151,10 +150,10 @@ class VitalCoreReactNativeModule(reactContext: ReactApplicationContext) :
   }
 
   @ReactMethod
-  fun userConnectedSources(promise: Promise) {
+  fun userConnections(promise: Promise) {
     mainScope.launch {
       try {
-        val sources = client.userConnectedSources()
+        val sources = client.userConnections()
         promise.resolve(
           WritableNativeArray().apply {
             for (source in sources) {
@@ -163,6 +162,38 @@ class VitalCoreReactNativeModule(reactContext: ReactApplicationContext) :
                   putString("name", source.name)
                   putString("slug", source.slug.toString())
                   putString("logo", source.logo)
+                  putString("status", source.status.toString())
+                  putMap("resourceAvailability", WritableNativeMap().apply {
+                    for ((resource, value) in source.resourceAvailability) {
+                      putMap(resource.toString(), WritableNativeMap().apply {
+                        putString("status", value.status.toString())
+
+                        val req = value.scopeRequirements
+                        if (req != null) {
+                          putMap("scopeRequirements", WritableNativeMap().apply {
+                            putMap("userGranted", WritableNativeMap().apply {
+                              putArray("required", WritableNativeArray().apply {
+                                req.userGranted.required.forEach(this::pushString)
+                              })
+                              putArray("optional", WritableNativeArray().apply {
+                                req.userGranted.optional.forEach(this::pushString)
+                              })
+                            })
+                            putMap("userDenied", WritableNativeMap().apply {
+                              putArray("required", WritableNativeArray().apply {
+                                req.userDenied.required.forEach(this::pushString)
+                              })
+                              putArray("optional", WritableNativeArray().apply {
+                                req.userDenied.optional.forEach(this::pushString)
+                              })
+                            })
+                          })
+                        } else {
+                          putNull("scopeRequirements")
+                        }
+                      })
+                    }
+                  })
                 }
                 .let(this::pushMap)
             }
@@ -191,86 +222,6 @@ class VitalCoreReactNativeModule(reactContext: ReactApplicationContext) :
         promise.resolve(null)
       } catch (e: Throwable) {
         promise.reject(VITAL_CORE_ERROR, "Failed to deregister provider: ${e.message}", e)
-      }
-    }
-  }
-
-  @ReactMethod
-  fun createConnectedSourceIfNotExist(provider: String, promise: Promise) {
-    val slug = try { ManualProviderSlug.fromJsonName(provider) } catch (e: IllegalArgumentException) {
-      return promise.reject(VITAL_CORE_ERROR, "Unrecognized manual provider: $provider")
-    }
-
-    mainScope.launch {
-      try {
-        client.createConnectedSourceIfNotExist(slug)
-        promise.resolve(null)
-      } catch (e: Throwable) {
-        promise.reject(VITAL_CORE_ERROR, "Failed to create connected source for $provider: ${e.message}", e)
-      }
-    }
-  }
-
-  @ReactMethod
-  @OptIn(ExperimentalStdlibApi::class)
-  fun postTimeSeriesData(jsonString: String, provider: String, timeZoneString: String?, promise: Promise) {
-    val userId = VitalClient.currentUserId ?: return promise.rejectUserIDNotSet()
-
-    val slug = try { ManualProviderSlug.fromJsonName(provider) } catch (e: IllegalArgumentException) {
-      return promise.reject(VITAL_CORE_ERROR, "Unrecognized manual provider: $provider")
-    }
-
-    val timeZone = if (timeZoneString != null) {
-      try {
-        ZoneId.of(timeZoneString)
-      } catch (e: Exception) {
-        promise.reject(VITAL_CORE_ERROR, "Unrecognized named time zone: $timeZoneString", e)
-        return
-      }
-    } else {
-      ZoneId.systemDefault()
-    }
-
-    val adapter = moshi.adapter<ReactNativeTimeSeriesData>()
-
-    val data = adapter.fromJson(jsonString)
-    if (data == null) {
-      promise.reject(VITAL_CORE_ERROR, "Failed to decode the provided JSON String.", null)
-      return
-    }
-
-    fun <T> makeTimeseriesPayload(data: T) = TimeseriesPayload(
-      stage = DataStage.Daily,
-      provider = slug,
-      startDate = null,
-      endDate = null,
-      timeZoneId = timeZone.id,
-      data = data,
-    )
-
-    mainScope.launch {
-      try {
-        when (data) {
-          is ReactNativeTimeSeriesData.Glucose ->
-            client.vitalsService.sendQuantitySamples(
-              userId = userId,
-              resource = IngestibleTimeseriesResource.BloodGlucose,
-              timeseriesPayload = makeTimeseriesPayload(
-                data.samples.map { it.payload }
-              )
-            )
-          is ReactNativeTimeSeriesData.BloodPressure ->
-            client.vitalsService.sendBloodPressure(
-              userId = userId,
-              timeseriesPayload = makeTimeseriesPayload(
-                data.samples.map { it.payload }
-              )
-            )
-        }
-
-        promise.resolve(null)
-      } catch (e: Throwable) {
-        promise.reject(VITAL_CORE_ERROR, "${(e::class.simpleName ?: "")}: ${e.message}", e)
       }
     }
   }

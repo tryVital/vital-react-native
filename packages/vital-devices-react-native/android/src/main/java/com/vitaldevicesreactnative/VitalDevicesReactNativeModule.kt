@@ -204,8 +204,8 @@ class VitalDevicesReactNativeModule(reactContext: ReactApplicationContext) :
     putString("id", it.id)
     putDouble("value", it.value.toDouble())
     putString("unit", it.unit)
-    putDouble("startDate", it.startDate.time.toDouble())
-    putDouble("endDate", it.endDate.time.toDouble())
+    putDouble("startDate", it.startDate.toEpochMilli().toDouble())
+    putDouble("endDate", it.endDate.toEpochMilli().toDouble())
     putString("type", it.type)
   }
 
