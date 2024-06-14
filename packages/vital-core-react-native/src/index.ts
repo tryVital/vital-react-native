@@ -1,6 +1,5 @@
 import { NativeEventEmitter, NativeModules, Platform } from 'react-native';
-import type { TimeSeriesData } from './models/TimeSeriesData';
-import type { ManualProviderSlug, Provider, ProviderSlug } from './models/Provider';
+import type { ManualProviderSlug, Provider, ProviderSlug, UserConnection } from './models/Provider';
 import type { VitalCoreStatus } from './models/VitalCoreStatus';
 
 export { VitalCoreStatus } from './models/VitalCoreStatus';
@@ -89,26 +88,15 @@ export class VitalCore {
     return VitalCoreReactNative.hasUserConnectedTo(provider);
   }
 
+  /**
+   * @deprecated Use `userConnections()` instead.
+   */
   static userConnectedSources(): Promise<Provider[]> {
-    return VitalCoreReactNative.userConnectedSources();
+    return this.userConnections();
   }
 
-  static createConnectedSourceIfNotExist(
-    provider: ManualProviderSlug
-  ): Promise<void> {
-    return VitalCoreReactNative.createConnectedSourceIfNotExist(provider);
-  }
-
-  static postTimeSeriesData(
-    data: TimeSeriesData,
-    provider: ManualProviderSlug,
-    timeZone: string | undefined = undefined
-  ): Promise<void> {
-    return VitalCoreReactNative.postTimeSeriesData(
-      JSON.stringify(data),
-      provider,
-      timeZone
-    );
+  static userConnections(): Promise<UserConnection[]> {
+    return VitalCoreReactNative.userConnections();
   }
 
   static deregisterProvider(provider: ProviderSlug): Promise<void> {

@@ -43,3 +43,28 @@ export interface Provider {
     slug: ProviderSlug | ManualProviderSlug | string
     logo?: string
 }
+
+export type UserConnectionStatus = "connected" | "paused" | "error";
+
+export interface UserConnection extends Provider {
+    name: string
+    slug: ProviderSlug | ManualProviderSlug | string
+    logo?: string
+    status: UserConnectionStatus;
+    resourceAvailability?: Record<string, ResourceAvailability>;
+}
+
+export interface ResourceAvailability {
+    status: "available" | "unavailable";
+    scopeRequirements?: ScopeRequirements;
+}
+
+export interface ScopeRequirementsGrants {
+    userGranted: ScopeRequirements;
+    userDenied: ScopeRequirements;
+}
+
+export interface ScopeRequirements {
+    required: string[];
+    optional: string[];
+}

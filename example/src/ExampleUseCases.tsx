@@ -6,9 +6,8 @@ import { PERMISSIONS, requestMultiple } from "react-native-permissions";
 
 // VitalCore example use case: Inspect user connected sources
 export async function inspectUserConnectedSources() {
-    await VitalCore.createConnectedSourceIfNotExist(ManualProviderSlug.LibreBLE)
 
-    var sources = await VitalCore.userConnectedSources()
+    var sources = await VitalCore.userConnections()
     console.log("sources =", sources)
 
     console.log(
@@ -73,12 +72,6 @@ async function readScannedGlucoseMeter(
     console.log("@@@ Read " + samples.length + " samples from device: " + device.name + " (id = " + device.id + ")")
     console.log(samples)
 
-    await VitalCore.createConnectedSourceIfNotExist(ManualProviderSlug.AccuchekBLE)
-    await VitalCore.postTimeSeriesData(
-        { "type": "glucose", "samples": samples },
-        ManualProviderSlug.AccuchekBLE
-    )
-
     return samples
 }
 
@@ -93,12 +86,6 @@ export async function readLibre1(
 
     let result = await deviceManager.readLibre1("reading", "errored", "completed")
     console.log(`@@@ Did read Libre1: ${JSON.stringify(result, null, 2)}`)
-
-    await VitalCore.createConnectedSourceIfNotExist(ManualProviderSlug.LibreBLE)
-    await VitalCore.postTimeSeriesData(
-        { "type": "glucose", "samples": result.samples },
-        ManualProviderSlug.LibreBLE
-    )
 
     console.log("@@@ Did post Libre1 timeseries data")
 }
@@ -148,12 +135,6 @@ async function readScannedBloodPressureMeter(
 
     console.log("@@@ Read " + samples.length + " samples from device: " + device.name + " (id = " + device.id + ")")
     console.log(samples)
-
-    await VitalCore.createConnectedSourceIfNotExist(ManualProviderSlug.OmronBLE)
-    await VitalCore.postTimeSeriesData(
-        { "type": "blood_pressure", "samples": samples },
-        ManualProviderSlug.OmronBLE
-    )
 
     return samples
 }
