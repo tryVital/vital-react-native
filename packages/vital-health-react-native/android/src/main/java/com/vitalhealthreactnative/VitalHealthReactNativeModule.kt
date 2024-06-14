@@ -45,9 +45,6 @@ class VitalHealthReactNativeModule(reactContext: ReactApplicationContext) :
 
   private val logger = VitalLogger.getOrCreate()
 
-  private val vitalCore: VitalCoreReactNativeModule by lazy {
-    reactContext.getNativeModule(VitalCoreReactNativeModule::class.java)!!
-  }
   private val vitalHealthConnectManager: VitalHealthConnectManager
     get() = VitalHealthConnectManager.getOrCreate(reactApplicationContext)
 
@@ -96,24 +93,6 @@ class VitalHealthReactNativeModule(reactContext: ReactApplicationContext) :
     )
 
     promise.resolve(null)
-  }
-
-  @ReactMethod
-  fun setUserId(userId: String, promise: Promise)  {
-    // [Backward Compatibility] Delegate to VitalCore.
-    vitalCore.setUserId(userId, promise)
-  }
-
-  @ReactMethod
-  fun configureClient(
-    apiKey: String,
-    environment: String,
-    region: String,
-    enableLogs: Boolean,
-    promise: Promise
-  ) {
-    // [Backward Compatibility] Delegate to VitalCore.
-    vitalCore.configure(apiKey, environment, region, enableLogs, promise)
   }
 
   @ReactMethod
