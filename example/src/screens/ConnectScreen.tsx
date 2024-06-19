@@ -14,7 +14,7 @@ export const ConnectSource = ({navigation, route}) => {
   };
 
   const getUrlParams = () => {
-    return `?token=${linkToken}=&env=${environment}&isMobile=true&region=${region}`;
+    return `?token=${encodeURIComponent(linkToken)}&env=${environment}&isMobile=true&region=${region}`;
   };
   return (
     <SafeAreaView style={{flex: 1}}>
