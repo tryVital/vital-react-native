@@ -3,7 +3,7 @@ package com.vitaldevicesreactnative
 import android.util.Log
 import com.facebook.react.bridge.*
 import com.facebook.react.modules.core.DeviceEventManagerModule
-import io.tryvital.client.services.data.QuantitySamplePayload
+import io.tryvital.client.services.data.LocalQuantitySample
 import io.tryvital.vitaldevices.*
 import io.tryvital.vitaldevices.devices.Libre1Reader
 import kotlinx.coroutines.*
@@ -200,22 +200,27 @@ class VitalDevicesReactNativeModule(reactContext: ReactApplicationContext) :
     }
   }
 
-  private fun WritableNativeMap.mapSample(it: QuantitySamplePayload) {
-    putString("id", it.id)
-    putDouble("value", it.value.toDouble())
+  private fun WritableNativeMap.mapSample(it: LocalQuantitySample) {
+    if (it.id != null) {
+      putString("id", it.id)
+    }
+    putDouble("value", it.value)
     putString("unit", it.unit)
     putDouble("startDate", it.startDate.toEpochMilli().toDouble())
     putDouble("endDate", it.endDate.toEpochMilli().toDouble())
-    putString("type", it.type)
+
+    if (it.type != null) {
+      putString("type", it.type!!.rawValue)
+    }
   }
 
   @ReactMethod
-  fun addListener(eventName: String?) {
+  fun addListener(@Suppress("UNUSED_PARAMETER") eventName: String?) {
     // Keep: Required for RN built in Event Emitter Calls.
   }
 
   @ReactMethod
-  fun removeListeners(count: Int) {
+  fun removeListeners(@Suppress("UNUSED_PARAMETER") count: Int) {
     // Keep: Required for RN built in Event Emitter Calls.
   }
 
