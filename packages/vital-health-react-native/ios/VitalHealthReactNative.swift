@@ -281,6 +281,8 @@ private func mapResourceToReadableVitalResource(_ name: String) throws -> VitalR
       return .nutrition(.water)
     case "caffeine":
       return .nutrition(.caffeine)
+    case "menstrualCycle":
+      return .menstrualCycle
     default:
       throw VitalError.UnsupportedResource(name)
   }
