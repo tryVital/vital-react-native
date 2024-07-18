@@ -300,6 +300,7 @@ export enum VitalResource {
   Water = 'water',
   Caffeine = 'caffeine',
   MindfulSession = 'mindfulSession',
+  MenstrualCycle = 'menstrualCycle',
 }
 
 export enum VitalWriteResource {
