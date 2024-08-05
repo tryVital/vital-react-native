@@ -240,8 +240,7 @@ extension LocalQuantitySample {
             // JS interop expects epoch millisecond
             "startDate": startDate.timeIntervalSince1970 * 1000,
             "endDate": endDate.timeIntervalSince1970 * 1000,
-            "type": type,
-            "metadata": metadata?.dictionary
+            "type": type
         ]
     }
 }
