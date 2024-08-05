@@ -1,6 +1,6 @@
 {
   "name": "@tryvital/vital-health-react-native",
-  "version": "4.1.0",
+  "version": "4.2.0",
   "description": "Client to access iOS's HealthKit and Android HealthConnect",
   "main": "lib/commonjs/index.js",
   "module": "lib/module/index.js",
