@@ -257,6 +257,8 @@ private func mapResourceToReadableVitalResource(_ name: String) throws -> VitalR
       return .vitals(.bloodPressure)
     case "heartRate":
       return .vitals(.heartRate)
+    case "heartRateVariability":
+      return .vitals(.heartRateVariability)
     case "mindfulSession":
       return .vitals(.mindfulSession)
     case "steps":
@@ -281,6 +283,12 @@ private func mapResourceToReadableVitalResource(_ name: String) throws -> VitalR
       return .nutrition(.water)
     case "caffeine":
       return .nutrition(.caffeine)
+    case "temperature":
+      return .vitals(.temperature)
+    case "respiratoryRate":
+      return .vitals(.respiratoryRate)
+    case "bloodOxygen":
+      return .vitals(.bloodOxygen)
     case "menstrualCycle":
       return .menstrualCycle
     default:
