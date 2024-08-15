@@ -1,6 +1,16 @@
-### Vital React Native Library
+# vital-react-native
 
-The Vital React Native Library, allows developers to easily connect to Vital's API using React Native. Our React Native library mirrors the functionality of our iOS and Android SDKs. It is a wrapper around the native SDKs, and it exposes the same methods and events. It is split into three parts: Core, Health and BLE Devices. They can be used interchangeably, but you need to install them separately. An example app project can be found under the `example` directory at the project root.
+The official React Native Library for Vital API, HealthKit and Devices.
+
+## Documentation
+
+* [Installation](https://docs.tryvital.io/wearables/sdks/installation)
+* [Authentication](https://docs.tryvital.io/wearables/sdks/authentication)
+* [Core SDK](https://docs.tryvital.io/wearables/sdks/vital-core)
+* [Health SDK](https://docs.tryvital.io/wearables/sdks/vital-health)
+* [Devices SDK](https://docs.tryvital.io/wearables/sdks/vital-devices)
+
+## Installation
 
 The documentation can be found [here](https://docs.tryvital.io/wearables/sdks/react_native).
 
