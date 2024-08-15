@@ -27,7 +27,7 @@
   ],
   "scripts": {
     "build": "bob build",
-    "clean": "del lib",
+    "clean": "del lib && del android/build && del android/.gradle",
     "prepack": "yarn run clean && yarn run build",
     "np": "np --no-publish",
     "test": "jest",
