@@ -28,7 +28,7 @@
   "scripts": {
     "build": "bob build && yarn run postbuild-copy-declarations",
     "postbuild-copy-declarations": "copyfiles -u 1 src/**/*.d.ts lib/typescript",
-    "clean": "del lib",
+    "clean": "del lib && del android/build && del android/.gradle",
     "prepack": "yarn run clean && yarn run build",
     "np": "np --no-publish",
     "test": "jest",

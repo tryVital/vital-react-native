@@ -24,6 +24,7 @@ export enum ProviderSlug {
     Garmin = "garmin",
     Fitbit = "fitbit",
     Libre = "freestyle_libre",
+    AbbottLibreView = "abbott_libreview",
     Whoop = "whoop",
     Strava = "strava",
     Renpho = "renpho",
@@ -35,6 +36,12 @@ export enum ProviderSlug {
     GoogleFit = "google_fit",
     Hammerhead = "hammerhead",
     Dexcom = "dexcom",
+    DexcomV3 = "dexcom_v3",
+    Polar = "polar",
+    Cronometer = "cronometer",
+    Kardia = "kardia",
+    Omron = "omron",
+    WhoopV2 = "whoop_v2",
     MyFitnessPal = "my_fitness_pal",
 }
 
