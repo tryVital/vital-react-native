@@ -131,7 +131,7 @@ repositories {
 }
 
 def kotlin_version = getExtOrDefault('kotlinVersion')
-def vital_sdk_version = '3.1.0'
+def vital_sdk_version = '3.2.1'
 
 dependencies {
   ksp "com.squareup.moshi:moshi-kotlin-codegen:1.13.0"
@@ -143,7 +143,7 @@ dependencies {
   api "com.squareup.moshi:moshi:1.13.0"
   api "com.squareup.moshi:moshi-adapters:1.13.0"
 
-  implementation "com.github.tryVital.vital-android:VitalClient:$vital_sdk_version"
+  implementation "io.tryvital:vital-client:$vital_sdk_version"
 
   testImplementation "junit:junit:4.13.2"
 
