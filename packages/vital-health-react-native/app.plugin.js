@@ -51,5 +51,5 @@ const withHealthConnect = function androidManifestPlugin(config) {
   });
 };
 
-module.exports = ({ config }) =>
+module.exports = (config) =>
   withPlugins(config, [[withHealthKit], [withHealthConnect]]);
