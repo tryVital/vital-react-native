@@ -308,6 +308,7 @@ export enum VitalResource {
   Temperature = 'temperature',
   RespiratoryRate = 'respiratoryRate',
   MenstrualCycle = 'menstrualCycle',
+  Meal = 'meal',
 }
 
 export enum VitalWriteResource {
