@@ -1133,23 +1133,23 @@ PODS:
     - RCT-Folly (= 2022.05.16.00)
     - React-Core
   - SocketRocket (0.6.1)
-  - vital-core-react-native (4.2.0):
+  - vital-core-react-native (4.2.1):
     - React-Core
-    - VitalCore (~> 1.2.2)
-  - vital-devices-react-native (4.2.0):
+    - VitalCore (~> 1.2.7)
+  - vital-devices-react-native (4.2.1):
     - React-Core
-    - VitalDevices (~> 1.2.2)
-  - vital-health-react-native (4.2.0):
+    - VitalDevices (~> 1.2.7)
+  - vital-health-react-native (4.2.1):
     - React-Core
-    - VitalHealthKit (~> 1.2.2)
-  - VitalCore (1.2.2):
-    - VitalLogging (~> 1.2.2)
-  - VitalDevices (1.2.2):
+    - VitalHealthKit (~> 1.2.7)
+  - VitalCore (1.2.7):
+    - VitalLogging (~> 1.2.7)
+  - VitalDevices (1.2.7):
     - CombineCoreBluetooth (~> 0.3.1)
-    - VitalCore (~> 1.2.2)
-  - VitalHealthKit (1.2.2):
-    - VitalCore (~> 1.2.2)
-  - VitalLogging (1.2.2)
+    - VitalCore (~> 1.2.7)
+  - VitalHealthKit (1.2.7):
+    - VitalCore (~> 1.2.7)
+  - VitalLogging (1.2.7)
   - Yoga (1.14.0)
 
 DEPENDENCIES:
@@ -1450,13 +1450,13 @@ SPEC CHECKSUMS:
   RNSVG: ba3e7232f45e34b7b47e74472386cf4e1a676d0a
   RNVectorIcons: 210f910e834e3485af40693ad4615c1ec22fc02b
   SocketRocket: f32cd54efbe0f095c4d7594881e52619cfe80b17
-  vital-core-react-native: f6098e3813a52dfcbeb74341cef24cf5e4007faf
-  vital-devices-react-native: 36a6e8ecaed6f711de11f095fb04b00ec36500d5
-  vital-health-react-native: 9844091596f094041726d48fbee65727002f4b0f
-  VitalCore: 662dbccb50c51e0b77e49ebbcb2ab96d63b1da8b
-  VitalDevices: 449ac77dbb75e9dfc04b890695b3cbb339640d44
-  VitalHealthKit: f817841069b9d3de15f7715b8c8a0a6525d32302
-  VitalLogging: 0db8e0436006d439b04463884322269b387fcd95
+  vital-core-react-native: e7ac69e856bb1a7e272f6c3775975eef45c97b4e
+  vital-devices-react-native: f3cb6a087f8d8b18e7f9ecd142f0f30b67da5c65
+  vital-health-react-native: 4e7e4449d7815ab54b9e0a67064638c9c4ab5d86
+  VitalCore: 9d0dd409a8995098f5453564bc07aa16a430052f
+  VitalDevices: ed08fe523eeca3101f54dae8343e857f53992793
+  VitalHealthKit: ae73f4442551b4a2f39959257cb690c6f630ec96
+  VitalLogging: fc8f48f2a61b260822666b774a1fa2844ff30b8c
   Yoga: 2b33a7ac96c58cdaa7b810948fc6a2a76ed2d108
 
 PODFILE CHECKSUM: 2a537c5b3fef93a43656a06053f42e15c4747741
