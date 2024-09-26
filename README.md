@@ -133,6 +133,30 @@ The plugin provides props for extra customization. Every time you change the pro
 }
 ```
 
+Edit your app.json again and add this to ensure you set the correct minimum android version.
+
+```json
+{
+  "expo": {
+    ...
+    "plugins": [
+      [
+        "expo-build-properties",
+        {
+          "android": {
+            "compileSdkVersion": 34,
+            "targetSdkVersion": 34,
+            "minSdkVersion": 26
+          },
+        }
+      ]
+    ]
+   ...
+  }
+}
+```
+
+
 ## Background Processing
 
 Background processing is not currently supported by this plugin.
