@@ -129,7 +129,7 @@ repositories {
 }
 
 def kotlin_version = getExtOrDefault('kotlinVersion')
-def vital_sdk_version = '3.2.3'
+def vital_sdk_version = '3.2.4'
 
 dependencies {
     //noinspection GradleDynamicVersion
