@@ -282,6 +282,14 @@ export class VitalHealth {
   static openPlatformHealthApp(): Promise<void> {
     return VitalHealthReactNative.openPlatformHealthApp();
   }
+
+  static async openSyncProgressView(): Promise<void> {
+    if (Platform.OS != "ios") {
+      return;
+    }
+
+    return await VitalHealthReactNative.openSyncProgressView();
+  }
 }
 
 // noinspection JSUnusedGlobalSymbols

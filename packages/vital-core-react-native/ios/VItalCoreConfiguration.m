@@ -9,4 +9,8 @@
   [VitalClient automaticConfigurationWithCompletion:nil];
 }
 
++ (void)setStdOutEnabled:(BOOL)stdOutEnabled {
+  VitalLoggerObjC.stdOutEnabled = stdOutEnabled;
+}
+
 @end

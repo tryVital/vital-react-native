@@ -8,6 +8,8 @@
 
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions
 {
+  [VitalCoreConfiguration setStdOutEnabled:YES];
+  [VitalHealthKitConfiguration automaticConfiguration];
 
   self.moduleName = @"example";
   // You can add your custom initial props in the dictionary below.

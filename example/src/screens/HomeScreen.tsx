@@ -4,10 +4,11 @@ import React, {useEffect, useState} from 'react';
 import {vitalNodeClient} from '../App';
 import { VITAL_ENVIRONMENT, VITAL_REGION } from '../Environment';
 import {HStack, VStack} from 'native-base';
-import Icon from 'react-native-vector-icons/FontAwesome';
+import Icon from 'react-native-vector-icons/FontAwesome5';
 import Dialog from 'react-native-dialog';
 import styles from '../Styles';
 import { VitalCore } from '@tryvital/vital-core-react-native';
+import { VitalHealth } from '@tryvital/vital-health-react-native';
 
 const DeleteButton = ({onPress}) => (
   <Icon
@@ -75,13 +76,22 @@ const HomeScreen = ({navigation}) => {
 
     navigation.setOptions({
       headerRight: () => (
-        <Icon
-          name="plus"
-          onPress={() => {
-            setIsOpen(true);
-          }}
-          style={styles.iconButton}
-        />
+        <>
+          <Icon
+            name="book"
+            onPress={() => {
+              VitalHealth.openSyncProgressView();
+            }}
+            style={styles.iconButton}
+          />
+          <Icon
+            name="plus"
+            onPress={() => {
+              setIsOpen(true);
+            }}
+            style={styles.iconButton}
+          />
+        </>
       ),
     });
 

@@ -1,6 +1,7 @@
 import VitalCore
 import VitalHealthKit
 import Combine
+import UIKit
 
 @objc(VitalHealthReactNative)
 class VitalHealthReactNative: RCTEventEmitter {
@@ -235,6 +236,22 @@ class VitalHealthReactNative: RCTEventEmitter {
     Task { @MainActor in
       await UIApplication.shared.open(URL(string: "x-apple-health://")!)
       resolve(())
+    }
+  }
+
+  @objc(openSyncProgressView:rejecter:)
+  func openSyncProgressView(_ resolve: @escaping RCTPromiseResolveBlock, reject: RCTPromiseRejectBlock) {
+    DispatchQueue.main.async {
+      defer { resolve(()) }
+      guard
+        let keyWindow = UIApplication.shared.windows.first(where: { $0.isKeyWindow })
+      else { return }
+
+      keyWindow.rootViewController?.present(
+        SyncProgressViewController(),
+        animated: true,
+        completion: nil
+      )
     }
   }
 }
