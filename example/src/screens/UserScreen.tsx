@@ -1,5 +1,5 @@
 import { VitalCore } from "@tryvital/vital-core-react-native";
-import { VitalHealth, VitalResource } from "@tryvital/vital-health-react-native";
+import { HealthConfig, VitalHealth, VitalResource } from "@tryvital/vital-health-react-native";
 import { ClientFacingUser } from "@tryvital/vital-node/client/models/user_models";
 import { Button, VStack, HStack, Box } from "native-base";
 import { useEffect, useState } from "react";
@@ -80,6 +80,11 @@ export const UserScreen = ({route, navigation}) => {
         // [2] The SDK would automatically begin sync on resources with read permission granted.
     };
 
+    const onSignInSuccess = async () => {
+        const config = new HealthConfig();
+        await VitalHealth.configure(config);
+    };
+
     const handleSignInWithJWTDemoMode = async () => {
         // IMPORTANT:
         //
@@ -91,6 +96,7 @@ export const UserScreen = ({route, navigation}) => {
         const response = await vitalNodeClient.User.createSignInToken(user.user_id)
 
         await VitalCore.signIn(response.sign_in_token);
+        await onSignInSuccess();
     };
 
     const handleSignInWithAPIKeyMode = async () => {
@@ -101,6 +107,7 @@ export const UserScreen = ({route, navigation}) => {
             true,
         );
         await VitalCore.setUserId(user.user_id);
+        await onSignInSuccess();
     };
 
     const handleBackgroundSync = () => {
