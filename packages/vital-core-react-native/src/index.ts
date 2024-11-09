@@ -1,5 +1,5 @@
 import { NativeEventEmitter, NativeModules, Platform } from 'react-native';
-import type { ManualProviderSlug, Provider, ProviderSlug, UserConnection } from './models/Provider';
+import type { ManualProviderSlug, ProviderSlug, UserConnection } from './models/Provider';
 import type { VitalCoreStatus } from './models/VitalCoreStatus';
 
 export { VitalCoreStatus } from './models/VitalCoreStatus';
@@ -86,13 +86,6 @@ export class VitalCore {
     provider: ManualProviderSlug
   ): Promise<boolean> {
     return VitalCoreReactNative.hasUserConnectedTo(provider);
-  }
-
-  /**
-   * @deprecated Use `userConnections()` instead.
-   */
-  static userConnectedSources(): Promise<Provider[]> {
-    return this.userConnections();
   }
 
   static userConnections(): Promise<UserConnection[]> {
