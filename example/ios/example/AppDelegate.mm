@@ -8,7 +8,9 @@
 
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions
 {
+#if DEBUG
   [VitalCoreConfiguration setStdOutEnabled:YES];
+#endif
   [VitalHealthKitConfiguration automaticConfiguration];
 
   self.moduleName = @"example";

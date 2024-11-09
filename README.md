@@ -50,12 +50,22 @@ yarn run example:start:android
 
 # Android Gradle setting notes
 
-In your root project Gradle file (`./build.gradle`), ensure that your Kotlin Gradle Plugin version is in sync with the Kotlin version.
+In your root project Gradle file (`./build.gradle`), make sure that:
+
+1. Your Kotlin Gradle Plugin version is in sync with the Kotlin version.
+
+2. You are compiling and targeting with Android SDK 34.
+
+3. You are minimally targeting at least Android SDK 26.
 
 ```diff
  buildscript {
    ext {
      kotlinVersion = "1.8.22"
+     buildToolsVersion = "34.0.0"
+     minSdkVersion = 26
+     compileSdkVersion = 34
+     targetSdkVersion = 34
    }
 
    dependencies {
@@ -65,23 +75,6 @@ In your root project Gradle file (`./build.gradle`), ensure that your Kotlin Gra
  }
 ```
 
-In your app project Gradle file (`./app/build.gradle`), ensure that you have enabled Core Library Desugaring if you target API Level <32.
-
-```diff
- android {
-    compileOptions {
-+     coreLibraryDesugaringEnabled true
-    }
- }
-
- dependencies {
-    // Either: Android Gradle Plugin 7.4.0 or above
-+   coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.0.4")
-
-    // Or: Android Gradle Plugin 7.3.0
-+   coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:1.2.3")
- }
-```
 
 # Expo installation
 
