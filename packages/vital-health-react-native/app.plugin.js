@@ -24,6 +24,13 @@ const withHealthKit = (config, { healthSharePermission } = {}) => {
       config.modResults.UIBackgroundModes = [...declaredModes, 'processing'];
     }
 
+    const vitalBgTask = 'io.tryvital.VitalHealthKit.ProcessingTask';
+    const bgIdentifiers = config.modResults.BGTaskSchedulerPermittedIdentifiers ?? [];
+
+    if (!bgIdentifiers.includes(vitalBgTask)) {
+      config.modResults.BGTaskSchedulerPermittedIdentifiers = [...bgIdentifiers, vitalBgTask];
+    }
+
     return config;
   });
 
