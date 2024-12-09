@@ -8,19 +8,27 @@ const { withPlugins } = require('@expo/config-plugins');
 const HEALTH_SHARE = 'Allow $(PRODUCT_NAME) to check health info';
 
 const withHealthKit = (config, { healthSharePermission } = {}) => {
-  // Add permissions
+
   config = withInfoPlist(config, (config) => {
+
     config.modResults.NSHealthShareUsageDescription =
       healthSharePermission ||
       config.modResults.NSHealthShareUsageDescription ||
       HEALTH_SHARE;
 
+    const declaredModes = config.modResults.UIBackgroundModes ?? [];
+
+    if (!declaredModes.includes('processing')) {
+      config.modResults.UIBackgroundModes = [...declaredModes, 'processing'];
+    }
+
     return config;
   });
 
-  // Add entitlements. These are automatically synced when using EAS build for production apps.
   config = withEntitlementsPlist(config, (config) => {
     config.modResults['com.apple.developer.healthkit'] = true;
+    config.modResults['com.apple.developer.healthkit.background-delivery'] = true;
+
     if (
       !Array.isArray(config.modResults['com.apple.developer.healthkit.access'])
     ) {
