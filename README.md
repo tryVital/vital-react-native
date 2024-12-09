@@ -149,14 +149,12 @@ Edit your app.json again and add this to ensure you set the correct minimum andr
 }
 ```
 
-
-## Background Processing
-
-Background processing is not currently supported by this plugin.
-
 ## Capabilities
 
-This plugin will enable the iOS `com.apple.developer.healthkit` entitlement, but in order to sync this with the bundle identifier' production capabilities you'll need to do one of two things:
+The Expo config plugin for Vital Health SDK would perform all the necessary code mods during EAS prebuild to [enable Apple HealthKit Background Delivery](https://docs.tryvital.io/wearables/guides/apple-healthkit#setting-up-apple-healthkit-background-delivery).
+
+This means your app project will declare HealthKit entitlements and will link the Apple HealthKit framework. So you must be prepared to demonstrate Apple
+HealthKit usage in your app in your next submission to the Apple App Store.
 
 - Automatic: Build the app with [EAS build](https://docs.expo.io/build/introduction/)
 - Manual: Visit [Apple developer portal](https://developer.apple.com/account/resources/identifiers/list) and enable the HealthKit capability for your bundle identifier before building for production. This can also be done via Xcode.
