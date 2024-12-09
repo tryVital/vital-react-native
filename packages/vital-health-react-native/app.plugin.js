@@ -2,8 +2,10 @@ const {
   withEntitlementsPlist,
   withInfoPlist,
   withAndroidManifest,
+  withAppDelegate,
 } = require('@expo/config-plugins');
 const { withPlugins } = require('@expo/config-plugins');
+const { addObjcImports, insertContentsInsideObjcFunctionBlock } = require('@expo/config-plugins/build/ios/codeMod');
 
 const HEALTH_SHARE = 'Allow $(PRODUCT_NAME) to check health info';
 
@@ -35,6 +37,21 @@ const withHealthKit = (config, { healthSharePermission } = {}) => {
       config.modResults['com.apple.developer.healthkit.access'] = [];
     }
 
+    return config;
+  });
+
+  config = withAppDelegate(config, (config) => {
+		let source = config.modResults.contents;
+
+    source = addObjcImports(source, ['"VitalHealthKitConfiguration.h"']);
+    source = insertContentsInsideObjcFunctionBlock(
+      source,
+      'application didFinishLaunchingWithOptions:',
+      '[VitalHealthKitConfiguration automaticConfiguration];',
+      { position: "head" },
+    );
+
+    config.modResults.contents = source;
     return config;
   });
 
