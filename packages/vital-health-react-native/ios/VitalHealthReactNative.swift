@@ -310,6 +310,12 @@ private func mapResourceToReadableVitalResource(_ name: String) throws -> VitalR
       return .menstrualCycle
     case "meal":
       return .meal
+    case "afibBurden":
+      return .afibBurden
+    case "heartRateAlert":
+      return .heartRateAlert
+    case "electrocardiogram":
+      return .electrocardiogram
     default:
       throw VitalError.UnsupportedResource(name)
   }

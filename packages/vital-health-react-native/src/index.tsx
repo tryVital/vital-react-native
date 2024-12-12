@@ -317,6 +317,9 @@ export enum VitalResource {
   RespiratoryRate = 'respiratoryRate',
   MenstrualCycle = 'menstrualCycle',
   Meal = 'meal',
+  AFibBurden = 'afibBurden', // iOS only
+  HeartRateAlert = 'heartRateAlert', // iOS only
+  Electrocardiogram = 'electrocardiogram', // iOS only
 }
 
 export enum VitalWriteResource {
