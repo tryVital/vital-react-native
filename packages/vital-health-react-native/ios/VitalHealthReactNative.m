@@ -19,10 +19,6 @@ RCT_EXTERN_METHOD(configureClient:(NSString *)apiKey
                   resolver:(RCTPromiseResolveBlock)resolve
                   rejecter:(RCTPromiseRejectBlock)reject)
 
-RCT_EXTERN_METHOD(askForResources:(NSArray<NSString *> *)resources
-                  resolver:(RCTPromiseResolveBlock)resolve
-                  rejecter:(RCTPromiseRejectBlock)reject)
-
 RCT_EXTERN_METHOD(ask:(NSArray<NSString *> *)readResources
                   writeResources:(NSArray<NSString *> *)writeResources
                   resolver:(RCTPromiseResolveBlock)resolve
@@ -56,7 +52,6 @@ RCT_EXTERN_METHOD(openPlatformHealthApp:(RCTPromiseResolveBlock)resolve
 RCT_EXTERN_METHOD(openSyncProgressView:(RCTPromiseResolveBlock)resolve
                   rejecter:(RCTPromiseRejectBlock)reject)
 
-RCT_EXTERN_METHOD(status)
 
 + (BOOL)requiresMainQueueSetup
 {
