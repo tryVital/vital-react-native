@@ -1,6 +1,6 @@
 {
   "name": "@tryvital/vital-devices-react-native",
-  "version": "5.1.0",
+  "version": "5.1.1",
   "description": "Client to access Vital's Endpoints",
   "main": "lib/commonjs/index.js",
   "module": "lib/module/index.js",
@@ -48,7 +48,7 @@
     "registry": "https://registry.npmjs.org/"
   },
   "dependencies": {
-    "@tryvital/vital-core-react-native": "^5.1.0",
+    "@tryvital/vital-core-react-native": "5.1.1",
     "react-native-permissions": "^3.6.1"
   },
   "peerDependencies": {
