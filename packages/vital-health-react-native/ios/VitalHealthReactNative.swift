@@ -169,15 +169,28 @@ class VitalHealthReactNative: RCTEventEmitter {
   }
 
   @objc(hasAskedForPermission:resolver:rejecter:)
-  func hasAskedForPermission(_ resource: String, resolve: RCTPromiseResolveBlock, reject: RCTPromiseRejectBlock) {
+  func hasAskedForPermission(_ resource: String, resolve: @escaping RCTPromiseResolveBlock, reject: @escaping RCTPromiseRejectBlock) {
     do {
       let vitalResource = try mapResourceToReadableVitalResource(resource)
-      let value: Bool = VitalHealthKitClient.shared.hasAskedForPermission(resource: vitalResource)
-      resolve(value)
+      Task {
+        do {
+          let statuses = try await VitalHealthKitClient.shared.permissionStatus(for: [vitalResource])
+          if let status = statuses[vitalResource] {
+            resolve(status == .asked)
+          } else {
+            reject(nil, "Unknown error [2]", nil)
+          }
+
+        } catch {
+          reject(nil, "Unknown error [3]", nil)
+        }
+      }
+
     } catch VitalError.UnsupportedResource(let errorMessage) {
         reject("UnsupportedResource", errorMessage, nil)
+
     } catch {
-        reject(nil, "Unknown error", nil)
+        reject(nil, "Unknown error [1]", nil)
     }
   }
 
