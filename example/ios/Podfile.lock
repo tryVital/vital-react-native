@@ -1133,23 +1133,23 @@ PODS:
     - RCT-Folly (= 2022.05.16.00)
     - React-Core
   - SocketRocket (0.6.1)
-  - vital-core-react-native (5.1.0):
+  - vital-core-react-native (5.1.1):
     - React-Core
     - VitalCore (~> 1.4.1)
-  - vital-devices-react-native (5.1.0):
+  - vital-devices-react-native (5.1.1):
     - React-Core
     - VitalDevices (~> 1.4.1)
-  - vital-health-react-native (5.1.0):
+  - vital-health-react-native (5.1.1):
     - React-Core
     - VitalHealthKit (~> 1.4.1)
-  - VitalCore (1.4.1):
-    - VitalLogging (~> 1.4.1)
-  - VitalDevices (1.4.1):
+  - VitalCore (1.4.5):
+    - VitalLogging (~> 1.4.5)
+  - VitalDevices (1.4.5):
     - CombineCoreBluetooth (~> 0.3.1)
-    - VitalCore (~> 1.4.1)
-  - VitalHealthKit (1.4.1):
-    - VitalCore (~> 1.4.1)
-  - VitalLogging (1.4.1)
+    - VitalCore (~> 1.4.5)
+  - VitalHealthKit (1.4.5):
+    - VitalCore (~> 1.4.5)
+  - VitalLogging (1.4.5)
   - Yoga (1.14.0)
 
 DEPENDENCIES:
@@ -1236,6 +1236,10 @@ DEPENDENCIES:
   - "vital-core-react-native (from `../node_modules/@tryvital/vital-core-react-native`)"
   - "vital-devices-react-native (from `../node_modules/@tryvital/vital-devices-react-native`)"
   - "vital-health-react-native (from `../node_modules/@tryvital/vital-health-react-native`)"
+  - VitalCore (from `https://github.com/tryVital/vital-ios`, branch `03-25-dev-328_healthkit_data_type_name_helper_functions_for_flutter_react_native`)
+  - VitalDevices (from `https://github.com/tryVital/vital-ios`, branch `03-25-dev-328_healthkit_data_type_name_helper_functions_for_flutter_react_native`)
+  - VitalHealthKit (from `https://github.com/tryVital/vital-ios`, branch `03-25-dev-328_healthkit_data_type_name_helper_functions_for_flutter_react_native`)
+  - VitalLogging (from `https://github.com/tryVital/vital-ios`, branch `03-25-dev-328_healthkit_data_type_name_helper_functions_for_flutter_react_native`)
   - Yoga (from `../node_modules/react-native/ReactCommon/yoga`)
 
 SPEC REPOS:
@@ -1254,10 +1258,6 @@ SPEC REPOS:
     - libevent
     - OpenSSL-Universal
     - SocketRocket
-    - VitalCore
-    - VitalDevices
-    - VitalHealthKit
-    - VitalLogging
 
 EXTERNAL SOURCES:
   boost:
@@ -1377,8 +1377,34 @@ EXTERNAL SOURCES:
     :path: "../node_modules/@tryvital/vital-devices-react-native"
   vital-health-react-native:
     :path: "../node_modules/@tryvital/vital-health-react-native"
+  VitalCore:
+    :branch: 03-25-dev-328_healthkit_data_type_name_helper_functions_for_flutter_react_native
+    :git: https://github.com/tryVital/vital-ios
+  VitalDevices:
+    :branch: 03-25-dev-328_healthkit_data_type_name_helper_functions_for_flutter_react_native
+    :git: https://github.com/tryVital/vital-ios
+  VitalHealthKit:
+    :branch: 03-25-dev-328_healthkit_data_type_name_helper_functions_for_flutter_react_native
+    :git: https://github.com/tryVital/vital-ios
+  VitalLogging:
+    :branch: 03-25-dev-328_healthkit_data_type_name_helper_functions_for_flutter_react_native
+    :git: https://github.com/tryVital/vital-ios
   Yoga:
     :path: "../node_modules/react-native/ReactCommon/yoga"
+
+CHECKOUT OPTIONS:
+  VitalCore:
+    :commit: 3437d3d70fc28ecb8c2d164dd11d0665aa9003d1
+    :git: https://github.com/tryVital/vital-ios
+  VitalDevices:
+    :commit: 3437d3d70fc28ecb8c2d164dd11d0665aa9003d1
+    :git: https://github.com/tryVital/vital-ios
+  VitalHealthKit:
+    :commit: 3437d3d70fc28ecb8c2d164dd11d0665aa9003d1
+    :git: https://github.com/tryVital/vital-ios
+  VitalLogging:
+    :commit: 3437d3d70fc28ecb8c2d164dd11d0665aa9003d1
+    :git: https://github.com/tryVital/vital-ios
 
 SPEC CHECKSUMS:
   boost: d3f49c53809116a5d38da093a8aa78bf551aed09
@@ -1450,15 +1476,15 @@ SPEC CHECKSUMS:
   RNSVG: ba3e7232f45e34b7b47e74472386cf4e1a676d0a
   RNVectorIcons: 73ab573085f65a572d3b6233e68996d4707fd505
   SocketRocket: f32cd54efbe0f095c4d7594881e52619cfe80b17
-  vital-core-react-native: 091fcf563d21657dedff738144e908f14f4ac8c2
-  vital-devices-react-native: 7dc748e0bab0d5295acdc5a1f10175e91ce42d69
-  vital-health-react-native: eddb5aa101feb03b25d8e82267d9ae1242e98cdb
-  VitalCore: d714180d04d76c7801243302fbfcefc8d5d65c92
-  VitalDevices: 8efb681b3c1df98132753fdbce1bf84990744615
-  VitalHealthKit: 315f703d49ad274736c6234d5c0a08541a1d3d24
-  VitalLogging: 015243b1da88b621099aee327259ec42b90921b1
+  vital-core-react-native: 9a55b79d4a4ecf2635a1b255c354825c9236e946
+  vital-devices-react-native: 2f827e5f017dbdba93961a256d054d693a247d7a
+  vital-health-react-native: b34c1f37e63a88ac03cb8daf5b793cf0b27ab605
+  VitalCore: e60d4324027c75a0455d479eba8c146360c73f99
+  VitalDevices: eae5f77c0002911fb042fbaca680f75f249c0583
+  VitalHealthKit: faab0fc66c68ea44b7c9adb6c124a9b15d43e9ca
+  VitalLogging: e9ab8455507701fef2b19ee4a5d6c3802b3ed7b0
   Yoga: 1f93d5925ea12fb0880b21efe3566677337cf2ed
 
-PODFILE CHECKSUM: 2a537c5b3fef93a43656a06053f42e15c4747741
+PODFILE CHECKSUM: 36f08dc300369f91e31a67efbf65cd0c61c1ea76
 
 COCOAPODS: 1.11.3
