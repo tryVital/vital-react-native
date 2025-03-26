@@ -1,5 +1,6 @@
 import { NativeEventEmitter, NativeModules, Platform } from 'react-native';
 import type { HealthConfig } from './health_config';
+import type { AskConfig } from './ask_config';
 
 // Reexports
 export * from './health_config';
@@ -246,9 +247,14 @@ export class VitalHealth {
 
   static async ask(
     readResources: VitalResource[],
-    writeResources: VitalWriteResource[]
+    writeResources: VitalWriteResource[],
+    config: AskConfig | undefined = undefined,
   ): Promise<PermissionOutcome> {
-    const result = await VitalHealthReactNative.ask(readResources, writeResources);
+    if (config && Platform.OS !== config.type) {
+      throw new Error(`ask config is for ${config.type} but runtime is ${Platform.OS}.`);
+    }
+
+    const result = await VitalHealthReactNative.ask(readResources, writeResources, config);
 
     if (Platform.OS !== "android") {
       return "success";

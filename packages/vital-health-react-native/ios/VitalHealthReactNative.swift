@@ -1,7 +1,8 @@
 import VitalCore
-import VitalHealthKit
+@_spi(VitalSDKCrossPlatformSupport) import VitalHealthKit
 import Combine
 import UIKit
+import HealthKit
 
 @objc(VitalHealthReactNative)
 class VitalHealthReactNative: RCTEventEmitter {
@@ -115,10 +116,11 @@ class VitalHealthReactNative: RCTEventEmitter {
       resolve(())
     }
 
-  @objc(ask:writeResources:resolver:rejecter:)
+  @objc(ask:writeResources:config:resolver:rejecter:)
   func ask(
     _ readResources: [String],
     writeResources: [String],
+    config: [String: Any]?,
     resolve: @escaping RCTPromiseResolveBlock,
     reject: @escaping RCTPromiseRejectBlock
   ) {
@@ -126,7 +128,30 @@ class VitalHealthReactNative: RCTEventEmitter {
       do {
         let readPermissions = try readResources.map { try mapResourceToReadableVitalResource($0) }
         let writePermissions = try writeResources.map { try mapResourceToWritableVitalResource($0) }
-        let outcome = await VitalHealthKitClient.shared.ask(readPermissions: readPermissions, writePermissions: writePermissions)
+
+        var extraReadPermissions = [HKObjectType]()
+        var extraWritePermissions = [HKSampleType]()
+        var dataTypeAllowlist: Set<HKObjectType>? = nil
+
+        if let config = config {
+          if let rawValues = config["extraReadPermissions"] as? [String] {
+            extraReadPermissions = rawValues.compactMap(decodeHealthKitDataTypeIdentifier)
+          }
+          if let rawValues = config["extraWritePermissions"] as? [String] {
+            extraWritePermissions = rawValues.compactMap(decodeHealthKitDataTypeIdentifier).compactMap { $0 as? HKSampleType }
+          }
+          if let rawValues = config["dataTypeAllowlist"] as? [String] {
+            dataTypeAllowlist = Set(rawValues.compactMap(decodeHealthKitDataTypeIdentifier))
+          }
+        }
+
+        let outcome = await VitalHealthKitClient.shared.ask(
+          readPermissions: readPermissions,
+          writePermissions: writePermissions,
+          extraReadPermissions: extraReadPermissions,
+          extraWritePermissions: extraWritePermissions,
+          dataTypeAllowlist: dataTypeAllowlist
+        )
 
         switch outcome {
           case .success:

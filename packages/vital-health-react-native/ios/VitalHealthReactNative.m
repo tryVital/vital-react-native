@@ -19,12 +19,9 @@ RCT_EXTERN_METHOD(configureClient:(NSString *)apiKey
                   resolver:(RCTPromiseResolveBlock)resolve
                   rejecter:(RCTPromiseRejectBlock)reject)
 
-RCT_EXTERN_METHOD(askForResources:(NSArray<NSString *> *)resources
-                  resolver:(RCTPromiseResolveBlock)resolve
-                  rejecter:(RCTPromiseRejectBlock)reject)
-
 RCT_EXTERN_METHOD(ask:(NSArray<NSString *> *)readResources
                   writeResources:(NSArray<NSString *> *)writeResources
+                  config:(NSDictionary<NSString *, id> *)config
                   resolver:(RCTPromiseResolveBlock)resolve
                   rejecter:(RCTPromiseRejectBlock)reject)
 

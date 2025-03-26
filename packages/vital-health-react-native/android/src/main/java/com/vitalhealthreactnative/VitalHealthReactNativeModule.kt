@@ -13,7 +13,6 @@ import com.facebook.react.ReactInstanceManager
 import com.facebook.react.bridge.*
 import com.facebook.react.module.annotations.ReactModule
 import com.facebook.react.modules.core.DeviceEventManagerModule
-import com.vitalcorereactnative.VitalCoreReactNativeModule
 import io.tryvital.client.utils.VitalLogger
 import io.tryvital.vitalhealthconnect.DefaultSyncNotificationBuilder
 import io.tryvital.vitalhealthconnect.DefaultSyncNotificationContent
@@ -96,17 +95,10 @@ class VitalHealthReactNativeModule(reactContext: ReactApplicationContext) :
   }
 
   @ReactMethod
-  fun askForResources(
-    resources: ReadableArray,
-    promise: Promise
-  ) {
-    return ask(resources, null, promise)
-  }
-
-  @ReactMethod
   fun ask(
     readResources: ReadableArray,
     writeResources: ReadableArray?,
+    config: ReadableMap?,
     promise: Promise
   ) = runOnMain {
     val manager = vitalHealthConnectManager
