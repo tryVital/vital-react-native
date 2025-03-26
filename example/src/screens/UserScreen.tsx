@@ -6,6 +6,7 @@ import { useEffect, useState } from "react";
 import { ActivityIndicator, Platform, Switch, Text } from "react-native";
 import { VITAL_API_KEY, VITAL_ENVIRONMENT, VITAL_REGION } from "../Environment";
 import { vitalNodeClient } from "../App";
+import { AskConfig } from "@tryvital/vital-health-react-native/lib/typescript/ask_config";
 
 export const UserScreen = ({route, navigation}) => {
     const user: ClientFacingUser = route.params.user;
@@ -16,6 +17,8 @@ export const UserScreen = ({route, navigation}) => {
     const [permissionAsked, setPermissionAsked] = useState<VitalResource[]>([]);
     const [isBackgroundSyncEnabled, setBackgroundSyncEnabled] = useState<boolean | undefined>(undefined);
     const [isUpdatingBackgroundSync, setUpdatingBackgroundSync] = useState<boolean>(true);
+
+    const [useRequestRestrictionDemo, setRequestRestrictionDemo] = useState<boolean>(false);
 
     // Observe Vital Core SDK Status
     useEffect(() => {
@@ -69,8 +72,25 @@ export const UserScreen = ({route, navigation}) => {
     }, [navigation]);
     
     const handleAskForPermission = () => {
+        let config: AskConfig | undefined = undefined;
+
+        if (Platform.OS == "ios" && useRequestRestrictionDemo) {
+            config = {
+                type: "ios",
+                dataTypeAllowlist: [
+                    "HKQuantityTypeIdentifierStepCount",
+                    "HKQuantityTypeIdentifierActiveEnergyBurned",
+                    "HKCategoryTypeIdentifierSleepAnalysis",
+                ]
+            }
+        }
+
         // [1] Request permissions for wearable data
-        VitalHealth.ask([VitalResource.Activity, VitalResource.Workout, VitalResource.Sleep, VitalResource.HeartRate], [])
+        VitalHealth.ask(
+            [VitalResource.Activity, VitalResource.Workout, VitalResource.Sleep, VitalResource.HeartRate],
+            [],
+            config,
+        )
         .then((outcome) => {
             console.log(`finished asking for permission: ${outcome}`);
             refreshPermissionAsked();
@@ -153,8 +173,23 @@ export const UserScreen = ({route, navigation}) => {
             }
 
             <Button onPress={() => handleAskForPermission()}>
-            Ask for permission
+            Ask for permission (Activity, Workout, Sleep)
             </Button>
+
+            {Platform.OS == "ios" && (
+                <HStack style={{paddingVertical: 16, gap: 4}}>
+                    <VStack style={{ flexShrink: 1 }}>
+                        <Text style={{ fontSize: 16 }}>Request Restriction Demo</Text>
+                        <Text style={{ fontSize: 12 }}>Only allow stepCount, activeEnergyBurned and sleepAnalysis (HealthKit types) to be requested.</Text>
+                    </VStack>
+
+                    <Switch
+                        value={useRequestRestrictionDemo}
+                        onValueChange={setRequestRestrictionDemo}
+                        style={{flexShrink: 0}}
+                    />
+                </HStack>
+            )}
 
             <Box h={2} />
 
