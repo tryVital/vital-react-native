@@ -5,21 +5,41 @@ private let statusEventKey = "VitalClientStatus"
 
 @objc(VitalCoreReactNative)
 class VitalCoreReactNative: RCTEventEmitter {
-  private var statusObservation: Task<Void, Never>?
+  private var statusObservation: Task<Void, Error>?
+  private let lock = NSLock()
+
+  /// Whether or not this native module is active & not invalidated.
+  var isActive: Bool {
+    callableJSModules != nil
+  }
 
   override func supportedEvents() -> [String]! {
     [statusEventKey]
   }
 
   override func startObserving() {
-    statusObservation = Task {
+    lock.lock()
+    defer { lock.unlock() }
+
+    guard statusObservation == nil else { return }
+
+    statusObservation = Task { [weak self] in
+      // Workaround React Native timing issues. We cannot call sendEvent immediately. or else
+      // React Native will complain:
+      try await Task.sleep(nanoseconds: NSEC_PER_MSEC * 100)
+
       for await status in VitalClient.statuses {
+        guard let self = self, self.isActive else { continue }
+
         sendEvent(withName: statusEventKey, body: status.strings())
       }
     }
   }
 
   override func stopObserving() {
+    lock.lock()
+    defer { lock.unlock() }
+
     statusObservation?.cancel()
     statusObservation = nil
   }
