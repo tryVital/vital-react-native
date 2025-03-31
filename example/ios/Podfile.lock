@@ -1133,23 +1133,23 @@ PODS:
     - RCT-Folly (= 2022.05.16.00)
     - React-Core
   - SocketRocket (0.6.1)
-  - vital-core-react-native (5.1.1):
+  - vital-core-react-native (5.1.2):
     - React-Core
-    - VitalCore (~> 1.4.6)
-  - vital-devices-react-native (5.1.1):
+    - VitalCore (~> 1.5.0)
+  - vital-devices-react-native (5.1.2):
     - React-Core
-    - VitalDevices (~> 1.4.6)
-  - vital-health-react-native (5.1.1):
+    - VitalDevices (~> 1.5.0)
+  - vital-health-react-native (5.1.2):
     - React-Core
-    - VitalHealthKit (~> 1.4.6)
-  - VitalCore (1.4.6):
-    - VitalLogging (~> 1.4.6)
-  - VitalDevices (1.4.6):
+    - VitalHealthKit (~> 1.5.0)
+  - VitalCore (1.5.0):
+    - VitalLogging (~> 1.5.0)
+  - VitalDevices (1.5.0):
     - CombineCoreBluetooth (~> 0.3.1)
-    - VitalCore (~> 1.4.6)
-  - VitalHealthKit (1.4.6):
-    - VitalCore (~> 1.4.6)
-  - VitalLogging (1.4.6)
+    - VitalCore (~> 1.5.0)
+  - VitalHealthKit (1.5.0):
+    - VitalCore (~> 1.5.0)
+  - VitalLogging (1.5.0)
   - Yoga (1.14.0)
 
 DEPENDENCIES:
@@ -1236,6 +1236,10 @@ DEPENDENCIES:
   - "vital-core-react-native (from `../node_modules/@tryvital/vital-core-react-native`)"
   - "vital-devices-react-native (from `../node_modules/@tryvital/vital-devices-react-native`)"
   - "vital-health-react-native (from `../node_modules/@tryvital/vital-health-react-native`)"
+  - VitalCore (from `https://github.com/tryVital/vital-ios`, commit `1.5.0`)
+  - VitalDevices (from `https://github.com/tryVital/vital-ios`, commit `1.5.0`)
+  - VitalHealthKit (from `https://github.com/tryVital/vital-ios`, commit `1.5.0`)
+  - VitalLogging (from `https://github.com/tryVital/vital-ios`, commit `1.5.0`)
   - Yoga (from `../node_modules/react-native/ReactCommon/yoga`)
 
 SPEC REPOS:
@@ -1254,10 +1258,6 @@ SPEC REPOS:
     - libevent
     - OpenSSL-Universal
     - SocketRocket
-    - VitalCore
-    - VitalDevices
-    - VitalHealthKit
-    - VitalLogging
 
 EXTERNAL SOURCES:
   boost:
@@ -1377,8 +1377,34 @@ EXTERNAL SOURCES:
     :path: "../node_modules/@tryvital/vital-devices-react-native"
   vital-health-react-native:
     :path: "../node_modules/@tryvital/vital-health-react-native"
+  VitalCore:
+    :commit: 1.5.0
+    :git: https://github.com/tryVital/vital-ios
+  VitalDevices:
+    :commit: 1.5.0
+    :git: https://github.com/tryVital/vital-ios
+  VitalHealthKit:
+    :commit: 1.5.0
+    :git: https://github.com/tryVital/vital-ios
+  VitalLogging:
+    :commit: 1.5.0
+    :git: https://github.com/tryVital/vital-ios
   Yoga:
     :path: "../node_modules/react-native/ReactCommon/yoga"
+
+CHECKOUT OPTIONS:
+  VitalCore:
+    :commit: 1.5.0
+    :git: https://github.com/tryVital/vital-ios
+  VitalDevices:
+    :commit: 1.5.0
+    :git: https://github.com/tryVital/vital-ios
+  VitalHealthKit:
+    :commit: 1.5.0
+    :git: https://github.com/tryVital/vital-ios
+  VitalLogging:
+    :commit: 1.5.0
+    :git: https://github.com/tryVital/vital-ios
 
 SPEC CHECKSUMS:
   boost: d3f49c53809116a5d38da093a8aa78bf551aed09
@@ -1450,15 +1476,15 @@ SPEC CHECKSUMS:
   RNSVG: ba3e7232f45e34b7b47e74472386cf4e1a676d0a
   RNVectorIcons: 210f910e834e3485af40693ad4615c1ec22fc02b
   SocketRocket: f32cd54efbe0f095c4d7594881e52619cfe80b17
-  vital-core-react-native: 8b8aff09140ba1d9e430f6edaa99034dd4afaa75
-  vital-devices-react-native: 46ae0d63baa0f5a09ad6759688c66a94b7617a48
-  vital-health-react-native: fe1434c6bb6d36cedf3e6d4d5f3ff8f25eae5e3c
-  VitalCore: edcf3183284916abede38b4e621b485023438cea
-  VitalDevices: c0a61568d386754eeb47fd6b96f9ead187275a6f
-  VitalHealthKit: 6bd8892b86e6233d3c2729abf5b040ea927d96c1
-  VitalLogging: a32062fba8fb1ee9d057618992b9f5451a2908b2
+  vital-core-react-native: 8d290c0ce9b351e881150fd7476a3f713680f032
+  vital-devices-react-native: 14d17f53ae82782443641dc31a59788892a1c84f
+  vital-health-react-native: 59e1c7f3fe49909e8ec574b755087bd46d2a0421
+  VitalCore: 866afa7eac95c3e19fce6055dd8c2af4588abd38
+  VitalDevices: 6c61fc60c8508d7296cc8131eabb8325dfa00ddc
+  VitalHealthKit: 91e5f9f75ac1b859b1342d41f9c0a38ee230008f
+  VitalLogging: b3fae20d40bcc489c923f5d2bc2f9e56723a7b3c
   Yoga: 2b33a7ac96c58cdaa7b810948fc6a2a76ed2d108
 
-PODFILE CHECKSUM: 2a537c5b3fef93a43656a06053f42e15c4747741
+PODFILE CHECKSUM: e4f5f5f01da1e2679daefec5f7e12652580f09e6
 
 COCOAPODS: 1.11.3
