@@ -313,7 +313,11 @@ export enum VitalResource {
   Steps = 'steps',
   ActiveEnergyBurned = 'activeEnergyBurned',
   BasalEnergyBurned = 'basalEnergyBurned',
-  DistanceWalkingRunning = 'distanceWalkingRunning',
+  /**
+   * @deprecated renamed to `Distance`.
+   */
+  DistanceWalkingRunning = 'distance',
+  Distance = 'distance',
   FloorsClimbed = 'floorsClimbed',
   VO2Max = 'vo2Max',
   Water = 'water',
@@ -323,15 +327,56 @@ export enum VitalResource {
   RespiratoryRate = 'respiratoryRate',
   MenstrualCycle = 'menstrualCycle',
   Meal = 'meal',
-  AFibBurden = 'afibBurden', // iOS only
-  HeartRateAlert = 'heartRateAlert', // iOS only
-  Electrocardiogram = 'electrocardiogram', // iOS only
+
+  /** iOS Only */
+  AFibBurden = 'afibBurden',
+  /** iOS Only */
+  HeartRateAlert = 'heartRateAlert',
+  /** iOS Only */
+  Electrocardiogram = 'electrocardiogram',
+  /** iOS Only */
+  WheelchairPush = 'wheelchairPush',
+  /** iOS Only */
+  LeanBodyMass = 'leanBodyMass',
+  /** iOS Only */
+  WaistCircumference = 'waistCircumference',
+  /** iOS Only */
+  BodyMassIndex = 'bodyMassIndex',
+  /** iOS Only */
+  StandHour = 'standHour',
+  /** iOS Only */
+  StandDuration = 'standDuration',
+  /** iOS Only */
+  SleepApneaAlert = 'sleepApneaAlert',
+  /** iOS Only */
+  SleepBreathingDisturbance = 'sleepBreathingDisturbance',
+  /** iOS Only */
+  ForcedExpiratoryVolume1 = 'forcedExpiratoryVolume1',
+  /** iOS Only */
+  ForcedVitalCapacity = 'forcedVitalCapacity',
+  /** iOS Only */
+  PeakExpiratoryFlowRate = 'peakExpiratoryFlowRate',
+  /** iOS Only */
+  InhalerUsage = 'inhalerUsage',
+  /** iOS Only */
+  Fall = 'fall',
+  /** iOS Only */
+  UvExposure = 'uvExposure',
+  /** iOS Only */
+  DaylightExposure = 'daylightExposure',
+  /** iOS Only */
+  Handwashing = 'handwashing',
+  /** iOS Only */
+  BasalBodyTemperature = 'basalBodyTemperature'
+
 }
 
 export enum VitalWriteResource {
   Water = 'water',
-  Caffeine = 'caffeine', // iOS only
-  MindfulSession = 'mindfulSession', // iOS only, value is ignored
+  /** iOS Only */
+  Caffeine = 'caffeine',
+  /** iOS Only */
+  MindfulSession = 'mindfulSession',
 }
 
 export type PermissionOutcome = 'success' | 'cancelled' | 'unknownError' | 'notPrompted' | 'healthDataUnavailable';
