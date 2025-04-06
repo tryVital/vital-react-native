@@ -10,3 +10,5 @@ gradle-wrapper.jar
 !.yarn/releases
 !.yarn/sdks
 !.yarn/versions
+
+*.tgz
