@@ -27,12 +27,13 @@
     "!**/.*"
   ],
   "scripts": {
-    "build": "bob build",
+    "build": "bob build && yarn run postbuild-copy-expo-plugin",
     "clean": "del lib && del android/build && del android/.gradle",
     "prepack": "yarn run clean && yarn run build",
     "np": "np --no-publish",
     "test": "jest",
-    "lint": "eslint \"**/*.{js,ts,tsx}\""
+    "lint": "eslint \"**/*.{js,ts,tsx}\"",
+    "postbuild-copy-expo-plugin": "cp app.plugin.js lib/commonjs"
   },
   "keywords": [
     "react-native",
