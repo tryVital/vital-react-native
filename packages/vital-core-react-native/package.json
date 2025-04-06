@@ -27,13 +27,14 @@
     "!**/.*"
   ],
   "scripts": {
-    "build": "bob build && yarn run postbuild-copy-declarations",
+    "build": "bob build && yarn run postbuild-copy-declarations && yarn run postbuild-copy-expo-plugin",
     "postbuild-copy-declarations": "copyfiles -u 1 src/**/*.d.ts lib/typescript",
     "clean": "del lib && del android/build && del android/.gradle",
     "prepack": "yarn run clean && yarn run build",
     "np": "np --no-publish",
     "test": "jest",
-    "lint": "eslint \"**/*.{js,ts,tsx}\""
+    "lint": "eslint \"**/*.{js,ts,tsx}\"",
+    "postbuild-copy-expo-plugin": "cp app.plugin.js lib/commonjs"
   },
   "keywords": [
     "react-native",
@@ -83,7 +84,8 @@
     "source": "src",
     "output": "lib",
     "files": [
-      "src/"
+      "src/",
+      "app.plugin.js"
     ],
     "targets": [
       "commonjs",
