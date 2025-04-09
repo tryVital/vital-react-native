@@ -50,7 +50,8 @@ export class VitalHealth {
   }
 
   /**
-   * [Android ONLY][Experimental API]
+   * IMPORTANT: This is Android-only API.
+   *
    * On iOS, this property always returns `true`. iOS HealthKit Background Delivery is
    * an app-level entitlement, and does not require explicit user consent.
    * 
@@ -67,7 +68,10 @@ export class VitalHealth {
   }
 
   /**
-   * [Android ONLY][Experimental API]
+   * IMPORTANT: This is Android-only API.
+   * 
+   * Returns the target frequency of Health Connect Background Sync.
+   * 
    * On iOS, this property always returns `3_600_000`.
    */
   static get backgroundSyncMinimumInterval(): Promise<number> {
@@ -79,7 +83,13 @@ export class VitalHealth {
   }
 
   /**
-   * [Android ONLY][Experimental API]
+   * IMPORTANT: This is Android-only API.
+   * 
+   * Returns the minimum time that must have elapsed before a any automatic Health Connect
+   * data sync attempt is permitted.
+   * 
+   * Automatic sync attempts include recurring Background Sync, as well as Sync on App Launch/Resumption.
+   * 
    * On iOS, this property always returns `0`.
    */
   static get autoSyncThrottle(): Promise<number> {
@@ -115,7 +125,8 @@ export class VitalHealth {
   }
 
   /**
-   * [Android ONLY][Experimental API]
+   * IMPORTANT: This is Android-only API.
+   * 
    * On iOS, this method is a no-op returning `true`. iOS HealthKit Background Delivery is an app-level
    * entitlement, and does not require explicit user consent.
    * 
@@ -162,7 +173,8 @@ export class VitalHealth {
   }
 
   /**
-   * [Android ONLY][Experimental API]
+   * IMPORTANT: This is Android-only API.
+   * 
    * On iOS, this method is a no-op. iOS HealthKit Background Delivery is an app-level
    * entitlement, and does not require explicit user consent.
    * 
@@ -184,7 +196,8 @@ export class VitalHealth {
   }
 
   /**
-   * [Android ONLY][Experimental API]
+   * IMPORTANT: This is Android-only API.
+   * 
    * On iOS, this method is a no-op. iOS does not require apps to show a user-visible
    * notification when performing extended work in background.
    * 
@@ -207,8 +220,12 @@ export class VitalHealth {
   }
 
   /**
-   * [Android ONLY][Experimental API]
+   * IMPORTANT: This is Android-only API.
+   * 
    * On iOS, this method is a no-op.
+   * 
+   * Set the minimum time that must have elapsed before a any automatic Health Connect
+   * data sync attempt is permitted.
    * 
    * A throttling threshold below 5 seconds is ignored.
    */
@@ -221,8 +238,11 @@ export class VitalHealth {
   }
 
   /**
-   * [Android ONLY][Experimental API]
+   * IMPORTANT: This is Android-only API.
+   *
    * On iOS, this method is a no-op.
+   * 
+   * Set the target frequency of Health Connect Background Sync.
    * 
    * A minimum interval below 3600 seconds is ignored.
    */
