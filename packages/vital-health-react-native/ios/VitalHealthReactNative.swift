@@ -388,6 +388,8 @@ private func mapResourceToReadableVitalResource(_ name: String) throws -> VitalR
     return .handwashing
   case "basalBodyTemperature":
     return .basalBodyTemperature
+  case "heartRateRecoveryOneMinute":
+    return .heartRateRecoveryOneMinute
   default:
     throw VitalError.UnsupportedResource(name)
   }
