@@ -387,8 +387,9 @@ export enum VitalResource {
   /** iOS Only */
   Handwashing = 'handwashing',
   /** iOS Only */
-  BasalBodyTemperature = 'basalBodyTemperature'
-
+  BasalBodyTemperature = 'basalBodyTemperature',
+  /** iOS Only */
+  HeartRateRecoveryOneMinute = 'heartRateRecoveryOneMinute',
 }
 
 export enum VitalWriteResource {
