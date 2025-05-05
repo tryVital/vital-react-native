@@ -2,13 +2,17 @@ import VitalCore
 
 private let errorKey = "VitalCoreError"
 private let statusEventKey = "VitalClientStatus"
+private let identifyExternalUserRequestKey = "IdentifyExternalUserRequest"
 
 @objc(VitalCoreReactNative)
 class VitalCoreReactNative: RCTEventEmitter {
   private var statusObservation: Task<Void, Never>?
 
+  private let lock = NSLock()
+  private var pendingIdentifyResponses: [String: CheckedContinuation<String, Never>] = [:]
+
   override func supportedEvents() -> [String]! {
-    [statusEventKey]
+    [statusEventKey, identifyExternalUserRequestKey]
   }
 
   override func startObserving() {
@@ -32,6 +36,48 @@ class VitalCoreReactNative: RCTEventEmitter {
   @objc(currentUserId:rejecter:)
   func currentUserId(resolve: @escaping RCTPromiseResolveBlock, reject: @escaping RCTPromiseRejectBlock) {
     resolve(VitalClient.currentUserId)
+  }
+  @objc(identifiedExternalUser:rejecter:)
+  func identifiedExternalUser(resolve: @escaping RCTPromiseResolveBlock, reject: @escaping RCTPromiseRejectBlock) {
+    resolve(VitalClient.identifiedExternalUser)
+  }
+
+  @objc(identifyExternalUser:callId:resolver:rejecter:)
+  func identifyExternalUser(_ externalUserId: String, callId: String, resolve: @escaping RCTPromiseResolveBlock, reject: @escaping RCTPromiseRejectBlock) {
+    Task {
+      do {
+        try await VitalClient.identifyExternalUser(externalUserId) { @MainActor externalUserId in
+          // Setup a listener
+          let rawResponse: String = await withCheckedContinuation { continuation in
+
+            // Register the continuation
+            lock.withLock { self.pendingIdentifyResponses[callId] = continuation }
+
+            // Send the request to JS land, which should eventually invoke the continuation
+            // via `identifyExternalUserResponse(4)`.
+            self.sendEvent(withName: identifyExternalUserRequestKey, body: [callId, externalUserId])
+          }
+
+          let decoder = JSONDecoder()
+          switch try decoder.decode(ReactNativeAuthenticateRequest.self, from: rawResponse.data(using: .utf8)!) {
+          case let .apiKey(userId, key, environment):
+            return .apiKey(key: key, userId: userId, environment)
+          case let .signInToken(token):
+            return .signInToken(rawToken: token)
+          }
+        }
+        resolve(())
+      } catch let error {
+        reject("VitalCoreError", "\(error)", error)
+      }
+    }
+  }
+
+  @objc(identifyExternalUserResponse:callId:resolver:rejecter:)
+  func identifyExternalUserResponse(_ jsonPayload: String, _ callId: String, resolve: @escaping RCTPromiseResolveBlock, reject: @escaping RCTPromiseRejectBlock) {
+    let continuation = lock.withLock { self.pendingIdentifyResponses.removeValue(forKey: callId) }
+    defer { resolve(()) }
+    continuation?.resume(returning: jsonPayload)
   }
 
   @objc(signIn:resolver:rejecter:)
@@ -258,5 +304,54 @@ extension VitalClient.Status {
     }
 
     return strings
+  }
+}
+
+enum ReactNativeAuthenticateRequest: Decodable {
+  case signInToken(String)
+  case apiKey(userId: String, key: String, environment: Environment)
+
+  enum CodingKeys: CodingKey {
+    case type
+    case rawToken
+    case userId
+    case key
+    case environment
+    case region
+  }
+
+  init(from decoder: any Decoder) throws {
+    let container = try decoder.container(keyedBy: CodingKeys.self)
+
+    switch try container.decode(String.self, forKey: .type) {
+    case "signInToken":
+      self = .signInToken(try container.decode(String.self, forKey: .rawToken))
+    case "apiKey":
+
+      let env: Environment
+      let rawEnv = try container.decode(String.self, forKey: .environment)
+      let rawRegion = try container.decode(String.self, forKey: .region)
+
+      switch (rawEnv, rawRegion) {
+      case ("production", "us"):
+        env = .production(.us)
+      case ("production", "eu"):
+        env = .production(.eu)
+      case ("sandbox", "us"):
+        env = .sandbox(.us)
+      case ("sandbox", "eu"):
+        env = .sandbox(.eu)
+      default:
+        throw DecodingError.dataCorruptedError(forKey: .environment, in: container, debugDescription: "unsupported: \(rawEnv) \(rawRegion)")
+      }
+
+      self = .apiKey(
+        userId: try container.decode(String.self, forKey: .userId),
+        key: try container.decode(String.self, forKey: .key),
+        environment: env
+      )
+    case let value:
+      throw DecodingError.dataCorruptedError(forKey: .type, in: container, debugDescription: "unrecognized: \(value)")
+    }
   }
 }

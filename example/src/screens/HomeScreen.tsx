@@ -58,8 +58,11 @@ const HomeScreen = ({navigation}) => {
       });
     });
 
-    return () => subscription.remove();
-  });
+    return () => {
+      console.log("clean up HomeScreen subscription");
+      subscription.remove();
+    };
+  }, []);
 
   useEffect(() => {
     setLoading(true);
