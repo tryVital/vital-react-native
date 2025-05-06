@@ -11,6 +11,7 @@ export interface AuthenticateRequestAPIKey {
     key: string;
     environment: Environment;
     region: Region;
+    userId: string;
 }
 
 export type AuthenticateRequest = AuthenticateRequestSignInToken | AuthenticateRequestAPIKey;
