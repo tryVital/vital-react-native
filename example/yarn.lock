@@ -2966,22 +2966,19 @@
   resolved "https://registry.yarnpkg.com/@trysound/sax/-/sax-0.2.0.tgz#cccaab758af56761eb7bf37af6f03f326dd798ad"
   integrity sha512-L7z9BgrNEcYyUYtF+HaEfiS5ebkh9jXqbszz7pC0hRBPaatV0XjSD3+eHrpqFemQfgwiFF0QPIarnIihIDn7OA==
 
-"@tryvital/vital-core-react-native@^3.0.1":
-  version "3.0.5"
-  resolved "https://registry.yarnpkg.com/@tryvital/vital-core-react-native/-/vital-core-react-native-3.0.5.tgz#b8244eb487cb8adac53f7ad030f4cf751e1fc8ea"
-  integrity sha512-AV+2drF/pwmuLiHWCqOCAqDXeW9mcIjWF0T9+H+UfAQtDSv2lzOx/zbayZTqqsiSuukL18FmbII0lGc3tWD7Rw==
+"@tryvital/vital-core-react-native@5.2.3", "@tryvital/vital-core-react-native@file:../packages/vital-core-react-native":
+  version "5.2.3"
 
-"@tryvital/vital-core-react-native@link:../packages/vital-core-react-native":
-  version "0.0.0"
-  uid ""
+"@tryvital/vital-devices-react-native@file:../packages/vital-devices-react-native":
+  version "5.2.3"
+  dependencies:
+    "@tryvital/vital-core-react-native" "5.2.3"
+    react-native-permissions "^3.6.1"
 
-"@tryvital/vital-devices-react-native@link:../packages/vital-devices-react-native":
-  version "0.0.0"
-  uid ""
-
-"@tryvital/vital-health-react-native@link:../packages/vital-health-react-native":
-  version "0.0.0"
-  uid ""
+"@tryvital/vital-health-react-native@file:../packages/vital-health-react-native":
+  version "5.2.3"
+  dependencies:
+    "@tryvital/vital-core-react-native" "5.2.3"
 
 "@tryvital/vital-node@^2.1.20":
   version "2.1.20"

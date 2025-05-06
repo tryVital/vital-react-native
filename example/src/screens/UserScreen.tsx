@@ -29,7 +29,10 @@ export const UserScreen = ({route, navigation}) => {
             });
         });
 
-        return () => subscription.remove();
+        return () => {
+            console.log("clean up UserScreen subscription");
+            subscription.remove();
+        };
     }, [user.user_id]);
 
     const refreshPermissionAsked = () => {
@@ -113,20 +116,40 @@ export const UserScreen = ({route, navigation}) => {
         // your backend service on behalf of your consumer apps, so that your
         // Vital API Key is kept strictly as a server-side secret.
         //
-        const response = await vitalNodeClient.User.createSignInToken(user.user_id)
 
-        await VitalCore.signIn(response.sign_in_token);
+        await VitalCore.identifyExternalUser(
+            `ext:${user.client_user_id}`,
+            async (externalUserId) => {
+                console.log(`SDK requesting auth credential for ${externalUserId}`);
+
+                const response = await vitalNodeClient.User.createSignInToken(user.user_id);
+
+                return {
+                    type: "signInToken",
+                    rawToken: response.sign_in_token,
+                };
+            }
+        );
         await onSignInSuccess();
     };
 
     const handleSignInWithAPIKeyMode = async () => {
-        await VitalCore.configure(
-            VITAL_API_KEY,
-            VITAL_ENVIRONMENT,
-            VITAL_REGION,
-            true,
-        );
-        await VitalCore.setUserId(user.user_id);
+
+        await VitalCore.identifyExternalUser(
+            `ext:${user.client_user_id}`,
+            async (externalUserId) => {
+                console.log(`SDK requesting auth credential for ${externalUserId}`);
+
+                return {
+                    type: "apiKey",
+                    environment: VITAL_ENVIRONMENT,
+                    region: VITAL_REGION,
+                    key: VITAL_API_KEY,
+                    userId: user.user_id
+                };
+            }
+        )
+
         await onSignInSuccess();
     };
 

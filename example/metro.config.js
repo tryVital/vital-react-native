@@ -19,7 +19,7 @@ const config = {
     sourceExts: [...sourceExts, "svg"],
     resolverMainFields: ["sbmodern", "react-native", "browser", "main"],
   },
-  watchFolders: [path.resolve(__dirname, "../")],
+  watchFolders: [path.resolve(__dirname, "./")],
 };
 
 module.exports = mergeConfig(defaultConfig, config);
