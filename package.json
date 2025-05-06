@@ -16,6 +16,6 @@
         "example:start:android": "yarn workspace example start:android",
         "syncpkg": "yarn workspaces run build && yarn --cwd ./example add file:../packages/vital-core-react-native file:../packages/vital-health-react-native file:../packages/vital-devices-react-native --check-files && yarn --cwd ./example build"
     },
-    "version": "5.2.3",
+    "version": "5.3.0",
     "packageManager": "yarn@1.22.19+sha1.4ba7fc5c6e704fce2066ecbfb0b0d8976fe62447"
 }
