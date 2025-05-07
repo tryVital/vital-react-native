@@ -102,9 +102,18 @@ export class VitalCore {
           return;
         }
 
-        authenticate(eventExternalUserId).then((request) => {
-          VitalCoreReactNative.identifyExternalUserResponse(JSON.stringify(request), callId);
-        });
+        authenticate(eventExternalUserId).then(
+          (request) => {
+            VitalCoreReactNative.identifyExternalUserResponse(JSON.stringify(request), callId);
+          },
+          (err) => {
+            const errorPayload = err instanceof Error
+              ? { type: "error", name: err.name, message: err.message, stack: err.stack }
+              : { type: "error", message: err.toString() };
+
+            VitalCoreReactNative.identifyExternalUserResponse(JSON.stringify(errorPayload), callId);
+          }
+        );
       }
     );
 

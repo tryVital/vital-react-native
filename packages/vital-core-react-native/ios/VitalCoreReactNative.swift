@@ -64,6 +64,8 @@ class VitalCoreReactNative: RCTEventEmitter {
             return .apiKey(key: key, userId: userId, environment)
           case let .signInToken(token):
             return .signInToken(rawToken: token)
+          case let .error(error):
+            throw error
           }
         }
         resolve(())
@@ -310,6 +312,7 @@ extension VitalClient.Status {
 enum ReactNativeAuthenticateRequest: Decodable {
   case signInToken(String)
   case apiKey(userId: String, key: String, environment: Environment)
+  case error(JSError)
 
   enum CodingKeys: CodingKey {
     case type
@@ -318,6 +321,9 @@ enum ReactNativeAuthenticateRequest: Decodable {
     case key
     case environment
     case region
+    case message
+    case name
+    case stack
   }
 
   init(from decoder: any Decoder) throws {
@@ -350,8 +356,26 @@ enum ReactNativeAuthenticateRequest: Decodable {
         key: try container.decode(String.self, forKey: .key),
         environment: env
       )
+    case "error":
+      self = .error(
+        JSError(
+          message: try container.decode(String.self, forKey: .message),
+          name: try container.decodeIfPresent(String.self, forKey: .name),
+          stack: try container.decodeIfPresent(String.self, forKey: .stack)
+        )
+      )
     case let value:
       throw DecodingError.dataCorruptedError(forKey: .type, in: container, debugDescription: "unrecognized: \(value)")
     }
+  }
+}
+
+internal struct JSError: Error, CustomStringConvertible {
+  let message: String
+  let name: String?
+  let stack: String?
+
+  var description: String {
+    "JS Error: \(name ?? "<no name>") \(message) \(stack ?? "<no stack>")"
   }
 }
