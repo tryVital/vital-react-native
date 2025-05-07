@@ -7,21 +7,36 @@ import HealthKit
 @objc(VitalHealthReactNative)
 class VitalHealthReactNative: RCTEventEmitter {
 
-  public var cancellable: AnyCancellable?
+  public var statusObserver: AnyCancellable?
+  private let lock = NSLock()
 
   /// Whether or not this native module is active & not invalidated.
   var isActive: Bool {
     callableJSModules != nil
   }
 
-  deinit {
-    cancellable?.cancel()
-  }
-
   override init() {
     super.init()
+  }
 
-    cancellable = VitalHealthKitClient.shared.status.sink { [weak self] status in
+  override func supportedEvents() -> [String]! {
+    return ["Status"]
+  }
+
+  override func startObserving() {
+    lock.lock()
+    defer { lock.unlock() }
+
+    guard statusObserver == nil else { return }
+
+    let publisher = Publishers.Concatenate(
+      // Workaround React Native timing issues. We cannot call sendEvent immediately. or else
+      // React Native will complain:
+      // > Sending '*' with no listeners registered.
+      prefix: Empty(completeImmediately: true).delay(for: .milliseconds(100), scheduler: DispatchQueue.main),
+      suffix: VitalHealthKitClient.shared.status
+    )
+    statusObserver = publisher.sink { [weak self] status in
       guard let self = self, self.isActive else { return }
 
       var payload: [String: String] = [:]
@@ -52,8 +67,12 @@ class VitalHealthReactNative: RCTEventEmitter {
     }
   }
 
-  override func supportedEvents() -> [String]! {
-    return ["Status"]
+  override func stopObserving() {
+    lock.lock()
+    defer { lock.unlock() }
+
+    statusObserver?.cancel()
+    statusObserver = nil
   }
 
   @objc(configure:numberOfDaysToBackFill:enableLogs:resolver:rejecter:)
