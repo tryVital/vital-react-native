@@ -1,6 +1,6 @@
 {
   "name": "@tryvital/vital-health-react-native",
-  "version": "5.3.0",
+  "version": "5.3.1",
   "description": "Client to access iOS's HealthKit and Android HealthConnect",
   "main": "lib/commonjs/index.js",
   "module": "lib/module/index.js",
@@ -50,7 +50,7 @@
     "registry": "https://registry.npmjs.org/"
   },
   "dependencies": {
-    "@tryvital/vital-core-react-native": "5.3.0"
+    "@tryvital/vital-core-react-native": "5.3.1"
   },
   "peerDependencies": {
     "react": "*",
