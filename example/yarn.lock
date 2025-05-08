@@ -2966,19 +2966,19 @@
   resolved "https://registry.yarnpkg.com/@trysound/sax/-/sax-0.2.0.tgz#cccaab758af56761eb7bf37af6f03f326dd798ad"
   integrity sha512-L7z9BgrNEcYyUYtF+HaEfiS5ebkh9jXqbszz7pC0hRBPaatV0XjSD3+eHrpqFemQfgwiFF0QPIarnIihIDn7OA==
 
-"@tryvital/vital-core-react-native@5.2.3", "@tryvital/vital-core-react-native@file:../packages/vital-core-react-native":
-  version "5.2.3"
+"@tryvital/vital-core-react-native@5.3.0", "@tryvital/vital-core-react-native@file:../packages/vital-core-react-native":
+  version "5.3.0"
 
 "@tryvital/vital-devices-react-native@file:../packages/vital-devices-react-native":
-  version "5.2.3"
+  version "5.3.0"
   dependencies:
-    "@tryvital/vital-core-react-native" "5.2.3"
+    "@tryvital/vital-core-react-native" "5.3.0"
     react-native-permissions "^3.6.1"
 
 "@tryvital/vital-health-react-native@file:../packages/vital-health-react-native":
-  version "5.2.3"
+  version "5.3.0"
   dependencies:
-    "@tryvital/vital-core-react-native" "5.2.3"
+    "@tryvital/vital-core-react-native" "5.3.0"
 
 "@tryvital/vital-node@^2.1.20":
   version "2.1.20"

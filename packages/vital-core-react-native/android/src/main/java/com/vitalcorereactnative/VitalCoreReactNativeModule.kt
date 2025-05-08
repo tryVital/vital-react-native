@@ -141,6 +141,9 @@ class VitalCoreReactNativeModule(reactContext: ReactApplicationContext) :
             ?: throw RuntimeException("failed to deserialize ReactNativeAuthenticateRequest")
 
           when (request) {
+            is ReactNativeAuthenticateRequest.Error -> {
+              throw RuntimeException("JS Error: ${request.name} ${request.message} ${request.stack}")
+            }
             is ReactNativeAuthenticateRequest.SignInToken -> {
               AuthenticateRequest.SignInToken(request.rawToken)
             }
