@@ -1142,14 +1142,14 @@ PODS:
   - vital-health-react-native (5.3.0):
     - React-Core
     - VitalHealthKit (~> 1.6.1)
-  - VitalCore (1.6.3):
-    - VitalLogging (~> 1.6.3)
-  - VitalDevices (1.6.3):
+  - VitalCore (1.6.4):
+    - VitalLogging (~> 1.6.4)
+  - VitalDevices (1.6.4):
     - CombineCoreBluetooth (~> 0.3.1)
-    - VitalCore (~> 1.6.3)
-  - VitalHealthKit (1.6.3):
-    - VitalCore (~> 1.6.3)
-  - VitalLogging (1.6.3)
+    - VitalCore (~> 1.6.4)
+  - VitalHealthKit (1.6.4):
+    - VitalCore (~> 1.6.4)
+  - VitalLogging (1.6.4)
   - Yoga (1.14.0)
 
 DEPENDENCIES:
@@ -1236,10 +1236,10 @@ DEPENDENCIES:
   - "vital-core-react-native (from `../node_modules/@tryvital/vital-core-react-native`)"
   - "vital-devices-react-native (from `../node_modules/@tryvital/vital-devices-react-native`)"
   - "vital-health-react-native (from `../node_modules/@tryvital/vital-health-react-native`)"
-  - VitalCore (from `https://github.com/tryVital/vital-ios`, commit `1.6.3`)
-  - VitalDevices (from `https://github.com/tryVital/vital-ios`, commit `1.6.3`)
-  - VitalHealthKit (from `https://github.com/tryVital/vital-ios`, commit `1.6.3`)
-  - VitalLogging (from `https://github.com/tryVital/vital-ios`, commit `1.6.3`)
+  - VitalCore (from `https://github.com/tryVital/vital-ios`, commit `1.6.4`)
+  - VitalDevices (from `https://github.com/tryVital/vital-ios`, commit `1.6.4`)
+  - VitalHealthKit (from `https://github.com/tryVital/vital-ios`, commit `1.6.4`)
+  - VitalLogging (from `https://github.com/tryVital/vital-ios`, commit `1.6.4`)
   - Yoga (from `../node_modules/react-native/ReactCommon/yoga`)
 
 SPEC REPOS:
@@ -1378,32 +1378,32 @@ EXTERNAL SOURCES:
   vital-health-react-native:
     :path: "../node_modules/@tryvital/vital-health-react-native"
   VitalCore:
-    :commit: 1.6.3
+    :commit: 1.6.4
     :git: https://github.com/tryVital/vital-ios
   VitalDevices:
-    :commit: 1.6.3
+    :commit: 1.6.4
     :git: https://github.com/tryVital/vital-ios
   VitalHealthKit:
-    :commit: 1.6.3
+    :commit: 1.6.4
     :git: https://github.com/tryVital/vital-ios
   VitalLogging:
-    :commit: 1.6.3
+    :commit: 1.6.4
     :git: https://github.com/tryVital/vital-ios
   Yoga:
     :path: "../node_modules/react-native/ReactCommon/yoga"
 
 CHECKOUT OPTIONS:
   VitalCore:
-    :commit: 1.6.3
+    :commit: 1.6.4
     :git: https://github.com/tryVital/vital-ios
   VitalDevices:
-    :commit: 1.6.3
+    :commit: 1.6.4
     :git: https://github.com/tryVital/vital-ios
   VitalHealthKit:
-    :commit: 1.6.3
+    :commit: 1.6.4
     :git: https://github.com/tryVital/vital-ios
   VitalLogging:
-    :commit: 1.6.3
+    :commit: 1.6.4
     :git: https://github.com/tryVital/vital-ios
 
 SPEC CHECKSUMS:
@@ -1479,12 +1479,12 @@ SPEC CHECKSUMS:
   vital-core-react-native: 9fb394f2c1622cb88a21181040293d5a9e58755e
   vital-devices-react-native: 0a2c776f5847fd13ccbe7b7052145a8441eede7d
   vital-health-react-native: 629d96524831313bae0b7e8a0d1e5a356c89d2a2
-  VitalCore: 7a586bd579825d39e1b2c1ace8c8e8b76fc7ab9b
-  VitalDevices: 812b33f7f0595cb0f282ec1ca339bdcd1b4aba16
-  VitalHealthKit: 36ea6d3042656e800e68a192d72b82d21fa66d9a
-  VitalLogging: 9df1f4d4050944fc3227afa51e22b44005794a4b
+  VitalCore: e8a8ec49aeeaa15bc0b60b9dfe622f6e28901faf
+  VitalDevices: a97a9899cb2c1f418401e8b657dac6003159705b
+  VitalHealthKit: bb7d76b8303021dab3cb01f51eeb8f058be76be6
+  VitalLogging: 85809fe1f476e0a714905fafb5ed0c47a50a282f
   Yoga: 2b33a7ac96c58cdaa7b810948fc6a2a76ed2d108
 
-PODFILE CHECKSUM: a308e40845ebdb791e128c8a0cc190acde9d8480
+PODFILE CHECKSUM: 8ac3ae0ce6ae07f7ce908c40fb5c7dcb8e117d95
 
 COCOAPODS: 1.11.3
