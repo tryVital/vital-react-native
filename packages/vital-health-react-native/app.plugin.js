@@ -5,7 +5,7 @@ const {
   withAppDelegate,
 } = require('@expo/config-plugins');
 const { withPlugins } = require('@expo/config-plugins');
-const { addObjcImports, insertContentsInsideObjcFunctionBlock } = require('@expo/config-plugins/build/ios/codeMod');
+const { addObjcImports, insertContentsInsideObjcFunctionBlock, addSwiftImports, insertContentsInsideSwiftFunctionBlock } = require('@expo/config-plugins/build/ios/codeMod');
 
 const HEALTH_SHARE = 'Allow $(PRODUCT_NAME) to check health info';
 
@@ -48,15 +48,47 @@ const withHealthKit = (config, { healthSharePermission } = {}) => {
   });
 
   config = withAppDelegate(config, (config) => {
-		let source = config.modResults.contents;
+    const { modResults, sdkVersion = "0.1.0" } = config;
+    const { language } = modResults;
 
-    source = addObjcImports(source, ['"VitalHealthKitConfiguration.h"']);
-    source = insertContentsInsideObjcFunctionBlock(
-      source,
-      'application didFinishLaunchingWithOptions:',
-      '[VitalHealthKitConfiguration automaticConfiguration];',
-      { position: "head" },
-    );
+    if (language !== "objc" && language !== "objcpp" && language !== "swift") {
+      throw new Error(
+        `Cannot modify the project AppDelegate as it's not in a supported language: ${language}`,
+      );
+    }
+
+    let source = config.modResults.contents;
+
+    if (language === "swift") {
+      source = addSwiftImports(source, ['VitalHealthKit']);
+
+      const autoConfig = "VitalHealthKitClient.automaticConfiguration()";
+      const hasAutoConfig = source.includes(autoConfig);
+
+      if (!hasAutoConfig) {
+        source = insertContentsInsideSwiftFunctionBlock(
+          source,
+          'application(_:didFinishLaunchingWithOptions:)',
+          autoConfig,
+          { position: "head" },
+        );
+      }
+
+    } else {
+      source = addObjcImports(source, ['"VitalHealthKitConfiguration.h"']);
+
+      const autoConfig = "[VitalHealthKitConfiguration automaticConfiguration];";
+      const hasAutoConfig = source.includes(autoConfig);
+
+      if (!hasAutoConfig) {
+        source = insertContentsInsideObjcFunctionBlock(
+          source,
+          'application didFinishLaunchingWithOptions:',
+          autoConfig,
+          { position: "head" },
+        );
+      }
+    }
 
     config.modResults.contents = source;
     return config;
