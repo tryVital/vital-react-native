@@ -1135,13 +1135,13 @@ PODS:
   - SocketRocket (0.6.1)
   - vital-core-react-native (5.3.4):
     - React-Core
-    - VitalCore (~> 1.8.0)
+    - VitalCore (~> 1.8.1)
   - vital-devices-react-native (5.3.4):
     - React-Core
-    - VitalDevices (~> 1.8.0)
+    - VitalDevices (~> 1.8.1)
   - vital-health-react-native (5.3.4):
     - React-Core
-    - VitalHealthKit (~> 1.8.0)
+    - VitalHealthKit (~> 1.8.1)
   - VitalCore (1.8.1):
     - VitalLogging (~> 1.8.1)
   - VitalDevices (1.8.1):
@@ -1476,9 +1476,9 @@ SPEC CHECKSUMS:
   RNSVG: ba3e7232f45e34b7b47e74472386cf4e1a676d0a
   RNVectorIcons: 210f910e834e3485af40693ad4615c1ec22fc02b
   SocketRocket: f32cd54efbe0f095c4d7594881e52619cfe80b17
-  vital-core-react-native: c378aa6dcfbf99b65913464aa2b994c2a477edc5
-  vital-devices-react-native: d3c1918cc100b74a70b0f5f415eb159f03fe20c3
-  vital-health-react-native: a4c491982373779cb30a4b9f5a0872a59ec88409
+  vital-core-react-native: deaad08bbfc9de0fbece09fac37c921a42489211
+  vital-devices-react-native: 1e1727ea2a1a887dbc3f85e642e420839cf20b33
+  vital-health-react-native: 456aa2631c8dea93a6710a36ddbdeb9eb2636101
   VitalCore: 73ee56c91bc272227efaaba61c2ede9d06b83f8b
   VitalDevices: 65ab86ac537659ae4d7b8be601e8b2fd2c46f172
   VitalHealthKit: 5bcf3a704c568c08b82b65b1b94b6c370decfcfc

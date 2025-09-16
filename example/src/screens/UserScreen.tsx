@@ -1,5 +1,5 @@
 import { VitalCore } from "@tryvital/vital-core-react-native";
-import { HealthConfig, VitalHealth, VitalResource } from "@tryvital/vital-health-react-native";
+import { ConnectionStatus, HealthConfig, VitalHealth, VitalResource } from "@tryvital/vital-health-react-native";
 import { ClientFacingUser } from "@tryvital/vital-node/client/models/user_models";
 import { Button, VStack, HStack, Box } from "native-base";
 import { useEffect, useState } from "react";
@@ -20,6 +20,10 @@ export const UserScreen = ({route, navigation}) => {
 
     const [useRequestRestrictionDemo, setRequestRestrictionDemo] = useState<boolean>(false);
 
+    const [useExplicitConnectMode, setExplicitConnectMode] = useState<boolean>(false);
+    const [connectionStatus, setConnectionStatus] = useState<ConnectionStatus | null>(null);
+    const [isConnectingDisconnecting, setConnectingDisconnecting] = useState<boolean>(false);
+
     // Observe Vital Core SDK Status
     useEffect(() => {
         const subscription = VitalCore.observeStatusChange((status) => {
@@ -29,9 +33,12 @@ export const UserScreen = ({route, navigation}) => {
             });
         });
 
+        const subscription2 = VitalHealth.observeConnectionStatusChange(setConnectionStatus);
+
         return () => {
             console.log("clean up UserScreen subscription");
             subscription.remove();
+            subscription2.remove();
         };
     }, [user.user_id]);
 
@@ -105,6 +112,7 @@ export const UserScreen = ({route, navigation}) => {
 
     const onSignInSuccess = async () => {
         const config = new HealthConfig();
+        config.connectionPolicy = useExplicitConnectMode ? "explicit" : "autoConnect";
         await VitalHealth.configure(config);
     };
 
@@ -176,12 +184,37 @@ export const UserScreen = ({route, navigation}) => {
         }
     };
 
+    const handleConnectDisconnect = () => {
+        setConnectingDisconnecting(true);
+
+        if (connectionStatus === "disconnected") {
+            VitalHealth.connect().finally(() => setConnectingDisconnecting(false));
+        } else {
+            VitalHealth.disconnect().finally(() => setConnectingDisconnecting(false));
+        }
+    };
+
     const HealthSDKCard = () => {
         return (
         <Box padding="4" borderColor="#333333" borderWidth="1">
             <Text style={{color: 'black', fontSize: 20, paddingBottom: 16}}>
             {Platform.OS == 'android' ? 'Health Connect' : 'HealthKit'}
             </Text>
+
+            {connectionStatus !== "autoConnect" && <>
+                <Text style={{color: 'black', fontSize: 16, paddingBottom: 16}}>
+                    Explicit Connection Status: {connectionStatus}
+                </Text>
+
+                <Button
+                    onPress={() => handleConnectDisconnect()}
+                    disabled={isConnectingDisconnecting}
+                    isLoading={isConnectingDisconnecting}
+                >
+                    {connectionStatus === "disconnected" ? "Connect" : "Disconnect"}
+                </Button>
+                <Box h={4} />
+            </>}
 
             {permissionAsked.length == 0 &&
             <Text style={{color: 'black', fontSize: 16, paddingBottom: 16}}>
@@ -227,7 +260,7 @@ export const UserScreen = ({route, navigation}) => {
 
             {!VitalHealth.canEnableBackgroundSyncNoninteractively && (
                 <HStack alignItems={'center'} style={{marginTop: 8}}>
-                    <Text style={{flexGrow: 1}}>Background Sync (Experimental)</Text>
+                    <Text style={{flexGrow: 1}}>Background Sync</Text>
                     {isBackgroundSyncEnabled !== undefined && (
                         <Switch 
                             value={isBackgroundSyncEnabled}
@@ -272,12 +305,19 @@ export const UserScreen = ({route, navigation}) => {
 {
             !isSDKConfigured &&
             <>
+            <HStack alignItems={'center'} style={{marginTop: 8}}>
+                <Text style={{flexGrow: 1}}>Health SDK Explicit Connect mode</Text>
+                <Switch 
+                    value={useExplicitConnectMode}
+                    onValueChange={(value) => setExplicitConnectMode(value)}
+                />
+            </HStack>
             <HStack alignItems={'center'}>
-                <Text style={{flexGrow: 1, color: 'black'}}>Sign-in Token Demo mode</Text>
+                <Text style={{flexGrow: 1, color: 'black'}}>Sign-in Token Demo</Text>
                 <Button onPress={handleSignInWithJWTDemoMode}>Sign-in</Button>
             </HStack>
             <HStack alignItems={'center'}>
-                <Text style={{flexGrow: 1, color: 'black'}}>API Key mode</Text>
+                <Text style={{flexGrow: 1, color: 'black'}}>API Key</Text>
                 <Button onPress={handleSignInWithAPIKeyMode}>Sign-in</Button>
             </HStack>
             </>

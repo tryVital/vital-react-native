@@ -8,6 +8,7 @@ import HealthKit
 class VitalHealthReactNative: RCTEventEmitter {
 
   public var cancellable: AnyCancellable?
+  public var cancellable2: AnyCancellable?
 
   /// Whether or not this native module is active & not invalidated.
   var isActive: Bool {
@@ -16,6 +17,7 @@ class VitalHealthReactNative: RCTEventEmitter {
 
   deinit {
     cancellable?.cancel()
+    cancellable2?.cancel()
   }
 
   override init() {
@@ -50,17 +52,24 @@ class VitalHealthReactNative: RCTEventEmitter {
 
       self.sendEvent(withName: "Status", body: payload)
     }
+
+    cancellable2 = VitalHealthKitClient.shared.connectionStatusPublisher().sink { [weak self] status in
+      guard let self = self, self.isActive else { return }
+
+      self.sendEvent(withName: "VitalHealthConnectionStatus", body: status.rawValue)
+    }
   }
 
   override func supportedEvents() -> [String]! {
-    return ["Status"]
+    return ["Status", "VitalHealthConnectionStatus"]
   }
 
-  @objc(configure:numberOfDaysToBackFill:enableLogs:resolver:rejecter:)
+  @objc(configure:numberOfDaysToBackFill:enableLogs:connectionPolicy:resolver:rejecter:)
   func configure(
     _ backgroundDeliveryEnabled: Bool,
     numberOfDaysToBackFill: Int,
     enableLogs: Bool,
+    connectionPolicy: String,
     resolve: @escaping RCTPromiseResolveBlock,
     reject: RCTPromiseRejectBlock
   ) {
@@ -68,7 +77,8 @@ class VitalHealthReactNative: RCTEventEmitter {
         .init(
             backgroundDeliveryEnabled: backgroundDeliveryEnabled,
             numberOfDaysToBackFill: numberOfDaysToBackFill,
-            logsEnabled: enableLogs
+            logsEnabled: enableLogs,
+            connectionPolicy: VitalHealthKitClient.ConnectionPolicy(rawValue: connectionPolicy) ?? .autoConnect
           )
       )
     resolve(())
@@ -277,6 +287,37 @@ class VitalHealthReactNative: RCTEventEmitter {
     }
   }
 
+  @objc(getConnectionStatus:rejecter:)
+  func getConnectionStatus(_ resolve: RCTPromiseResolveBlock, reject: RCTPromiseRejectBlock) {
+    resolve(VitalHealthKitClient.shared.connectionStatus.rawValue)
+  }
+
+  @objc(connect:rejecter:)
+  func connect(_ resolve: @escaping RCTPromiseResolveBlock, reject: @escaping RCTPromiseRejectBlock) {
+    Task { @MainActor in
+      do {
+        try await VitalHealthKitClient.shared.connect()
+        resolve(())
+
+      } catch let error {
+        reject("VitalHealthError", "\(error)", error)
+      }
+    }
+  }
+
+  @objc(disconnect:rejecter:)
+  func disconnect(_ resolve: @escaping RCTPromiseResolveBlock, reject: @escaping RCTPromiseRejectBlock) {
+    Task { @MainActor in
+      do {
+        try await VitalHealthKitClient.shared.disconnect()
+        resolve(())
+
+      } catch let error {
+        reject("VitalHealthError", "\(error)", error)
+      }
+    }
+  }
+
   @objc(openSyncProgressView:rejecter:)
   func openSyncProgressView(_ resolve: @escaping RCTPromiseResolveBlock, reject: RCTPromiseRejectBlock) {
     DispatchQueue.main.async {
@@ -416,4 +457,19 @@ enum VitalError: Error {
   case UnsupportedProvider(String)
   case UnsupportedBrand(String)
   case UnsupportedKind(String)
+}
+
+extension VitalHealthKitClient.ConnectionStatus {
+  var rawValue: String {
+    switch self {
+    case .autoConnect:
+      return "autoConnect"
+    case .connected:
+      return "connected"
+    case .connectionPaused:
+      return "connectionPaused"
+    case .disconnected:
+      return "disconnected"
+    }
+  }
 }

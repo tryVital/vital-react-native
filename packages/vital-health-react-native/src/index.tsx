@@ -1,6 +1,7 @@
 import { NativeEventEmitter, NativeModules, Platform } from 'react-native';
 import type { HealthConfig } from './health_config';
 import type { AskConfig } from './ask_config';
+import type { Subscription } from '@tryvital/vital-core-react-native';
 
 // Reexports
 export * from './health_config';
@@ -35,11 +36,46 @@ export interface SyncNotificationContent {
   channelDescription: string;
 }
 
+export type ConnectionStatus =
+  | 'autoConnect'
+  | 'connected'
+  | 'disconnected'
+  | 'connectionPaused';
+
 export class VitalHealth {
   static status = new NativeEventEmitter(VitalHealthReactNative);
+  private static eventEmitter = new NativeEventEmitter(NativeModules.VitalHealthReactNative);
+
+  static setEventEmitter(emitter: NativeEventEmitter) {
+    this.eventEmitter = emitter;
+  }
 
   static get canEnableBackgroundSyncNoninteractively(): boolean {
     return Platform.OS !== 'android';
+  }
+
+  static get connectionStatus(): Promise<ConnectionStatus> {
+    return VitalHealthReactNative.getConnectionStatus();
+  }
+
+  static observeConnectionStatusChange(listener: (status: ConnectionStatus) => void): Subscription {
+    var isCancelled = false
+
+    const wrappedListener = (status: ConnectionStatus) => {
+      if (isCancelled) {
+        return;
+      }
+      listener(status);
+    }
+    const subscription = this.eventEmitter.addListener("VitalHealthConnectionStatus", wrappedListener);
+    this.connectionStatus.then(wrappedListener);
+
+    return {
+      remove() {
+        isCancelled = true;
+        subscription.remove();
+      },
+    };
   }
 
   /**
@@ -113,15 +149,35 @@ export class VitalHealth {
       return VitalHealthReactNative.configure(
         healthConfig.androidConfig.syncOnAppStart,
         healthConfig.numberOfDaysToBackFill,
-        healthConfig.logsEnabled
+        healthConfig.logsEnabled,
+        healthConfig.connectionPolicy,
       );
     } else {
       return VitalHealthReactNative.configure(
         healthConfig.iOSConfig.backgroundDeliveryEnabled,
         healthConfig.numberOfDaysToBackFill,
-        healthConfig.logsEnabled
+        healthConfig.logsEnabled,
+        healthConfig.connectionPolicy,
       );
     }
+  }
+
+  /**
+   * Setup a HealthKit (iOS) or Health Connect (Android) connection with this device.
+   *
+   * @precondition You must configure the Health SDK to use the `explicit` Connection Policy.
+   */
+  static async connect(): Promise<void> {
+    return await VitalHealthReactNative.connect();
+  }
+
+  /**
+   * Disconnect the active HealthKit (iOS) or Health Connect (Android) connection with this device.
+   *
+   * @precondition You must configure the Health SDK to use the `explicit` Connection Policy.
+   */
+  static async disconnect(): Promise<void> {
+    return await VitalHealthReactNative.disconnect();
   }
 
   /**
