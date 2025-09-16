@@ -32,6 +32,7 @@ import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.jsonPrimitive
 import java.time.Instant
+import java.util.Locale
 import java.util.concurrent.atomic.AtomicReference
 import kotlin.time.Duration.Companion.milliseconds
 
@@ -67,6 +68,7 @@ class VitalHealthReactNativeModule(reactContext: ReactApplicationContext) :
     syncOnAppStart: Boolean,
     numberOfDaysToBackFill: Int,
     enableLogs: Boolean,
+    connectionPolicy: String,
     promise: Promise
   ) = runOnMain {
     logger.enabled = enableLogs
@@ -89,6 +91,9 @@ class VitalHealthReactNativeModule(reactContext: ReactApplicationContext) :
       logsEnabled = enableLogs,
       syncOnAppStart = syncOnAppStart,
       numberOfDaysToBackFill = numberOfDaysToBackFill,
+      connectionPolicy = kotlin.runCatching {
+        ConnectionPolicy.valueOf(connectionPolicy.replaceFirstChar { it.titlecase() })
+      }.getOrNull() ?: ConnectionPolicy.AutoConnect
     )
 
     promise.resolve(null)
@@ -384,6 +389,31 @@ class VitalHealthReactNativeModule(reactContext: ReactApplicationContext) :
   }
 
   @ReactMethod
+  fun getConnectionStatus(promise: Promise) = runOnMain {
+    promise.resolve(vitalHealthConnectManager.connectionStatus.value.name.replaceFirstChar { it.lowercase() })
+  }
+
+  @ReactMethod
+  fun connect(promise: Promise) = runOnMain {
+    try {
+      vitalHealthConnectManager.connect()
+      promise.resolve(null)
+    } catch (e: Throwable) {
+      promise.reject("VitalHealthError", e.message, e)
+    }
+  }
+
+  @ReactMethod
+  fun disconnect(promise: Promise) = runOnMain {
+    try {
+      vitalHealthConnectManager.disconnect()
+      promise.resolve(null)
+    } catch (e: Throwable) {
+      promise.reject("VitalHealthError", e.message, e)
+    }
+  }
+
+  @ReactMethod
   fun addListener(eventName: String?) {
     // Keep: Required for RN built in Event Emitter Calls.
   }
@@ -396,7 +426,6 @@ class VitalHealthReactNativeModule(reactContext: ReactApplicationContext) :
   private fun VitalHealthConnectManager.startStatusUpdate() {
     this.status
       .onEach {
-        logger.logI("Status: $it")
         when (it) {
           is SyncStatus.ResourceSyncFailed -> {
             sendEvent(VitalHealthEvent.Status, WritableNativeMap().apply {
@@ -433,6 +462,12 @@ class VitalHealthReactNativeModule(reactContext: ReactApplicationContext) :
             })
           }
         }
+      }
+      .launchIn(mainScope)
+
+    this.connectionStatus
+      .onEach {
+        sendEvent(VitalHealthEvent.ConnectionStatus, it.name.replaceFirstChar { it.lowercase() })
       }
       .launchIn(mainScope)
   }

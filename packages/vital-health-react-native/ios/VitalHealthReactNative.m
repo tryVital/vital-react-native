@@ -5,6 +5,7 @@
 RCT_EXTERN_METHOD(configure:(BOOL)backgroundDeliveryEnabled
                   numberOfDaysToBackFill:(int)numberOfDaysToBackFill
                   enableLogs:(BOOL)enableLogs
+                  connectionPolicy:(NSString *)connectionPolicy
                   resolver:(RCTPromiseResolveBlock)resolve
                   rejecter:(RCTPromiseRejectBlock)reject)
 
@@ -48,6 +49,15 @@ RCT_EXTERN_METHOD(setPauseSynchronization:(BOOL)resource
                   rejecter:(RCTPromiseRejectBlock)reject)
 
 RCT_EXTERN_METHOD(openPlatformHealthApp:(RCTPromiseResolveBlock)resolve
+                  rejecter:(RCTPromiseRejectBlock)reject)
+
+RCT_EXTERN_METHOD(getConnectionStatus:(RCTPromiseResolveBlock)resolve
+                  rejecter:(RCTPromiseRejectBlock)reject)
+
+RCT_EXTERN_METHOD(connect:(RCTPromiseResolveBlock)resolve
+                  rejecter:(RCTPromiseRejectBlock)reject)
+
+RCT_EXTERN_METHOD(disconnect:(RCTPromiseResolveBlock)resolve
                   rejecter:(RCTPromiseRejectBlock)reject)
 
 RCT_EXTERN_METHOD(openSyncProgressView:(RCTPromiseResolveBlock)resolve
