@@ -61,7 +61,7 @@ In your root project Gradle file (`./build.gradle`), make sure that:
 ```diff
  buildscript {
    ext {
-     kotlinVersion = "1.8.22"
+     kotlinVersion = "2.0.21"
      buildToolsVersion = "34.0.0"
      minSdkVersion = 26
      compileSdkVersion = 34

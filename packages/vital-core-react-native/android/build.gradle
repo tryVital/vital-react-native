@@ -1,6 +1,15 @@
 buildscript {
   // Buildscript is evaluated before everything else so we can't use getExtOrDefault
-  def kotlin_version = rootProject.ext.has('kotlinVersion') ? rootProject.ext.get('kotlinVersion') : project.properties['VitalCoreReactNative_kotlinVersion']
+  def default_kotlin_version = project.properties['VitalCoreReactNative_kotlinVersion']
+  def kotlin_version = rootProject.ext.has('kotlinVersion') ? rootProject.ext.get('kotlinVersion') : default_kotlin_version
+  def default_ksp_version = project.properties['VitalCoreReactNative_kspVersion']
+  // Keep KSP pinned for the default Expo 54 line, but if a host app overrides Kotlin
+  // without providing kspVersion, fall back to the matching KSP line for that Kotlin version.
+  def ksp_version = rootProject.ext.has('kspVersion')
+    ? rootProject.ext.get('kspVersion')
+    : (rootProject.ext.has('kotlinVersion') && kotlin_version.toString() != default_kotlin_version.toString()
+      ? "${kotlin_version}+"
+      : default_ksp_version)
 
   repositories {
       google()
@@ -11,7 +20,7 @@ buildscript {
     classpath 'com.android.tools.build:gradle:3.5.3'
     // noinspection DifferentKotlinGradleVersion
     classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
-    classpath "com.google.devtools.ksp:com.google.devtools.ksp.gradle.plugin:$kotlin_version+"
+    classpath "com.google.devtools.ksp:com.google.devtools.ksp.gradle.plugin:$ksp_version"
   }
 }
 
