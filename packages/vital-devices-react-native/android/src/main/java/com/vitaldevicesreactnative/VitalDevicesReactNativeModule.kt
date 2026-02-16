@@ -99,7 +99,7 @@ class VitalDevicesReactNativeModule(reactContext: ReactApplicationContext) :
   @ReactMethod
   private fun readLibre1(promise: Promise) {
     mainScope.launch {
-      val activity = currentActivity ?: return@launch promise.reject("ReadError", "No active Android Activity")
+      val activity = reactApplicationContext.currentActivity ?: return@launch promise.reject("ReadError", "No active Android Activity")
       try {
         val reader = Libre1Reader.create(activity)
         val libre1 = reader.read()

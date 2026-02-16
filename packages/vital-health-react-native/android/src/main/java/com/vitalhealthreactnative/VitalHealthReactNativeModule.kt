@@ -114,7 +114,7 @@ class VitalHealthReactNativeModule(reactContext: ReactApplicationContext) :
       )
     }
 
-    val activity = currentActivity ?: return@runOnMain promise.reject(
+    val activity = reactApplicationContext.currentActivity ?: return@runOnMain promise.reject(
       VITAL_HEALTH_ERROR,
       "Cannot find the current ReactNative Activity"
     )
@@ -260,7 +260,7 @@ class VitalHealthReactNativeModule(reactContext: ReactApplicationContext) :
       )
     }
 
-    val activity = currentActivity ?: return@runOnMain promise.reject(
+    val activity = reactApplicationContext.currentActivity ?: return@runOnMain promise.reject(
       VITAL_HEALTH_ERROR,
       "Cannot find the current ReactNative Activity"
     )
@@ -374,7 +374,7 @@ class VitalHealthReactNativeModule(reactContext: ReactApplicationContext) :
 
   @ReactMethod
   fun openPlatformHealthApp(promise: Promise) = runOnMain {
-    val activity = currentActivity ?: return@runOnMain promise.reject(
+    val activity = reactApplicationContext.currentActivity ?: return@runOnMain promise.reject(
       VITAL_HEALTH_ERROR,
       "No active Android Activity"
     )
@@ -513,7 +513,7 @@ class VitalHealthReactNativeModule(reactContext: ReactApplicationContext) :
       val module = reactInstanceManager.currentReactContext?.getNativeModule(VitalHealthReactNativeModule::class.java) ?: return
 
       if (synchronized(module) { module.askForPermission != null }) {
-        val activity = module.currentActivity as ComponentActivity
+        val activity = module.reactApplicationContext.currentActivity as? ComponentActivity ?: return
 
         // Lifted from ComponentActivity.onRequestPermissionsResult
         activity.activityResultRegistry.dispatchResult(
