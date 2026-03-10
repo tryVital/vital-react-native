@@ -3,8 +3,8 @@ const {
   withInfoPlist,
   withAndroidManifest,
   withAppDelegate,
-} = require('@expo/config-plugins');
-const { withPlugins } = require('@expo/config-plugins');
+} = require('expo/config-plugins');
+const { withPlugins } = require('expo/config-plugins');
 const { addObjcImports, insertContentsInsideObjcFunctionBlock, addSwiftImports, insertContentsInsideSwiftFunctionBlock } = require('@expo/config-plugins/build/ios/codeMod');
 
 const HEALTH_SHARE = 'Allow $(PRODUCT_NAME) to check health info';

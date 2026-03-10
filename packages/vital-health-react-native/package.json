@@ -54,7 +54,8 @@
   },
   "peerDependencies": {
     "react": "*",
-    "react-native": "*"
+    "react-native": "*",
+    "expo": "*"
   },
   "devDependencies": {
     "@react-native-community/eslint-config": "^3.0.2",

@@ -24,6 +24,11 @@ import io.tryvital.vitalhealthconnect.disableBackgroundSync
 import io.tryvital.vitalhealthconnect.enableBackgroundSyncContract
 import io.tryvital.vitalhealthconnect.isBackgroundSyncEnabled
 import io.tryvital.vitalhealthconnect.model.*
+import io.tryvital.vitalhealthcore.model.ConnectionPolicy
+import io.tryvital.vitalhealthcore.model.ProviderAvailability
+import io.tryvital.vitalhealthcore.model.SyncStatus
+import io.tryvital.vitalhealthcore.model.VitalResource
+import io.tryvital.vitalhealthcore.model.WritableVitalResource
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
@@ -32,7 +37,6 @@ import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.jsonPrimitive
 import java.time.Instant
-import java.util.Locale
 import java.util.concurrent.atomic.AtomicReference
 import kotlin.time.Duration.Companion.milliseconds
 
@@ -60,7 +64,7 @@ class VitalHealthReactNativeModule(reactContext: ReactApplicationContext) :
   @ReactMethod
   fun isAvailable(promise: Promise) = runOnMain {
     val availability = VitalHealthConnectManager.isAvailable(reactApplicationContext)
-    promise.resolve(availability == HealthConnectAvailability.Installed)
+    promise.resolve(availability == ProviderAvailability.Installed)
   }
 
   @ReactMethod
@@ -75,7 +79,7 @@ class VitalHealthReactNativeModule(reactContext: ReactApplicationContext) :
 
     val availability = VitalHealthConnectManager.isAvailable(reactApplicationContext)
 
-    if (availability != HealthConnectAvailability.Installed) {
+    if (availability != ProviderAvailability.Installed) {
       return@runOnMain promise.reject(
           VITAL_HEALTH_ERROR,
           "Health Connect is unavailable: $availability",

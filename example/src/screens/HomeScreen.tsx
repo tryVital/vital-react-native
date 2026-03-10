@@ -1,24 +1,27 @@
-import {ClientFacingUser} from '@tryvital/vital-node/client/models/user_models';
-import {FlatList, Text, TextInput, TouchableOpacity, View} from 'react-native';
-import React, {useEffect, useState} from 'react';
-import {vitalNodeClient} from '../App';
+/* eslint-disable react-native/no-inline-styles */
+import { Vital } from '@tryvital/vital-node';
+import {
+  FlatList,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
+} from 'react-native';
+import React, { useEffect, useState } from 'react';
+import { vitalNodeClient } from '../App';
 import { VITAL_ENVIRONMENT, VITAL_REGION } from '../Environment';
-import {HStack, VStack} from 'native-base';
-import Icon from 'react-native-vector-icons/FontAwesome5';
+import { HStack, VStack } from 'native-base';
+import { FontAwesome5 as Icon } from '@expo/vector-icons';
 import Dialog from 'react-native-dialog';
 import styles from '../Styles';
 import { VitalCore } from '@tryvital/vital-core-react-native';
 import { VitalHealth } from '@tryvital/vital-health-react-native';
 
-const DeleteButton = ({onPress}) => (
-  <Icon
-    onPress={onPress}
-    name="trash"
-    style={styles.iconButtonDestructive}
-  />
+const DeleteButton = ({ onPress }) => (
+  <Icon onPress={onPress} name="trash" style={styles.iconButtonDestructive} />
 );
 
-const LinkButton = ({onPress, isLoading}) => (
+const LinkButton = ({ onPress, isLoading }) => (
   <Icon
     onPress={onPress}
     name="link"
@@ -28,38 +31,42 @@ const LinkButton = ({onPress, isLoading}) => (
 );
 
 enum ResourceStatus {
-  Loaded, Loading, Failure
+  Loaded,
+  Loading,
+  Failure,
 }
 
-type ResourceLoaded<T> = { status: ResourceStatus.Loaded, users: T };
+type ResourceLoaded<T> = { status: ResourceStatus.Loaded; users: T };
 type ResourceLoading = { status: ResourceStatus.Loading };
-type ResourceFailure = { status: ResourceStatus.Failure, error: any };
+type ResourceFailure = { status: ResourceStatus.Failure; error: any };
 
-type ResourceState<T> = ResourceLoaded<T> | ResourceLoading | ResourceFailure
+type ResourceState<T> = ResourceLoaded<T> | ResourceLoading | ResourceFailure;
 
-const HomeScreen = ({navigation}) => {
-  const [getUsers, setUsers] = useState({ status: ResourceStatus.Loading } as ResourceState<ClientFacingUser[]>);
+const HomeScreen = ({ navigation }) => {
+  const [getUsers, setUsers] = useState({
+    status: ResourceStatus.Loading,
+  } as ResourceState<Vital.ClientFacingUser[]>);
   const [isLoading, setLoading] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
   const textInput = React.useRef<TextInput>(null);
 
-  const [isSDKConfigured, setIsSDKConfigured] = useState(false);
+  const [_, setIsSDKConfigured] = useState(false);
   const [sdkCurrentUserId, setSDKCurrentUserId] = useState<string | null>(null);
 
   // Observe Vital Core SDK Status
   useEffect(() => {
-    const subscription = VitalCore.observeStatusChange((status) => {
-      console.log("Vital Core SDK status:", status)
-      setIsSDKConfigured(status.includes("configured"));
+    const subscription = VitalCore.observeStatusChange(status => {
+      console.log('Vital Core SDK status:', status);
+      setIsSDKConfigured(status.includes('configured'));
 
-      VitalCore.currentUserId().then((userId) => {
-        console.log("Vital Current User ID:", userId)
+      VitalCore.currentUserId().then(userId => {
+        console.log('Vital Current User ID:', userId);
         setSDKCurrentUserId(userId);
       });
     });
 
     return () => {
-      console.log("clean up HomeScreen subscription");
+      console.log('clean up HomeScreen subscription');
       subscription.remove();
     };
   }, []);
@@ -67,17 +74,19 @@ const HomeScreen = ({navigation}) => {
   useEffect(() => {
     setLoading(true);
 
-    vitalNodeClient.User.getAll()
+    vitalNodeClient.user
+      .getAll()
       .then(response => {
         setUsers({ status: ResourceStatus.Loaded, users: response.users });
       })
       .catch(err => {
         setUsers({ status: ResourceStatus.Failure, error: err });
-        console.log({err});
+        console.log({ err });
       })
       .finally(() => setLoading(false));
 
     navigation.setOptions({
+      // eslint-disable-next-line react/no-unstable-nested-components
       headerRight: () => (
         <>
           <Icon
@@ -97,16 +106,16 @@ const HomeScreen = ({navigation}) => {
         </>
       ),
     });
-
   }, [navigation]);
 
   const handleCreateUser = () => {
     setIsOpen(false);
     const newUserClientId = textInput.current!.state as string;
     setLoading(true);
-    vitalNodeClient.User.create(newUserClientId)
+    vitalNodeClient.user
+      .create({ clientUserId: newUserClientId })
       .then(_ => {
-        return vitalNodeClient.User.getAll();
+        return vitalNodeClient.user.getAll();
       })
       .then(response => {
         setUsers({ status: ResourceStatus.Loaded, users: response.users });
@@ -119,9 +128,9 @@ const HomeScreen = ({navigation}) => {
 
   const handlePressOnConnectDevice = async (user_id: string) => {
     setLoading(true);
-    const token = await vitalNodeClient.Link.create(user_id);
+    const token = await vitalNodeClient.link.token({ userId: user_id });
     navigation.navigate('ConnectSource', {
-      linkToken: token.link_token,
+      linkToken: token.linkToken,
       environment: VITAL_ENVIRONMENT,
       region: VITAL_REGION,
     });
@@ -131,9 +140,10 @@ const HomeScreen = ({navigation}) => {
 
   const handlePressDeleteUser = async (user_id: string) => {
     setLoading(true);
-    vitalNodeClient.User.delete(user_id)
+    vitalNodeClient.user
+      .delete(user_id)
       .then(_ => {
-        return vitalNodeClient.User.getAll();
+        return vitalNodeClient.user.getAll();
       })
       .then(response => {
         setUsers({ status: ResourceStatus.Loaded, users: response.users });
@@ -145,9 +155,10 @@ const HomeScreen = ({navigation}) => {
   };
 
   type UserListProps = {
-    state: ResourceState<ClientFacingUser[]>
-    sdkCurrentUserId: string | null
+    state: ResourceState<Vital.ClientFacingUser[]>;
+    sdkCurrentUserId: string | null;
   };
+  // eslint-disable-next-line react/no-unstable-nested-components
   const UserList = (props: UserListProps) => {
     switch (props.state.status) {
       case ResourceStatus.Loading:
@@ -160,48 +171,55 @@ const HomeScreen = ({navigation}) => {
           </VStack>
         );
       case ResourceStatus.Loaded:
-      return (
-        <FlatList
-          data={props.state.users}
-          renderItem={({item}) => (
-            <TouchableOpacity
-              onPress={() => navigation.navigate('User', {user: item})}
-            >
-              <HStack
-                justifyContent={'space-between'}
-                px={4}
-                py={2}
-                borderBottomColor={'gray.100'}
-                borderBottomWidth={1}
+        return (
+          <FlatList
+            data={props.state.users}
+            renderItem={({ item }) => (
+              <TouchableOpacity
+                onPress={() => navigation.navigate('User', { user: item })}
               >
-                <VStack flexShrink={1}>
-                  <Text style={styles.itemTitle}>{item.client_user_id}</Text>
-                  {
-                    item.user_id.toLowerCase() == sdkCurrentUserId?.toLowerCase() &&
-                    <HStack alignItems={"center"}>
-                      <Icon name="arrow-up" size={14} color={"green"} />
-                      <Text style={styles.itemSubtitle}>Current SDK User</Text>
-                    </HStack>
-                  }
-                </VStack>
-                <HStack alignItems={"center"}>
-                  <Icon name="chevron-right" size={14} color={"grey"} style={{marginLeft: 4}} />
-                  {
-                    item.user_id.toLowerCase() == sdkCurrentUserId?.toLowerCase() &&
-                    <LinkButton
-                      onPress={() => handlePressOnConnectDevice(item.user_id)}
-                      isLoading={isLoading}
+                <HStack
+                  justifyContent={'space-between'}
+                  px={4}
+                  py={2}
+                  borderBottomColor={'gray.100'}
+                  borderBottomWidth={1}
+                >
+                  <VStack flexShrink={1}>
+                    <Text style={styles.itemTitle}>{item.clientUserId}</Text>
+                    {item.userId.toLowerCase() ==
+                      sdkCurrentUserId?.toLowerCase() && (
+                        <HStack alignItems={'center'}>
+                          <Icon name="arrow-up" size={14} color={'green'} />
+                          <Text style={styles.itemSubtitle}>
+                            Current SDK User
+                          </Text>
+                        </HStack>
+                      )}
+                  </VStack>
+                  <HStack alignItems={'center'}>
+                    <Icon
+                      name="chevron-right"
+                      size={14}
+                      color={'grey'}
+                      style={{ marginLeft: 4 }}
                     />
-                  }
-                  <DeleteButton
-                    onPress={() => handlePressDeleteUser(item.user_id)}
-                  />
+                    {item.userId.toLowerCase() ==
+                      sdkCurrentUserId?.toLowerCase() && (
+                        <LinkButton
+                          onPress={() => handlePressOnConnectDevice(item.userId)}
+                          isLoading={isLoading}
+                        />
+                      )}
+                    <DeleteButton
+                      onPress={() => handlePressDeleteUser(item.userId)}
+                    />
+                  </HStack>
                 </HStack>
-              </HStack>
-            </TouchableOpacity>
-          )}
-        />
-      );
+              </TouchableOpacity>
+            )}
+          />
+        );
     }
   };
 
