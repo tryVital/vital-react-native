@@ -1,4 +1,34 @@
 {
-  "name": "example",
-  "displayName": "example"
+  "expo": {
+    "name": "example",
+    "slug": "example",
+    "scheme": "example",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "platforms": [
+      "ios",
+      "android"
+    ],
+    "ios": {
+      "bundleIdentifier": "com.tryvital.example"
+    },
+    "android": {
+      "package": "com.tryvital.example",
+
+    },
+    "plugins": [
+      "expo-dev-client",
+      "expo-font",
+      [
+        "expo-build-properties",
+        {
+          "android": {
+            "minSdkVersion": 26
+          }
+        }
+      ],
+      "@tryvital/vital-core-react-native",
+      "@tryvital/vital-health-react-native"
+    ]
+  }
 }

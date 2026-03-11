@@ -75,7 +75,8 @@
   },
   "peerDependencies": {
     "react": "*",
-    "react-native": "*"
+    "react-native": "*",
+    "expo": "*"
   },
   "engines": {
     "node": ">= 18.0.0"
