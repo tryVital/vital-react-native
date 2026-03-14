@@ -23,12 +23,19 @@
         "expo-build-properties",
         {
           "android": {
-            "minSdkVersion": 26
+            "minSdkVersion": 29
           }
         }
       ],
       "@tryvital/vital-core-react-native",
-      "@tryvital/vital-health-react-native"
+      [
+        "@tryvital/vital-health-react-native",
+        {
+          "samsungHealth": {
+            "aarPath": "../vendor/samsung-health-data-api-1.0.0.aar"
+          }
+        }
+      ]
     ]
   }
 }

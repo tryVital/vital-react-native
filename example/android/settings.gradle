@@ -1,4 +1,9 @@
 pluginManagement {
+  repositories {
+    gradlePluginPortal()
+    google()
+    mavenCentral()
+  }
   def reactNativeGradlePlugin = new File(
     providers.exec {
       workingDir(rootDir)
@@ -20,6 +25,7 @@ pluginManagement {
 plugins {
   id("com.facebook.react.settings")
   id("expo-autolinking-settings")
+  id("io.tryvital.shealth-settings-plugin") version "5.0.0-beta.4"
 }
 
 extensions.configure(com.facebook.react.ReactSettingsExtension) { ex ->

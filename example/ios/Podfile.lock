@@ -2072,7 +2072,7 @@ PODS:
     - ReactCommon/turbomodule/core
     - ReactNativeDependencies
     - Yoga
-  - vital-core-react-native (5.4.3):
+  - vital-core-react-native (5.5.0):
     - hermes-engine
     - RCTRequired
     - RCTTypeSafety
@@ -2095,7 +2095,7 @@ PODS:
     - ReactNativeDependencies
     - VitalCore (~> 1.8.6)
     - Yoga
-  - vital-devices-react-native (5.4.3):
+  - vital-devices-react-native (5.5.0):
     - hermes-engine
     - RCTRequired
     - RCTTypeSafety
@@ -2118,7 +2118,7 @@ PODS:
     - ReactNativeDependencies
     - VitalDevices (~> 1.8.6)
     - Yoga
-  - vital-health-react-native (5.4.3):
+  - vital-health-react-native (5.5.0):
     - hermes-engine
     - RCTRequired
     - RCTTypeSafety
@@ -2519,9 +2519,9 @@ SPEC CHECKSUMS:
   RNPermissions: 3118e6558c4e97a2f3c67643710b6869650c0a2e
   RNScreens: d8d6f1792f6e7ac12b0190d33d8d390efc0c1845
   RNSVG: 31d6639663c249b7d5abc9728dde2041eb2a3c34
-  vital-core-react-native: 8374da59a7a3047a0957c8e4d158593f89ffe4d0
-  vital-devices-react-native: 0073274c6161832ad3aaa8e41c9b261750602217
-  vital-health-react-native: 9337804483c733490a2bb79f4f29578be9a42dd5
+  vital-core-react-native: 1b70824939e465f5f864a4e7579fd9385ce8eb5e
+  vital-devices-react-native: 8afad1792d69697c73a176b34ea068a456604005
+  vital-health-react-native: 9de89552161ac6c8c0581814a269a0ea0d32ecf0
   VitalCore: 76253255283525e4b7544fe447cafc021fa07874
   VitalDevices: 2f7d222e7a607e01a0e146cad11bb25bf43452e8
   VitalHealthKit: 30a897140cabd27729c3311b0cee7381957f2a74
