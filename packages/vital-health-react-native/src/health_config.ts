@@ -1,5 +1,16 @@
 export type ConnectionPolicy = 'autoConnect' | 'explicit';
 
+export enum IOSHealthProvider {
+  AppleHealthKit = 'apple_health_kit',
+}
+
+export enum AndroidHealthProvider {
+  HealthConnect = 'health_connect',
+  SamsungHealth = 'samsung_health',
+}
+
+export type HealthProvider = IOSHealthProvider | AndroidHealthProvider;
+
 export class HealthConfig {
   logsEnabled = true;
   numberOfDaysToBackFill = 30;
@@ -9,6 +20,7 @@ export class HealthConfig {
 }
 
 export class AndroidHealthConfig {
+  provider: AndroidHealthProvider = AndroidHealthProvider.HealthConnect;
   syncOnAppStart = true;
 }
 
