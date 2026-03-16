@@ -9,7 +9,10 @@ export enum AndroidHealthProvider {
   SamsungHealth = 'samsung_health',
 }
 
-export type HealthProvider = IOSHealthProvider | AndroidHealthProvider;
+export type HealthProvider =
+  | 'apple_health_kit'
+  | 'health_connect'
+  | 'samsung_health';
 
 export class HealthConfig {
   logsEnabled = true;
@@ -20,7 +23,6 @@ export class HealthConfig {
 }
 
 export class AndroidHealthConfig {
-  provider: AndroidHealthProvider = AndroidHealthProvider.HealthConnect;
   syncOnAppStart = true;
 }
 

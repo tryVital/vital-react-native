@@ -1,6 +1,6 @@
 import { NativeEventEmitter, NativeModules, Platform } from 'react-native';
 import { AndroidHealthProvider, IOSHealthProvider } from './health_config';
-import type { HealthConfig } from './health_config';
+import type { HealthConfig, HealthProvider } from './health_config';
 import type { AskConfig } from './ask_config';
 import type { Subscription } from '@tryvital/vital-core-react-native';
 
@@ -24,56 +24,46 @@ const VitalHealthReactNative = NativeModules.VitalHealthReactNative
       }
     );
 
-const providerAwareNativeMethods = new Set([
-  'ask',
-  'autoSyncThrottle',
-  'backgroundSyncMinimumInterval',
-  'configure',
-  'configureClient',
-  'connect',
-  'disableBackgroundSync',
-  'disconnect',
-  'enableBackgroundSync',
-  'getConnectionStatus',
-  'getPauseSynchronization',
-  'hasAskedForPermission',
-  'isAvailable',
-  'isBackgroundSyncEnabled',
-  'openPlatformHealthApp',
-  'openSyncProgressView',
-  'setAutoSyncThrottle',
-  'setBackgroundSyncMinimumInterval',
-  'setPauseSynchronization',
-  'setSyncNotificationContent',
-  'setUserId',
-  'syncData',
-  'writeHealthData',
-]);
-
-let currentAndroidProvider = AndroidHealthProvider.HealthConnect;
-
-function nativeProvider() {
+function defaultHealthProvider(): HealthProvider {
   return Platform.OS === 'android'
-    ? currentAndroidProvider
+    ? AndroidHealthProvider.HealthConnect
     : IOSHealthProvider.AppleHealthKit;
 }
 
-export const VitalHealthReactNativeModule = new Proxy(VitalHealthReactNative, {
-  get(target, prop, receiver) {
-    const value = Reflect.get(target, prop, receiver);
+function isAndroidHealthProvider(
+  provider: HealthProvider
+): provider is AndroidHealthProvider {
+  return (
+    provider === AndroidHealthProvider.HealthConnect ||
+    provider === AndroidHealthProvider.SamsungHealth
+  );
+}
 
-    if (typeof value !== 'function') {
-      return value;
+function validateHealthProvider(provider: HealthProvider): HealthProvider {
+  if (Platform.OS === 'ios') {
+    if (provider !== IOSHealthProvider.AppleHealthKit) {
+      throw new Error(
+        `Provider ${provider} is only supported on Android. Use ${IOSHealthProvider.AppleHealthKit} on iOS.`
+      );
     }
 
-    if (typeof prop !== 'string' || !providerAwareNativeMethods.has(prop)) {
-      return value.bind(target);
+    return provider;
+  }
+
+  if (Platform.OS === 'android') {
+    if (!isAndroidHealthProvider(provider)) {
+      throw new Error(
+        `Provider ${provider} is only supported on iOS. Use ${AndroidHealthProvider.HealthConnect} or ${AndroidHealthProvider.SamsungHealth} on Android.`
+      );
     }
 
-    return (...args: unknown[]) =>
-      value.call(target, nativeProvider(), ...args);
-  },
-});
+    return provider;
+  }
+
+  throw new Error(`Unsupported platform: ${Platform.OS}.`);
+}
+
+export const VitalHealthReactNativeModule = VitalHealthReactNative;
 
 export const VitalHealthEvents = {
   statusEvent: 'Status',
@@ -93,21 +83,36 @@ export type ConnectionStatus =
   | 'connectionPaused';
 
 export class VitalHealth {
-  static status = new NativeEventEmitter(VitalHealthReactNativeModule);
-  private static eventEmitter = new NativeEventEmitter(
-    VitalHealthReactNativeModule
-  );
+  static status = new NativeEventEmitter(VitalHealthReactNative);
+  private static eventEmitter = new NativeEventEmitter(VitalHealthReactNative);
 
   static setEventEmitter(emitter: NativeEventEmitter) {
     this.eventEmitter = emitter;
   }
 
-  static get canEnableBackgroundSyncNoninteractively(): boolean {
+  static getCanEnableBackgroundSyncNoninteractively(): boolean {
     return Platform.OS !== 'android';
   }
 
+  /**
+   * @deprecated Use `getCanEnableBackgroundSyncNoninteractively()` instead.
+   */
+  static get canEnableBackgroundSyncNoninteractively(): boolean {
+    return this.getCanEnableBackgroundSyncNoninteractively();
+  }
+
+  static getConnectionStatus(
+    provider: HealthProvider = defaultHealthProvider()
+  ): Promise<ConnectionStatus> {
+    provider = validateHealthProvider(provider);
+    return VitalHealthReactNative.getConnectionStatus(provider);
+  }
+
+  /**
+   * @deprecated Use `getConnectionStatus()` instead.
+   */
   static get connectionStatus(): Promise<ConnectionStatus> {
-    return VitalHealthReactNativeModule.getConnectionStatus();
+    return this.getConnectionStatus();
   }
 
   static observeConnectionStatusChange(
@@ -125,7 +130,7 @@ export class VitalHealth {
       'VitalHealthConnectionStatus',
       wrappedListener
     );
-    this.connectionStatus.then(wrappedListener);
+    this.getConnectionStatus().then(wrappedListener);
 
     return {
       remove() {
@@ -138,8 +143,18 @@ export class VitalHealth {
   /**
    * Whether health data sync is paused at the moment.
    */
+  static getPauseSynchronization(
+    provider: HealthProvider = defaultHealthProvider()
+  ): Promise<boolean> {
+    provider = validateHealthProvider(provider);
+    return VitalHealthReactNative.getPauseSynchronization(provider);
+  }
+
+  /**
+   * @deprecated Use `getPauseSynchronization()` instead.
+   */
   static get pauseSynchronization(): Promise<boolean> {
-    return VitalHealthReactNativeModule.getPauseSynchronization();
+    return this.getPauseSynchronization();
   }
 
   /**
@@ -152,12 +167,23 @@ export class VitalHealth {
    *
    * Whether Background Sync on Android is enabled at the moment.
    */
-  static get isBackgroundSyncEnabled(): Promise<boolean> {
+  static getIsBackgroundSyncEnabled(
+    provider: HealthProvider = defaultHealthProvider()
+  ): Promise<boolean> {
+    provider = validateHealthProvider(provider);
+
     if (Platform.OS !== 'android') {
       return Promise.resolve(true);
     }
 
-    return VitalHealthReactNativeModule.isBackgroundSyncEnabled();
+    return VitalHealthReactNative.isBackgroundSyncEnabled(provider);
+  }
+
+  /**
+   * @deprecated Use `getIsBackgroundSyncEnabled()` instead.
+   */
+  static get isBackgroundSyncEnabled(): Promise<boolean> {
+    return this.getIsBackgroundSyncEnabled();
   }
 
   /**
@@ -167,12 +193,23 @@ export class VitalHealth {
    *
    * On iOS, this property always returns `3_600_000`.
    */
-  static get backgroundSyncMinimumInterval(): Promise<number> {
+  static getBackgroundSyncMinimumInterval(
+    provider: HealthProvider = defaultHealthProvider()
+  ): Promise<number> {
+    provider = validateHealthProvider(provider);
+
     if (Platform.OS !== 'android') {
       return Promise.resolve(3_600_000);
     }
 
-    return VitalHealthReactNativeModule.backgroundSyncMinimumInterval();
+    return VitalHealthReactNative.backgroundSyncMinimumInterval(provider);
+  }
+
+  /**
+   * @deprecated Use `getBackgroundSyncMinimumInterval()` instead.
+   */
+  static get backgroundSyncMinimumInterval(): Promise<number> {
+    return this.getBackgroundSyncMinimumInterval();
   }
 
   /**
@@ -185,34 +222,54 @@ export class VitalHealth {
    *
    * On iOS, this property always returns `0`.
    */
-  static get autoSyncThrottle(): Promise<number> {
+  static getAutoSyncThrottle(
+    provider: HealthProvider = defaultHealthProvider()
+  ): Promise<number> {
+    provider = validateHealthProvider(provider);
+
     if (Platform.OS !== 'android') {
       return Promise.resolve(0);
     }
 
-    return VitalHealthReactNativeModule.autoSyncThrottle();
+    return VitalHealthReactNative.autoSyncThrottle(provider);
   }
 
-  static isAvailable(): Promise<boolean> {
+  /**
+   * @deprecated Use `getAutoSyncThrottle()` instead.
+   */
+  static get autoSyncThrottle(): Promise<number> {
+    return this.getAutoSyncThrottle();
+  }
+
+  static isAvailable(
+    provider: HealthProvider = defaultHealthProvider()
+  ): Promise<boolean> {
+    provider = validateHealthProvider(provider);
+
     if (Platform.OS === 'android') {
-      return VitalHealthReactNativeModule.isAvailable();
+      return VitalHealthReactNative.isAvailable(provider);
     } else {
       return Promise.resolve(true);
     }
   }
 
-  static configure(healthConfig: HealthConfig): Promise<void> {
-    if (Platform.OS === 'android') {
-      currentAndroidProvider = healthConfig.androidConfig.provider;
+  static configure(
+    healthConfig: HealthConfig,
+    provider: HealthProvider = defaultHealthProvider()
+  ): Promise<void> {
+    provider = validateHealthProvider(provider);
 
-      return VitalHealthReactNativeModule.configure(
+    if (Platform.OS === 'android') {
+      return VitalHealthReactNative.configure(
+        provider,
         healthConfig.androidConfig.syncOnAppStart,
         healthConfig.numberOfDaysToBackFill,
         healthConfig.logsEnabled,
         healthConfig.connectionPolicy
       );
     } else {
-      return VitalHealthReactNativeModule.configure(
+      return VitalHealthReactNative.configure(
+        provider,
         healthConfig.iOSConfig.backgroundDeliveryEnabled,
         healthConfig.numberOfDaysToBackFill,
         healthConfig.logsEnabled,
@@ -226,8 +283,11 @@ export class VitalHealth {
    *
    * @precondition You must configure the Health SDK to use the `explicit` Connection Policy.
    */
-  static async connect(): Promise<void> {
-    return await VitalHealthReactNativeModule.connect();
+  static async connect(
+    provider: HealthProvider = defaultHealthProvider()
+  ): Promise<void> {
+    provider = validateHealthProvider(provider);
+    return await VitalHealthReactNative.connect(provider);
   }
 
   /**
@@ -235,8 +295,11 @@ export class VitalHealth {
    *
    * @precondition You must configure the Health SDK to use the `explicit` Connection Policy.
    */
-  static async disconnect(): Promise<void> {
-    return await VitalHealthReactNativeModule.disconnect();
+  static async disconnect(
+    provider: HealthProvider = defaultHealthProvider()
+  ): Promise<void> {
+    provider = validateHealthProvider(provider);
+    return await VitalHealthReactNative.disconnect(provider);
   }
 
   /**
@@ -277,14 +340,18 @@ export class VitalHealth {
    *
    * @return `true` if the background sync has been enabled successfully. `false` otherwise.
    */
-  static async enableBackgroundSync(): Promise<boolean> {
+  static async enableBackgroundSync(
+    provider: HealthProvider = defaultHealthProvider()
+  ): Promise<boolean> {
+    provider = validateHealthProvider(provider);
+
     if (Platform.OS !== 'android') {
       // iOS background delivery does not require user explicit consent.
       // It requires only the app-level HealthKit Bgnd. Delivery entitlement.
       return true;
     }
 
-    return await VitalHealthReactNativeModule.enableBackgroundSync();
+    return await VitalHealthReactNative.enableBackgroundSync(provider);
   }
 
   /**
@@ -300,14 +367,18 @@ export class VitalHealth {
    *
    * Disable background sync on Android.
    */
-  static async disableBackgroundSync(): Promise<void> {
+  static async disableBackgroundSync(
+    provider: HealthProvider = defaultHealthProvider()
+  ): Promise<void> {
+    provider = validateHealthProvider(provider);
+
     if (Platform.OS !== 'android') {
       // iOS background delivery does not require user explicit consent.
       // It requires only the app-level HealthKit Bgnd. Delivery entitlement.
       return;
     }
 
-    return await VitalHealthReactNativeModule.disableBackgroundSync();
+    return await VitalHealthReactNative.disableBackgroundSync(provider);
   }
 
   /**
@@ -323,15 +394,19 @@ export class VitalHealth {
    * Refer to the [Vital Health Connect guide for full context and setup instructions](https://docs.tryvital.io/wearables/guides/android_health_connect).
    */
   static async setSyncNotificationContent(
-    content: SyncNotificationContent
+    content: SyncNotificationContent,
+    provider: HealthProvider = defaultHealthProvider()
   ): Promise<void> {
+    provider = validateHealthProvider(provider);
+
     if (Platform.OS !== 'android') {
       // iOS background delivery does not require user explicit consent.
       // It requires only the app-level HealthKit Bgnd. Delivery entitlement.
       return;
     }
 
-    return await VitalHealthReactNativeModule.setSyncNotificationContent(
+    return await VitalHealthReactNative.setSyncNotificationContent(
+      provider,
       JSON.stringify(content)
     );
   }
@@ -347,13 +422,17 @@ export class VitalHealth {
    * A throttling threshold below 5 seconds is ignored.
    */
   static async setAutoSyncThrottle(
-    thresholdInMilliseconds: number
+    thresholdInMilliseconds: number,
+    provider: HealthProvider = defaultHealthProvider()
   ): Promise<void> {
+    provider = validateHealthProvider(provider);
+
     if (Platform.OS !== 'android') {
       return;
     }
 
-    return await VitalHealthReactNativeModule.setAutoSyncThrottle(
+    return await VitalHealthReactNative.setAutoSyncThrottle(
+      provider,
       thresholdInMilliseconds
     );
   }
@@ -368,13 +447,17 @@ export class VitalHealth {
    * A minimum interval below 3600 seconds is ignored.
    */
   static async setBackgroundSyncMinimumInterval(
-    intervalInMilliseconds: number
+    intervalInMilliseconds: number,
+    provider: HealthProvider = defaultHealthProvider()
   ): Promise<void> {
+    provider = validateHealthProvider(provider);
+
     if (Platform.OS !== 'android') {
       return;
     }
 
-    return await VitalHealthReactNativeModule.setBackgroundSyncMinimumInterval(
+    return await VitalHealthReactNative.setBackgroundSyncMinimumInterval(
+      provider,
       intervalInMilliseconds
     );
   }
@@ -382,28 +465,40 @@ export class VitalHealth {
   /**
    * Pause or unpause health data sync.
    */
-  static async setPauseSynchronization(paused: boolean) {
-    return await VitalHealthReactNativeModule.setPauseSynchronization(paused);
+  static async setPauseSynchronization(
+    paused: boolean,
+    provider: HealthProvider = defaultHealthProvider()
+  ) {
+    provider = validateHealthProvider(provider);
+    return await VitalHealthReactNative.setPauseSynchronization(
+      provider,
+      paused
+    );
   }
 
   static askForResources(
-    resources: VitalResource[]
+    resources: VitalResource[],
+    provider: HealthProvider = defaultHealthProvider()
   ): Promise<PermissionOutcome> {
-    return this.ask(resources, []);
+    return this.ask(resources, [], undefined, provider);
   }
 
   static async ask(
     readResources: VitalResource[],
     writeResources: VitalWriteResource[],
-    config: AskConfig | undefined = undefined
+    config: AskConfig | undefined = undefined,
+    provider: HealthProvider = defaultHealthProvider()
   ): Promise<PermissionOutcome> {
+    provider = validateHealthProvider(provider);
+
     if (config && Platform.OS !== config.type) {
       throw new Error(
         `ask config is for ${config.type} but runtime is ${Platform.OS}.`
       );
     }
 
-    const result = await VitalHealthReactNativeModule.ask(
+    const result = await VitalHealthReactNative.ask(
+      provider,
       readResources,
       writeResources,
       config
@@ -420,9 +515,12 @@ export class VitalHealth {
     resource: VitalWriteResource,
     value: number,
     startDate: Date,
-    endDate: Date
+    endDate: Date,
+    provider: HealthProvider = defaultHealthProvider()
   ): Promise<void> {
-    return VitalHealthReactNativeModule.writeHealthData(
+    provider = validateHealthProvider(provider);
+    return VitalHealthReactNative.writeHealthData(
+      provider,
       resource,
       value,
       startDate.getTime(),
@@ -430,24 +528,39 @@ export class VitalHealth {
     );
   }
 
-  static hasAskedForPermission(resource: VitalResource): Promise<boolean> {
-    return VitalHealthReactNativeModule.hasAskedForPermission(resource);
+  static hasAskedForPermission(
+    resource: VitalResource,
+    provider: HealthProvider = defaultHealthProvider()
+  ): Promise<boolean> {
+    provider = validateHealthProvider(provider);
+    return VitalHealthReactNative.hasAskedForPermission(provider, resource);
   }
 
-  static syncData(resources: VitalResource[] = []): Promise<void> {
-    return VitalHealthReactNativeModule.syncData(resources);
+  static syncData(
+    resources: VitalResource[] = [],
+    provider: HealthProvider = defaultHealthProvider()
+  ): Promise<void> {
+    provider = validateHealthProvider(provider);
+    return VitalHealthReactNative.syncData(provider, resources);
   }
 
-  static openPlatformHealthApp(): Promise<void> {
-    return VitalHealthReactNativeModule.openPlatformHealthApp();
+  static openPlatformHealthApp(
+    provider: HealthProvider = defaultHealthProvider()
+  ): Promise<void> {
+    provider = validateHealthProvider(provider);
+    return VitalHealthReactNative.openPlatformHealthApp(provider);
   }
 
-  static async openSyncProgressView(): Promise<void> {
+  static async openSyncProgressView(
+    provider: HealthProvider = defaultHealthProvider()
+  ): Promise<void> {
+    provider = validateHealthProvider(provider);
+
     if (Platform.OS !== 'ios') {
       return;
     }
 
-    return await VitalHealthReactNativeModule.openSyncProgressView();
+    return await VitalHealthReactNative.openSyncProgressView(provider);
   }
 }
 
