@@ -1,10 +1,10 @@
 package com.vitalhealthreactnative
 
 sealed class VitalHealthEvent(val value: String) {
-  object HealthConnectSyncStatus : VitalHealthEvent("HealthConnectSyncStatus")
+  object HealthConnectSyncStatus : VitalHealthEvent("Status")
   object HealthConnectConnectionStatus : VitalHealthEvent("HealthConnectConnectionStatus")
   object SamsungHealthSyncStatus : VitalHealthEvent("SamsungHealthSyncStatus")
-  object SamsungHealthConnectionStatus : VitalHealthEvent("VitalHealthConnectConnectionStatus")
+  object SamsungHealthConnectionStatus : VitalHealthEvent("SamsungHealthConnectionStatus")
 
   companion object {
     fun values(): Array<VitalHealthEvent> {
