@@ -33,15 +33,6 @@
       <intent-filter>
         <action android:name="androidx.health.ACTION_SHOW_PERMISSIONS_RATIONALE"/>
       </intent-filter>
-      <intent-filter>
-        <action android:name="androidx.health.ACTION_SHOW_PERMISSIONS_RATIONALE"/>
-      </intent-filter>
-      <intent-filter>
-        <action android:name="androidx.health.ACTION_SHOW_PERMISSIONS_RATIONALE"/>
-      </intent-filter>
-      <intent-filter>
-        <action android:name="androidx.health.ACTION_SHOW_PERMISSIONS_RATIONALE"/>
-      </intent-filter>
     </activity>
   </application>
 </manifest>

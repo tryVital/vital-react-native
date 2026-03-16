@@ -2785,19 +2785,19 @@
   dependencies:
     tslib "^2.8.0"
 
-"@tryvital/vital-core-react-native@5.4.3", "@tryvital/vital-core-react-native@file:../packages/vital-core-react-native":
-  version "5.4.3"
+"@tryvital/vital-core-react-native@5.5.0", "@tryvital/vital-core-react-native@file:../packages/vital-core-react-native":
+  version "5.5.0"
 
 "@tryvital/vital-devices-react-native@file:../packages/vital-devices-react-native":
-  version "5.4.3"
+  version "5.5.0"
   dependencies:
-    "@tryvital/vital-core-react-native" "5.4.3"
+    "@tryvital/vital-core-react-native" "5.5.0"
     react-native-permissions "^3.6.1"
 
 "@tryvital/vital-health-react-native@file:../packages/vital-health-react-native":
-  version "5.4.3"
+  version "5.5.0"
   dependencies:
-    "@tryvital/vital-core-react-native" "5.4.3"
+    "@tryvital/vital-core-react-native" "5.5.0"
 
 "@tryvital/vital-node@^3.1.544":
   version "3.1.551"

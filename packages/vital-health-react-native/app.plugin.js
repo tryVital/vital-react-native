@@ -3,11 +3,30 @@ const {
   withInfoPlist,
   withAndroidManifest,
   withAppDelegate,
+  withGradleProperties,
+  withProjectBuildGradle,
+  withSettingsGradle,
 } = require('expo/config-plugins');
 const { withPlugins } = require('expo/config-plugins');
 const { addObjcImports, insertContentsInsideObjcFunctionBlock, addSwiftImports, insertContentsInsideSwiftFunctionBlock } = require('@expo/config-plugins/build/ios/codeMod');
+const { addWarningAndroid } = require('@expo/config-plugins/build/utils/warnings');
+const { updateAndroidBuildProperty } = require('@expo/config-plugins/build/android/BuildProperties');
 
 const HEALTH_SHARE = 'Allow $(PRODUCT_NAME) to check health info';
+const SAMSUNG_HEALTH_SETTINGS_PLUGIN = 'io.tryvital.shealth-settings-plugin';
+const SAMSUNG_HEALTH_PROJECT_PLUGIN = 'io.tryvital.shealth-project-plugin';
+const SAMSUNG_HEALTH_PLUGIN_VERSION = '5.0.0-beta.4';
+const SAMSUNG_HEALTH_SETTINGS_PLUGIN_DECLARATION =
+  `id("${SAMSUNG_HEALTH_SETTINGS_PLUGIN}") version "${SAMSUNG_HEALTH_PLUGIN_VERSION}"`;
+const SAMSUNG_HEALTH_PLUGIN_CLASSPATH =
+  `io.tryvital:shealth-plugins:${SAMSUNG_HEALTH_PLUGIN_VERSION}`;
+
+const escapeRegExp = (value) => value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+
+const getSamsungHealthAarPath = ({ samsungHealth } = {}) => {
+  const aarPath = samsungHealth?.aarPath;
+  return typeof aarPath === 'string' && aarPath.trim() ? aarPath.trim() : null;
+};
 
 const withHealthKit = (config, { healthSharePermission } = {}) => {
 
@@ -115,5 +134,144 @@ const withHealthConnect = function androidManifestPlugin(config) {
   });
 };
 
-module.exports = (config) =>
-  withPlugins(config, [[withHealthKit], [withHealthConnect]]);
+const setSettingsPlugin = (settingsGradle) => {
+  if (/pluginManagement\s*{/.test(settingsGradle) && !/pluginManagement\s*{[\s\S]*repositories\s*{/.test(settingsGradle)) {
+    settingsGradle = settingsGradle.replace(
+      /pluginManagement\s*{/,
+      `pluginManagement {\n  repositories {\n    gradlePluginPortal()\n    google()\n    mavenCentral()\n  }`
+    );
+  }
+
+  if (/dependencyResolutionManagement\s*{/.test(settingsGradle) && !/dependencyResolutionManagement\s*{[\s\S]*repositories\s*{/.test(settingsGradle)) {
+    settingsGradle = settingsGradle.replace(
+      /dependencyResolutionManagement\s*{/,
+      `dependencyResolutionManagement {\n  repositories {\n    google()\n    mavenCentral()\n  }`
+    );
+  }
+
+  settingsGradle = settingsGradle.replace(
+    new RegExp(
+      `\\n?buildscript\\s*\\{\\s*dependencies\\s*\\{\\s*classpath\\s+['"]${escapeRegExp(SAMSUNG_HEALTH_PLUGIN_CLASSPATH)}['"]\\s*\\}\\s*\\}\\n?`,
+      'g'
+    ),
+    '\n'
+  );
+
+  settingsGradle = settingsGradle.replace(
+    new RegExp(
+      `(^|\\n)\\s*classpath\\s+['"]io\\.tryvital:shealth-plugins:[^'"]+['"]\\s*`,
+      'gm'
+    ),
+    '\n'
+  );
+
+  settingsGradle = settingsGradle.replace(
+    new RegExp(`(^|\\n)\\s*id(?:\\s+|\\()['"]${escapeRegExp(SAMSUNG_HEALTH_SETTINGS_PLUGIN)}['"]\\)?[^\\n]*`, 'gm'),
+    ''
+  );
+
+  settingsGradle = settingsGradle.replace(
+    new RegExp(`(^|\\n)\\s*apply plugin:\\s*['"]${escapeRegExp(SAMSUNG_HEALTH_SETTINGS_PLUGIN)}['"]`, 'gm'),
+    ''
+  );
+
+  settingsGradle = settingsGradle.replace(
+    /\n\s*buildscript\s*\{\s*dependencies\s*\{\s*\}\s*\}\s*/g,
+    '\n'
+  );
+
+  settingsGradle = settingsGradle.replace(
+    /\n{3,}/g,
+    '\n\n'
+  );
+
+  if (/plugins\s*{[\s\S]*?\n}/.test(settingsGradle)) {
+    return settingsGradle.replace(
+      /plugins\s*{[\s\S]*?\n}/,
+      (match) => `${match.slice(0, -1)}  ${SAMSUNG_HEALTH_SETTINGS_PLUGIN_DECLARATION}\n}`
+    );
+  }
+
+  return `${settingsGradle}\n\nplugins {\n  ${SAMSUNG_HEALTH_SETTINGS_PLUGIN_DECLARATION}\n}`;
+};
+
+const setProjectPluginClasspath = (buildGradle) => {
+  const classpathLine = `classpath '${SAMSUNG_HEALTH_PLUGIN_CLASSPATH}'`;
+
+  buildGradle = buildGradle.replace(
+    new RegExp(
+      `(^|\\n)\\s*classpath\\s+['"]io\\.tryvital:shealth-plugins:[^'"]+['"]\\s*`,
+      'gm'
+    ),
+    '\n'
+  );
+
+  buildGradle = buildGradle.replace(
+    /dependencies\s*{/,
+    `dependencies {\n    ${classpathLine}`
+  );
+
+  return buildGradle.replace(
+    new RegExp(`(^|\\n)(?:\\s*${escapeRegExp(classpathLine)}\\s*\\n){2,}`, 'g'),
+    `$1    ${classpathLine}\n`
+  );
+};
+
+const setProjectPlugin = (buildGradle) => {
+  const pattern = new RegExp(`(^|\\n)\\s*apply plugin:\\s*['"]${SAMSUNG_HEALTH_PROJECT_PLUGIN}['"]`, 'm');
+  if (pattern.test(buildGradle)) {
+    return buildGradle;
+  }
+
+  return `apply plugin: '${SAMSUNG_HEALTH_PROJECT_PLUGIN}'\n\n${buildGradle}`;
+};
+
+const withSamsungHealth = (config, props) => {
+  const samsungHealthAarPath = getSamsungHealthAarPath(props);
+
+  if (!samsungHealthAarPath) {
+    return config;
+  }
+
+  config = withGradleProperties(config, (config) => {
+    config.modResults = updateAndroidBuildProperty(
+      config.modResults,
+      'samsungHealthAarPath',
+      samsungHealthAarPath
+    );
+
+    return config;
+  });
+
+  config = withSettingsGradle(config, (config) => {
+    if (config.modResults.language === 'groovy') {
+      config.modResults.contents = setSettingsPlugin(config.modResults.contents);
+    } else {
+      addWarningAndroid(
+        'samsungHealth.aarPath',
+        "Cannot automatically configure settings.gradle if it's not groovy"
+      );
+    }
+
+    return config;
+  });
+
+  config = withProjectBuildGradle(config, (config) => {
+    if (config.modResults.language === 'groovy') {
+      config.modResults.contents = setProjectPluginClasspath(config.modResults.contents);
+      config.modResults.contents = setProjectPlugin(config.modResults.contents);
+    } else {
+      addWarningAndroid(
+        'samsungHealth.aarPath',
+        "Cannot automatically configure root build.gradle if it's not groovy"
+      );
+    }
+
+    return config;
+  });
+
+  return config;
+};
+
+module.exports = (config, props = {}) =>
+  withPlugins(config, [[withHealthKit, props], [withHealthConnect], [withSamsungHealth, props]]);

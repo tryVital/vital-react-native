@@ -18,6 +18,20 @@ def isNewArchitectureEnabled() {
   return rootProject.hasProperty("newArchEnabled") &&  rootProject.getProperty("newArchEnabled") == "true"
 }
 
+def getSamsungHealthAarPath() {
+  if (!rootProject.hasProperty('samsungHealthAarPath')) {
+    return null
+  }
+
+  def path = rootProject.getProperty('samsungHealthAarPath')
+  return path ? path.toString().trim() : null
+}
+
+def hasSamsungHealthAarPath() {
+  def path = getSamsungHealthAarPath()
+  return path != null && !path.isEmpty()
+}
+
 apply plugin: 'com.android.library'
 apply plugin: 'kotlin-android'
 
@@ -54,6 +68,14 @@ android {
   compileOptions {
     sourceCompatibility JavaVersion.VERSION_1_8
     targetCompatibility JavaVersion.VERSION_1_8
+  }
+
+  sourceSets {
+    main {
+      java.srcDirs += hasSamsungHealthAarPath()
+        ? ['src/samsungHealthEnabled/java']
+        : ['src/samsungHealthDisabled/java']
+    }
   }
 
 }
@@ -139,6 +161,10 @@ dependencies {
   implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.4"
   implementation "io.tryvital:vital-client:$vital_sdk_version"
   implementation "io.tryvital:vital-health-connect:$vital_sdk_version"
+
+  if (hasSamsungHealthAarPath()) {
+    implementation "io.tryvital:vital-samsung-health:5.0.0-beta.4"
+  }
 
   implementation project(':tryvital_vital-core-react-native')
 // From node_modules
