@@ -4,32 +4,32 @@ import android.annotation.SuppressLint
 import android.content.Intent
 import android.util.Log
 import androidx.activity.ComponentActivity
-import androidx.activity.result.ActivityResultCallback
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContract
 import androidx.activity.result.contract.ActivityResultContracts.RequestMultiplePermissions.Companion.EXTRA_PERMISSIONS
 import androidx.activity.result.contract.ActivityResultContracts.RequestMultiplePermissions.Companion.EXTRA_PERMISSION_GRANT_RESULTS
 import com.facebook.react.ReactInstanceManager
-import com.facebook.react.bridge.*
+import com.facebook.react.bridge.Arguments
+import com.facebook.react.bridge.Promise
+import com.facebook.react.bridge.ReactApplicationContext
+import com.facebook.react.bridge.ReactContextBaseJavaModule
+import com.facebook.react.bridge.ReactMethod
+import com.facebook.react.bridge.ReadableArray
+import com.facebook.react.bridge.ReadableMap
+import com.facebook.react.bridge.WritableNativeMap
 import com.facebook.react.module.annotations.ReactModule
 import com.facebook.react.modules.core.DeviceEventManagerModule
 import io.tryvital.client.utils.VitalLogger
-import io.tryvital.vitalhealthconnect.DefaultSyncNotificationBuilder
-import io.tryvital.vitalhealthconnect.DefaultSyncNotificationContent
-import io.tryvital.vitalhealthconnect.ExperimentalVitalApi
-import io.tryvital.vitalhealthconnect.VitalHealthConnectManager
-import io.tryvital.vitalhealthconnect.autoSyncThrottle
-import io.tryvital.vitalhealthconnect.backgroundSyncMinimumInterval
-import io.tryvital.vitalhealthconnect.disableBackgroundSync
-import io.tryvital.vitalhealthconnect.enableBackgroundSyncContract
-import io.tryvital.vitalhealthconnect.isBackgroundSyncEnabled
-import io.tryvital.vitalhealthconnect.model.*
 import io.tryvital.vitalhealthcore.model.ConnectionPolicy
 import io.tryvital.vitalhealthcore.model.ProviderAvailability
 import io.tryvital.vitalhealthcore.model.SyncStatus
 import io.tryvital.vitalhealthcore.model.VitalResource
 import io.tryvital.vitalhealthcore.model.WritableVitalResource
-import kotlinx.coroutines.*
+import kotlinx.coroutines.Deferred
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.MainScope
+import kotlinx.coroutines.cancel
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.serialization.decodeFromString
@@ -38,10 +38,10 @@ import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.jsonPrimitive
 import java.time.Instant
 import java.util.concurrent.atomic.AtomicReference
+import kotlin.collections.mutableMapOf
 import kotlin.time.Duration.Companion.milliseconds
 
 const val VITAL_HEALTH_ERROR = "VitalHealthError"
-const val VITAL_REQUEST_CODE = 1984
 
 @ReactModule(name = VitalHealthReactNativeModule.NAME)
 class VitalHealthReactNativeModule(reactContext: ReactApplicationContext) :
@@ -49,11 +49,12 @@ class VitalHealthReactNativeModule(reactContext: ReactApplicationContext) :
 
   private val logger = VitalLogger.getOrCreate()
 
-  private val vitalHealthConnectManager: VitalHealthConnectManager
-    get() = VitalHealthConnectManager.getOrCreate(reactApplicationContext)
-
   private var askForPermission: AskForPermissionContinuation? = null
   private var enableBackgroundSync: EnableBackgroundSyncContinuation? = null
+
+  private val managers = mutableMapOf<AndroidProvider, VitalHealthManagerBridge>()
+  private var statusObservationJobs = mutableMapOf<AndroidProvider, Job>()
+  private var connectionObservationJobs = mutableMapOf<AndroidProvider, Job>()
 
   private var mainScope = MainScope()
 
@@ -61,10 +62,14 @@ class VitalHealthReactNativeModule(reactContext: ReactApplicationContext) :
     return NAME
   }
 
+  override fun invalidate() {
+    mainScope.cancel()
+    super.invalidate()
+  }
+
   @ReactMethod
   fun isAvailable(promise: Promise) = runOnMain {
-    val availability = VitalHealthConnectManager.isAvailable(reactApplicationContext)
-    promise.resolve(availability == ProviderAvailability.Installed)
+    promise.resolve(definitionOf(AndroidProvider.HealthConnect).isAvailable(reactApplicationContext))
   }
 
   @ReactMethod
@@ -73,31 +78,27 @@ class VitalHealthReactNativeModule(reactContext: ReactApplicationContext) :
     numberOfDaysToBackFill: Int,
     enableLogs: Boolean,
     connectionPolicy: String,
-    promise: Promise
+    promise: Promise,
   ) = runOnMain {
     logger.enabled = enableLogs
 
-    val availability = VitalHealthConnectManager.isAvailable(reactApplicationContext)
-
+    val providerDefinition = definitionOf(AndroidProvider.HealthConnect)
+    val availability = providerDefinition.isAvailable(reactApplicationContext)
     if (availability != ProviderAvailability.Installed) {
       return@runOnMain promise.reject(
-          VITAL_HEALTH_ERROR,
-          "Health Connect is unavailable: $availability",
+        VITAL_HEALTH_ERROR,
+        "${providerDefinition.displayName} is unavailable: $availability",
       )
     }
 
-    val manager = vitalHealthConnectManager
+    val manager = providerDefinition.getOrCreateManager(reactApplicationContext)
+    startStatusUpdate(providerDefinition, manager)
 
-    // Start status observation before we do anything that can update it.
-    manager.startStatusUpdate()
-
-    manager.configureHealthConnectClient(
-      logsEnabled = enableLogs,
+    manager.configure(
       syncOnAppStart = syncOnAppStart,
       numberOfDaysToBackFill = numberOfDaysToBackFill,
-      connectionPolicy = kotlin.runCatching {
-        ConnectionPolicy.valueOf(connectionPolicy.replaceFirstChar { it.titlecase() })
-      }.getOrNull() ?: ConnectionPolicy.AutoConnect
+      logsEnabled = enableLogs,
+      connectionPolicy = parseConnectionPolicy(connectionPolicy),
     )
 
     promise.resolve(null)
@@ -108,110 +109,132 @@ class VitalHealthReactNativeModule(reactContext: ReactApplicationContext) :
     readResources: ReadableArray,
     writeResources: ReadableArray?,
     config: ReadableMap?,
-    promise: Promise
+    promise: Promise,
   ) = runOnMain {
-    val manager = vitalHealthConnectManager
-    if (synchronized(this) { this.askForPermission != null }) {
+    config
+
+    if (synchronized(this) { askForPermission != null }) {
       return@runOnMain promise.reject(
-          VITAL_HEALTH_ERROR,
-          "Another ask for permission call is already in progress."
+        VITAL_HEALTH_ERROR,
+        "Another ask for permission call is already in progress.",
       )
     }
 
     val activity = reactApplicationContext.currentActivity ?: return@runOnMain promise.reject(
       VITAL_HEALTH_ERROR,
-      "Cannot find the current ReactNative Activity"
+      "Cannot find the current ReactNative Activity",
     )
 
     if (activity !is ComponentActivity) {
       return@runOnMain promise.reject(
-          VITAL_HEALTH_ERROR,
-          "The Android Activity class of your React Native host app must be a androidx.activity.ComponentActivity subclass for the permission request flow to function properly."
+        VITAL_HEALTH_ERROR,
+        "The Android Activity class of your React Native host app must be a androidx.activity.ComponentActivity subclass for the permission request flow to function properly.",
       )
     }
+
+    val providerDefinition = definitionOf(AndroidProvider.HealthConnect)
+    val manager = providerDefinition.getOrCreateManager(reactApplicationContext)
 
     val read = readResources.toArrayList().mapTo(mutableSetOf()) {
       try {
         VitalResource.valueOf(it as String)
       } catch (e: IllegalArgumentException) {
-        return@runOnMain promise.reject(VITAL_HEALTH_ERROR, "Unrecognized vital resource: $it")
+        return@runOnMain promise.reject(
+          VITAL_HEALTH_ERROR,
+          "Unrecognized vital resource: $it",
+        )
       }
     }
     val write = writeResources?.toArrayList()?.mapTo(mutableSetOf()) {
       try {
         WritableVitalResource.valueOf(it as String)
       } catch (e: IllegalArgumentException) {
-        return@runOnMain promise.reject(VITAL_HEALTH_ERROR, "Unrecognized vital resource: $it")
+        return@runOnMain promise.reject(
+          VITAL_HEALTH_ERROR,
+          "Unrecognized writable resource: $it",
+        )
       }
-    } ?: setOf()
-    val contract = manager.createPermissionRequestContract(
-      readResources = read, writeResources = write
-    )
+    } ?: emptySet()
+
+    val unsupportedWriteResources = write - providerDefinition.supportedWriteResources
+    if (unsupportedWriteResources.isNotEmpty()) {
+      return@runOnMain promise.reject(
+        VITAL_HEALTH_ERROR,
+        "Write access is unavailable for ${providerDefinition.displayName}: " +
+          unsupportedWriteResources.joinToString(", ") { it.name },
+      )
+    }
+
+    val contract = try {
+      manager.createPermissionRequestContract(
+        readResources = read,
+        writeResources = write,
+      )
+    } catch (e: Throwable) {
+      return@runOnMain promise.reject(VITAL_HEALTH_ERROR, e.message, e)
+    }
 
     synchronized(this) {
-      askForPermission = AskForPermissionContinuation(contract, promise)
+      askForPermission = AskForPermissionContinuation(contract, manager, promise)
     }
 
     val registry = activity.activityResultRegistry
-    val launcherRef = AtomicReference<ActivityResultLauncher<*>>(null)
-    val launcher = registry.register("io.tryvital.health.ask", contract, ActivityResultCallback { result ->
+    val launcherRef = AtomicReference<ActivityResultLauncher<Unit>?>(null)
+    val launcher = registry.register("io.tryvital.health.ask", contract) { result ->
       val continuation = synchronized(this) {
         val currentValue = askForPermission
         askForPermission = null
-        return@synchronized currentValue
+        currentValue
       }
 
-      val launcher = launcherRef.getAndSet(null)
-      launcher?.unregister()
+      launcherRef.getAndSet(null)?.unregister()
 
       if (continuation != null) {
         mainScope.launch {
-          val outcome = result.await()
-
-          continuation.promise.resolve(
-            when (outcome) {
-              is PermissionOutcome.Success -> "success"
-              is PermissionOutcome.HealthConnectUnavailable -> "healthDataUnavailable"
-              is PermissionOutcome.Cancelled -> "cancelled"
-              is PermissionOutcome.NotPrompted -> "notPrompted"
-              is PermissionOutcome.UnknownError -> "unknownError"
-            }
-          )
+          try {
+            continuation.promise.resolve(
+              continuation.manager.resolvePermissionOutcome(result).jsValue,
+            )
+          } catch (e: Throwable) {
+            continuation.promise.reject(VITAL_HEALTH_ERROR, e.message, e)
+          }
         }
       }
-    })
+    }
     launcherRef.set(launcher)
     launcher.launch(Unit)
   }
 
   @ReactMethod
   fun hasAskedForPermission(resource: String, promise: Promise) = runOnMain {
-    val manager = vitalHealthConnectManager
     val vitalResource = try {
       VitalResource.valueOf(resource)
     } catch (e: IllegalArgumentException) {
-      return@runOnMain promise.reject(VITAL_HEALTH_ERROR, "Unrecognized vital resource: $resource")
+      return@runOnMain promise.reject(
+        VITAL_HEALTH_ERROR,
+        "Unrecognized vital resource: $resource",
+      )
     }
 
+    val manager = managerOf(AndroidProvider.HealthConnect)
     promise.resolve(manager.hasAskedForPermission(vitalResource))
   }
 
   @ReactMethod
   fun syncData(resources: ReadableArray, promise: Promise) = runOnMain {
-    val manager = vitalHealthConnectManager
-
-    val vitalResources = resources.toArrayList().toList()
+    val vitalResources = resources.toArrayList()
       .mapNotNull {
         try {
           VitalResource.valueOf(it.toString())
         } catch (e: IllegalArgumentException) {
-          promise.reject("VitalHealthError", "Unrecognized vital resource: $it")
+          promise.reject(VITAL_HEALTH_ERROR, "Unrecognized vital resource: $it")
           return@runOnMain
         }
       }
       .toSet()
 
-    // Treat empty set as "sync all" (resources = null)
+    val manager = managerOf(AndroidProvider.HealthConnect)
+
     try {
       manager.syncData(resources = vitalResources.ifEmpty { null })
       promise.resolve(null)
@@ -226,15 +249,26 @@ class VitalHealthReactNativeModule(reactContext: ReactApplicationContext) :
     startDate: Double,
     endDate: Double,
     value: Double,
-    promise: Promise
+    promise: Promise,
   ) = runOnMain {
-    val manager = vitalHealthConnectManager
-
     val writableResource = try {
       WritableVitalResource.valueOf(resource)
     } catch (e: IllegalArgumentException) {
-      return@runOnMain promise.reject("VitalHealthError", "Unrecognized writable resource: $resource")
+      return@runOnMain promise.reject(
+        VITAL_HEALTH_ERROR,
+        "Unrecognized writable resource: $resource",
+      )
     }
+
+    val providerDefinition = definitionOf(AndroidProvider.HealthConnect)
+    if (writableResource !in providerDefinition.supportedWriteResources) {
+      return@runOnMain promise.reject(
+        VITAL_HEALTH_ERROR,
+        "Writing ${writableResource.name} is unavailable for ${providerDefinition.displayName}.",
+      )
+    }
+
+    val manager = providerDefinition.getOrCreateManager(reactApplicationContext)
 
     try {
       manager.writeRecord(
@@ -248,34 +282,33 @@ class VitalHealthReactNativeModule(reactContext: ReactApplicationContext) :
       promise.reject(
         VITAL_HEALTH_ERROR,
         "Failed to write data: ${e.message}",
-        e
+        e,
       )
     }
   }
 
-  @OptIn(ExperimentalVitalApi::class)
   @ReactMethod
   fun enableBackgroundSync(promise: Promise) = runOnMain {
-    val manager = vitalHealthConnectManager
-    if (synchronized(this) { this.enableBackgroundSync != null }) {
+    if (synchronized(this) { enableBackgroundSync != null }) {
       return@runOnMain promise.reject(
         VITAL_HEALTH_ERROR,
-        "Another enableBackgroundSync call is already in progress."
+        "Another enableBackgroundSync call is already in progress.",
       )
     }
 
     val activity = reactApplicationContext.currentActivity ?: return@runOnMain promise.reject(
       VITAL_HEALTH_ERROR,
-      "Cannot find the current ReactNative Activity"
+      "Cannot find the current ReactNative Activity",
     )
 
     if (activity !is ComponentActivity) {
       return@runOnMain promise.reject(
         VITAL_HEALTH_ERROR,
-        "The Android Activity class of your React Native host app must be a androidx.activity.ComponentActivity subclass for the permission request flow to function properly."
+        "The Android Activity class of your React Native host app must be a androidx.activity.ComponentActivity subclass for the permission request flow to function properly.",
       )
     }
 
+    val manager = managerOf(AndroidProvider.HealthConnect)
     val contract = manager.enableBackgroundSyncContract()
 
     synchronized(this) {
@@ -283,50 +316,46 @@ class VitalHealthReactNativeModule(reactContext: ReactApplicationContext) :
     }
 
     val registry = activity.activityResultRegistry
-    val launcherRef = AtomicReference<ActivityResultLauncher<*>>(null)
+    val launcherRef = AtomicReference<ActivityResultLauncher<Unit>?>(null)
     val launcher = registry.register("io.tryvital.health.enableBackgroundSync", contract) { success ->
       val continuation = synchronized(this) {
         val currentValue = enableBackgroundSync
         enableBackgroundSync = null
-        return@synchronized currentValue
+        currentValue
       }
 
-      val launcher = launcherRef.getAndSet(null)
-      launcher?.unregister()
+      launcherRef.getAndSet(null)?.unregister()
 
       if (continuation != null) {
-        mainScope.launch {
-          continuation.promise.resolve(success)
-        }
+        continuation.promise.resolve(success)
       }
     }
     launcherRef.set(launcher)
     launcher.launch(Unit)
   }
 
-  @OptIn(ExperimentalVitalApi::class)
   @ReactMethod
   fun disableBackgroundSync(promise: Promise) = runOnMain {
-    vitalHealthConnectManager.disableBackgroundSync()
+    managerOf(AndroidProvider.HealthConnect)
+      .disableBackgroundSync()
     promise.resolve(null)
   }
 
   @ReactMethod
   fun setSyncNotificationContent(content: String, promise: Promise) = runOnMain {
-    val builder = vitalHealthConnectManager.syncNotificationBuilder as? DefaultSyncNotificationBuilder
-      ?: return@runOnMain promise.resolve(null)
+    val manager = managerOf(AndroidProvider.HealthConnect)
 
     try {
       val payload = Json.decodeFromString<JsonObject>(content).let {
-        DefaultSyncNotificationContent(
-          notificationTitle = it["notificationTitle"]!!.jsonPrimitive.toString(),
-          notificationContent = it["notificationContent"]!!.jsonPrimitive.toString(),
-          channelName = it["channelName"]!!.jsonPrimitive.toString(),
-          channelDescription = it["channelDescription"]!!.jsonPrimitive.toString(),
+        VitalHealthSyncNotificationContent(
+          notificationTitle = it["notificationTitle"]!!.jsonPrimitive.content,
+          notificationContent = it["notificationContent"]!!.jsonPrimitive.content,
+          channelName = it["channelName"]!!.jsonPrimitive.content,
+          channelDescription = it["channelDescription"]!!.jsonPrimitive.content,
         )
       }
 
-      builder.setContentOverride(payload)
+      manager.setSyncNotificationContent(reactApplicationContext, payload)
       promise.resolve(null)
     } catch (e: Exception) {
       promise.reject(VITAL_HEALTH_ERROR, "Failed to decode the supplied notification content", e)
@@ -335,44 +364,46 @@ class VitalHealthReactNativeModule(reactContext: ReactApplicationContext) :
 
   @ReactMethod
   fun setPauseSynchronization(paused: Boolean, promise: Promise) = runOnMain {
-    vitalHealthConnectManager.pauseSynchronization = paused
+    val manager = managerOf(AndroidProvider.HealthConnect)
+    manager.pauseSynchronization = paused
     promise.resolve(null)
   }
 
   @ReactMethod
   fun getPauseSynchronization(promise: Promise) = runOnMain {
-    promise.resolve(vitalHealthConnectManager.pauseSynchronization)
+    val manager = managerOf(AndroidProvider.HealthConnect)
+    promise.resolve(manager.pauseSynchronization)
   }
 
-  @OptIn(ExperimentalVitalApi::class)
   @ReactMethod
   fun isBackgroundSyncEnabled(promise: Promise) = runOnMain {
-    promise.resolve(vitalHealthConnectManager.isBackgroundSyncEnabled)
+    val manager = managerOf(AndroidProvider.HealthConnect)
+    promise.resolve(manager.isBackgroundSyncEnabled)
   }
 
-  @OptIn(ExperimentalVitalApi::class)
   @ReactMethod
   fun autoSyncThrottle(promise: Promise) = runOnMain {
-    promise.resolve(vitalHealthConnectManager.autoSyncThrottle.inWholeMilliseconds.toDouble())
+    val manager = managerOf(AndroidProvider.HealthConnect)
+    promise.resolve(manager.autoSyncThrottle.inWholeMilliseconds.toDouble())
   }
 
-  @OptIn(ExperimentalVitalApi::class)
   @ReactMethod
   fun backgroundSyncMinimumInterval(promise: Promise) = runOnMain {
-    promise.resolve(vitalHealthConnectManager.backgroundSyncMinimumInterval.inWholeMilliseconds.toDouble())
+    val manager = managerOf(AndroidProvider.HealthConnect)
+    promise.resolve(manager.backgroundSyncMinimumInterval.inWholeMilliseconds.toDouble())
   }
 
-  @OptIn(ExperimentalVitalApi::class)
   @ReactMethod
   fun setBackgroundSyncMinimumInterval(intervalInMilliseconds: Double, promise: Promise) = runOnMain {
-    vitalHealthConnectManager.backgroundSyncMinimumInterval = intervalInMilliseconds.milliseconds
+    val manager = managerOf(AndroidProvider.HealthConnect)
+    manager.backgroundSyncMinimumInterval = intervalInMilliseconds.milliseconds
     promise.resolve(null)
   }
 
-  @OptIn(ExperimentalVitalApi::class)
   @ReactMethod
   fun setAutoSyncThrottle(thresholdInMilliseconds: Double, promise: Promise) = runOnMain {
-    vitalHealthConnectManager.autoSyncThrottle = thresholdInMilliseconds.milliseconds
+    val manager = definitionOf(AndroidProvider.HealthConnect).getOrCreateManager(reactApplicationContext)
+    manager.autoSyncThrottle = thresholdInMilliseconds.milliseconds
     promise.resolve(null)
   }
 
@@ -380,100 +411,110 @@ class VitalHealthReactNativeModule(reactContext: ReactApplicationContext) :
   fun openPlatformHealthApp(promise: Promise) = runOnMain {
     val activity = reactApplicationContext.currentActivity ?: return@runOnMain promise.reject(
       VITAL_HEALTH_ERROR,
-      "No active Android Activity"
+      "No active Android Activity",
     )
 
-    VitalHealthConnectManager
-      .openHealthConnectIntent(reactApplicationContext)
-      ?.let {
-        activity.startActivity(it)
-      }
+    definitionOf(AndroidProvider.HealthConnect)
+      .openPlatformHealthAppIntent(reactApplicationContext)
+      ?.let(activity::startActivity)
 
     promise.resolve(null)
   }
 
   @ReactMethod
   fun getConnectionStatus(promise: Promise) = runOnMain {
-    promise.resolve(vitalHealthConnectManager.connectionStatus.value.name.replaceFirstChar { it.lowercase() })
+    val manager = managerOf(AndroidProvider.HealthConnect)
+    promise.resolve(
+      manager.connectionStatus.value.name.replaceFirstChar { it.lowercase() },
+    )
   }
 
   @ReactMethod
   fun connect(promise: Promise) = runOnMain {
     try {
-      vitalHealthConnectManager.connect()
+      managerOf(AndroidProvider.HealthConnect)
+        .connect()
       promise.resolve(null)
     } catch (e: Throwable) {
-      promise.reject("VitalHealthError", e.message, e)
+      promise.reject(VITAL_HEALTH_ERROR, e.message, e)
     }
   }
 
   @ReactMethod
   fun disconnect(promise: Promise) = runOnMain {
     try {
-      vitalHealthConnectManager.disconnect()
+      managerOf(AndroidProvider.HealthConnect)
+        .disconnect()
       promise.resolve(null)
     } catch (e: Throwable) {
-      promise.reject("VitalHealthError", e.message, e)
+      promise.reject(VITAL_HEALTH_ERROR, e.message, e)
     }
   }
 
   @ReactMethod
   fun addListener(eventName: String?) {
-    // Keep: Required for RN built in Event Emitter Calls.
+    eventName
   }
 
   @ReactMethod
   fun removeListeners(count: Int) {
-    // Keep: Required for RN built in Event Emitter Calls.
+    count
   }
 
-  private fun VitalHealthConnectManager.startStatusUpdate() {
-    this.status
-      .onEach {
-        when (it) {
-          is SyncStatus.ResourceSyncFailed -> {
-            sendEvent(VitalHealthEvent.Status, WritableNativeMap().apply {
-              putString("status", "failedSyncing")
-              putString("resource", it.resource.name)
-            })
-          }
-          is SyncStatus.ResourceNothingToSync -> {
-            sendEvent(VitalHealthEvent.Status, WritableNativeMap().apply {
-              putString("status", "nothingToSync")
-              putString("resource", it.resource.name)
-            })
-          }
-          is SyncStatus.ResourceSyncing -> {
-            sendEvent(VitalHealthEvent.Status, WritableNativeMap().apply {
-              putString("status", "syncing")
-              putString("resource", it.resource.name)
-            })
-          }
-          is SyncStatus.ResourceSyncingComplete -> {
-            sendEvent(VitalHealthEvent.Status, WritableNativeMap().apply {
-              putString("status", "successSyncing")
-              putString("resource", it.resource.name)
-            })
-          }
-          SyncStatus.SyncingCompleted -> {
-            sendEvent(VitalHealthEvent.Status, WritableNativeMap().apply {
-              putString("status", "syncingCompleted")
-            })
-          }
-          SyncStatus.Unknown -> {
-            sendEvent(VitalHealthEvent.Status, WritableNativeMap().apply {
-              putString("status", "unknown")
-            })
-          }
-        }
+  override fun getConstants(): MutableMap<String, Any> {
+    return VitalHealthEvent.values().associate { it.value to it.value }.toMutableMap()
+  }
+
+  private fun startStatusUpdate(
+    providerDefinition: VitalHealthProviderDefinition,
+    manager: VitalHealthManagerBridge,
+  ) {
+    val provider = providerDefinition.provider
+
+    statusObservationJobs[provider]?.cancel()
+    connectionObservationJobs[provider]?.cancel()
+
+    statusObservationJobs[provider] = manager.status
+      .onEach { status ->
+        sendEvent(providerDefinition.syncStatusEvent, statusPayload(status))
       }
       .launchIn(mainScope)
 
-    this.connectionStatus
-      .onEach {
-        sendEvent(VitalHealthEvent.ConnectionStatus, it.name.replaceFirstChar { it.lowercase() })
+    connectionObservationJobs[provider] = manager.connectionStatus
+      .onEach { status ->
+        sendEvent(
+          providerDefinition.connectionStatusEvent,
+          status.name.replaceFirstChar { it.lowercase() },
+        )
       }
       .launchIn(mainScope)
+  }
+
+  private fun statusPayload(status: SyncStatus): Any {
+    return when (status) {
+      is SyncStatus.ResourceSyncFailed -> Arguments.createMap().apply {
+        putString("status", "failedSyncing")
+        putString("resource", status.resource.name)
+      }
+      is SyncStatus.ResourceNothingToSync -> Arguments.createMap().apply {
+        putString("status", "nothingToSync")
+        putString("resource", status.resource.name)
+      }
+      is SyncStatus.ResourceSyncing -> Arguments.createMap().apply {
+        putString("status", "syncing")
+        putString("resource", status.resource.name)
+      }
+      is SyncStatus.ResourceSyncingComplete -> Arguments.createMap().apply {
+        putString("status", "successSyncing")
+        putString("resource", status.resource.name)
+      }
+      SyncStatus.SyncingCompleted -> WritableNativeMap().apply {
+        putString("status", "syncingCompleted")
+      }
+      SyncStatus.Unknown -> WritableNativeMap().apply {
+        putString("status", "unknown")
+      }
+    }
   }
 
   private fun sendEvent(event: VitalHealthEvent, params: Any) {
@@ -486,8 +527,26 @@ class VitalHealthReactNativeModule(reactContext: ReactApplicationContext) :
     }
   }
 
-  override fun getConstants(): MutableMap<String, Any> {
-    return VitalHealthEvent.values().associate { it.value to it.value }.toMutableMap()
+  private fun parseConnectionPolicy(connectionPolicy: String): ConnectionPolicy {
+    return kotlin.runCatching {
+      ConnectionPolicy.valueOf(connectionPolicy.replaceFirstChar { it.titlecase() })
+    }.getOrNull() ?: ConnectionPolicy.AutoConnect
+  }
+
+  private fun definitionOf(provider: AndroidProvider) = when (provider) {
+    AndroidProvider.HealthConnect -> HealthConnectVitalHealthProviderDefinition
+    AndroidProvider.SamsungHealth -> SamsungHealthVitalHealthProviderDefinition
+  }
+
+  private fun managerOf(provider: AndroidProvider): VitalHealthManagerBridge {
+    val existing = this.managers[provider]
+    if (existing != null) {
+      return existing
+    }
+
+    val manager = definitionOf(provider).getOrCreateManager(reactApplicationContext)
+    this.managers[provider] = manager
+    return manager
   }
 
   companion object {
@@ -500,32 +559,32 @@ class VitalHealthReactNativeModule(reactContext: ReactApplicationContext) :
 
     /**
      * This method is a workaround which manually dispatches request permission results back to
-     * where the Health Connect activity contract expects it.
+     * where AndroidX activity result contracts expect them.
      *
      * As at React Native 0.37, ReactActivity eats the `onRequestPermissionsResult` and does not
      * forward it to AndroidX AppCompatActivity / ComponentActivity. This causes some (if not all)
      * ActivityResultsContract to be broken.
-     *
      */
     @SuppressLint("VisibleForTests")
     fun onRequestPermissionsResult(
       reactInstanceManager: ReactInstanceManager,
       p0: Int,
       p1: Array<out String>?,
-      p2: IntArray?
+      p2: IntArray?,
     ) {
-      val module = reactInstanceManager.currentReactContext?.getNativeModule(VitalHealthReactNativeModule::class.java) ?: return
+      val module = reactInstanceManager.currentReactContext
+        ?.getNativeModule(VitalHealthReactNativeModule::class.java)
+        ?: return
 
       if (synchronized(module) { module.askForPermission != null }) {
         val activity = module.reactApplicationContext.currentActivity as? ComponentActivity ?: return
 
-        // Lifted from ComponentActivity.onRequestPermissionsResult
         activity.activityResultRegistry.dispatchResult(
           p0,
           android.app.Activity.RESULT_OK,
           Intent()
             .putExtra(EXTRA_PERMISSIONS, p1!!)
-            .putExtra(EXTRA_PERMISSION_GRANT_RESULTS, p2!!)
+            .putExtra(EXTRA_PERMISSION_GRANT_RESULTS, p2!!),
         )
       }
     }
@@ -537,11 +596,12 @@ class VitalHealthReactNativeModule(reactContext: ReactApplicationContext) :
 }
 
 private data class AskForPermissionContinuation(
-  val contract: ActivityResultContract<Unit, Deferred<PermissionOutcome>>,
-  val promise: Promise
+  val contract: ActivityResultContract<Unit, Deferred<*>>,
+  val manager: VitalHealthManagerBridge,
+  val promise: Promise,
 )
 
 private data class EnableBackgroundSyncContinuation(
   val contract: ActivityResultContract<Unit, Boolean>,
-  val promise: Promise
+  val promise: Promise,
 )
