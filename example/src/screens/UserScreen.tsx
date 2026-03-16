@@ -1,41 +1,37 @@
 /* eslint-disable react-native/no-inline-styles */
 import { VitalCore } from '@tryvital/vital-core-react-native';
 import {
-  ConnectionStatus,
+  AndroidHealthProvider,
   HealthConfig,
+  IOSHealthProvider,
   VitalHealth,
-  VitalResource,
 } from '@tryvital/vital-health-react-native';
 import React from 'react';
 import { Vital } from '@tryvital/vital-node';
-import { Button, VStack, HStack, Box } from 'native-base';
+import { Button, VStack, HStack, ScrollView, Box } from 'native-base';
 import { useEffect, useState } from 'react';
-import { ActivityIndicator, Platform, Switch, Text } from 'react-native';
+import { Platform, Switch, Text } from 'react-native';
 import { VITAL_API_KEY, VITAL_ENVIRONMENT, VITAL_REGION } from '../Environment';
 import { vitalNodeClient } from '../App';
-import { AskConfig } from '@tryvital/vital-health-react-native/lib/typescript/ask_config';
+import { HealthProviderCard } from '../components/HealthProviderCard';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import { ScreenWrapper } from './ScreenWrapper';
 
-export const UserScreen = ({ route, navigation }) => {
+const supportedProviders =
+  Platform.OS === 'android'
+    ? [AndroidHealthProvider.HealthConnect, AndroidHealthProvider.SamsungHealth]
+    : [IOSHealthProvider.AppleHealthKit];
+
+export const UserScreen = ({ route }) => {
   const user: Vital.ClientFacingUser = route.params.user;
 
   const [isCurrentSDKUser, setIsCurrentSDKUser] = useState(false);
   const [isSDKConfigured, setIsSDKConfigured] = useState(false);
 
-  const [permissionAsked, setPermissionAsked] = useState<VitalResource[]>([]);
-  const [isBackgroundSyncEnabled, setBackgroundSyncEnabled] = useState<
-    boolean | undefined
-  >(undefined);
-  const [isUpdatingBackgroundSync, setUpdatingBackgroundSync] =
-    useState<boolean>(true);
-
   const [useRequestRestrictionDemo, setRequestRestrictionDemo] =
     useState<boolean>(false);
 
   const [useExplicitConnectMode, setExplicitConnectMode] =
-    useState<boolean>(false);
-  const [connectionStatus, setConnectionStatus] =
-    useState<ConnectionStatus | null>(null);
-  const [isConnectingDisconnecting, setConnectingDisconnecting] =
     useState<boolean>(false);
 
   // Observe Vital Core SDK Status
@@ -49,96 +45,25 @@ export const UserScreen = ({ route, navigation }) => {
       });
     });
 
-    const subscription2 =
-      VitalHealth.observeConnectionStatusChange(setConnectionStatus);
-
     return () => {
       console.log('clean up UserScreen subscription');
       subscription.remove();
-      subscription2.remove();
     };
   }, [user.userId]);
-
-  const refreshPermissionAsked = () => {
-    Promise.all([
-      VitalHealth.hasAskedForPermission(VitalResource.Activity),
-      VitalHealth.hasAskedForPermission(VitalResource.Workout),
-      VitalHealth.hasAskedForPermission(VitalResource.Sleep),
-      VitalHealth.hasAskedForPermission(VitalResource.HeartRate),
-    ]).then(([activityAsked, workoutAsked, sleepAsked, heartRateAsked]) => {
-      let resources = new Set<VitalResource>();
-
-      if (activityAsked) {
-        resources.add(VitalResource.Activity);
-      }
-
-      if (workoutAsked) {
-        resources.add(VitalResource.Workout);
-      }
-
-      if (sleepAsked) {
-        resources.add(VitalResource.Sleep);
-      }
-
-      if (heartRateAsked) {
-        resources.add(VitalResource.HeartRate);
-      }
-
-      let sortedResources = new Array(...resources.values()).sort((lhs, rhs) =>
-        lhs.localeCompare(rhs),
-      );
-      setPermissionAsked(sortedResources);
-    });
-  };
-
-  useEffect(() => {
-    refreshPermissionAsked();
-
-    VitalHealth.isBackgroundSyncEnabled
-      .then(enabled => setBackgroundSyncEnabled(enabled))
-      .then(_ => setUpdatingBackgroundSync(false));
-  }, [navigation]);
-
-  const handleAskForPermission = () => {
-    let config: AskConfig | undefined;
-
-    if (Platform.OS === 'ios' && useRequestRestrictionDemo) {
-      config = {
-        type: 'ios',
-        dataTypeAllowlist: [
-          'HKQuantityTypeIdentifierStepCount',
-          'HKQuantityTypeIdentifierActiveEnergyBurned',
-          'HKCategoryTypeIdentifierSleepAnalysis',
-        ],
-      };
-    }
-
-    // [1] Request permissions for wearable data
-    VitalHealth.ask(
-      [
-        VitalResource.Activity,
-        VitalResource.Workout,
-        VitalResource.Sleep,
-        VitalResource.HeartRate,
-      ],
-      [],
-      config,
-    )
-      .then(outcome => {
-        console.log(`finished asking for permission: ${outcome}`);
-        refreshPermissionAsked();
-      })
-      .catch(err => console.error('errored when asking for permission', err));
-
-    // [2] The SDK would automatically begin sync on resources with read permission granted.
-  };
 
   const onSignInSuccess = async () => {
     const config = new HealthConfig();
     config.connectionPolicy = useExplicitConnectMode
       ? 'explicit'
       : 'autoConnect';
-    await VitalHealth.configure(config);
+
+    for (const provider of supportedProviders) {
+      if (Platform.OS === 'android' && !(await VitalHealth.isAvailable(provider))) {
+        continue;
+      }
+
+      await VitalHealth.configure(config, provider);
+    }
   };
 
   const handleSignInWithJWTDemoMode = async () => {
@@ -187,128 +112,8 @@ export const UserScreen = ({ route, navigation }) => {
     await onSignInSuccess();
   };
 
-  const handleBackgroundSync = () => {
-    if (isBackgroundSyncEnabled === undefined) {
-      console.log('LOL');
-      return;
-    }
-
-    setUpdatingBackgroundSync(true);
-
-    if (isBackgroundSyncEnabled) {
-      VitalHealth.disableBackgroundSync()
-        .then(() => setBackgroundSyncEnabled(false))
-        .then(() => setUpdatingBackgroundSync(false));
-    } else {
-      VitalHealth.enableBackgroundSync()
-        .then(x => {
-          console.log(x);
-          return x;
-        })
-        .then(success => setBackgroundSyncEnabled(success))
-        .then(() => setUpdatingBackgroundSync(false));
-    }
-  };
-
-  const handleConnectDisconnect = () => {
-    setConnectingDisconnecting(true);
-
-    if (connectionStatus === 'disconnected') {
-      VitalHealth.connect().finally(() => setConnectingDisconnecting(false));
-    } else {
-      VitalHealth.disconnect().finally(() => setConnectingDisconnecting(false));
-    }
-  };
-
-  // eslint-disable-next-line react/no-unstable-nested-components
-  const HealthSDKCard = () => {
-    return (
-      <Box padding="4" borderColor="#333333" borderWidth="1">
-        <Text style={{ color: 'black', fontSize: 20, paddingBottom: 16 }}>
-          {Platform.OS === 'android' ? 'Health Connect' : 'HealthKit'}
-        </Text>
-
-        {connectionStatus !== 'autoConnect' && (
-          <>
-            <Text style={{ color: 'black', fontSize: 16, paddingBottom: 16 }}>
-              Explicit Connection Status: {connectionStatus}
-            </Text>
-
-            <Button
-              onPress={() => handleConnectDisconnect()}
-              disabled={isConnectingDisconnecting}
-              isLoading={isConnectingDisconnecting}
-            >
-              {connectionStatus === 'disconnected' ? 'Connect' : 'Disconnect'}
-            </Button>
-            <Box h={4} />
-          </>
-        )}
-
-        {permissionAsked.length === 0 && (
-          <Text style={{ color: 'black', fontSize: 16, paddingBottom: 16 }}>
-            No permission was asked previously
-          </Text>
-        )}
-
-        {permissionAsked.length > 0 && (
-          <Text style={{ color: 'black', fontSize: 16, paddingBottom: 16 }}>
-            Asked permission: {permissionAsked.join(', ')}
-          </Text>
-        )}
-
-        <Button onPress={() => handleAskForPermission()}>
-          Ask for permission (Activity, Workout, Sleep)
-        </Button>
-
-        {Platform.OS === 'ios' && (
-          <HStack style={{ paddingVertical: 16, gap: 4 }}>
-            <VStack style={{ flexShrink: 1 }}>
-              <Text style={{ fontSize: 16 }}>Request Restriction Demo</Text>
-              <Text style={{ fontSize: 12 }}>
-                Only allow stepCount, activeEnergyBurned and sleepAnalysis
-                (HealthKit types) to be requested.
-              </Text>
-            </VStack>
-
-            <Switch
-              value={useRequestRestrictionDemo}
-              onValueChange={setRequestRestrictionDemo}
-              style={{ flexShrink: 0 }}
-            />
-          </HStack>
-        )}
-
-        <Box h={2} />
-
-        <Button onPress={() => VitalHealth.openPlatformHealthApp()}>
-          Open Platform Health App
-        </Button>
-
-        <HStack alignItems={'center'} style={{ marginTop: 8 }}>
-          <Text style={{ flexGrow: 1 }}>Force Sync</Text>
-          <Button onPress={() => VitalHealth.syncData()}>Sync</Button>
-        </HStack>
-
-        {!VitalHealth.canEnableBackgroundSyncNoninteractively && (
-          <HStack alignItems={'center'} style={{ marginTop: 8 }}>
-            <Text style={{ flexGrow: 1 }}>Background Sync</Text>
-            {isBackgroundSyncEnabled !== undefined && (
-              <Switch
-                value={isBackgroundSyncEnabled}
-                disabled={isUpdatingBackgroundSync}
-                onChange={handleBackgroundSync}
-              />
-            )}
-            {isBackgroundSyncEnabled === undefined && <ActivityIndicator />}
-          </HStack>
-        )}
-      </Box>
-    );
-  };
-
   return (
-    <VStack px={4} py={4} space={4}>
+    <ScreenWrapper>
       <VStack space={1}>
         <Text style={{ color: 'black' }}>User ID</Text>
         <Text style={{ color: 'black' }}>{user.userId}</Text>
@@ -364,9 +169,19 @@ export const UserScreen = ({ route, navigation }) => {
 
       {isCurrentSDKUser && (
         <>
-          <HealthSDKCard />
+          {supportedProviders.map(provider => (
+            <HealthProviderCard
+              key={`${user.userId}-${provider}`}
+              provider={provider}
+              useRequestRestrictionDemo={useRequestRestrictionDemo}
+              onUseRequestRestrictionDemoChange={setRequestRestrictionDemo}
+              userId={user.userId}
+            />
+          ))}
         </>
       )}
-    </VStack>
+
+      <Box height={16} />
+    </ScreenWrapper>
   );
 };

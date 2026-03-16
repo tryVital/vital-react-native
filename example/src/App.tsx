@@ -14,6 +14,8 @@ import {
 // import { VitalDevicesManager } from '@tryvital/vital-devices-react-native';
 import { NativeEventEmitter } from 'react-native';
 import { VITAL_API_KEY, VITAL_ENVIRONMENT, VITAL_REGION } from './Environment';
+import {SafeAreaView, SafeAreaProvider} from 'react-native-safe-area-context';
+
 // import {
 //   readBLEGlucoseMeter,
 //   readBLEBloodPressureMeter,
@@ -48,42 +50,12 @@ export const vitalNodeClient = new VitalClient({
   apiKey: VITAL_API_KEY,
 });
 
-const healthEventEmitter = new NativeEventEmitter(VitalHealthReactNativeModule);
-
-healthEventEmitter.addListener(VitalHealthEvents.statusEvent, (event: any) => {
-  console.log(VitalHealthEvents.statusEvent, event);
-});
-
 // const vitalDevicesManager = new VitalDevicesManager();
 
 const Stack = createNativeStackNavigator();
 
-const App = () => {
-  useEffect(() => {
-    const initialize = async () => {
-      console.log('Starting to initialize App');
-
-      const isHealthSDKAvailable = await VitalHealth.isAvailable();
-      console.log(`HealthKit/HealthConnect available: ${isHealthSDKAvailable}`);
-
-      // Example: Read BLE Glucose Meter
-      // await readBLEGlucoseMeter(vitalDevicesManager)
-
-      // Example: Read Freestyle Libre 1 via NFC
-      // await readLibre1(vitalDevicesManager)
-
-      // Example: Read BLE Blood Pressure
-      // await readBLEBloodPressureMeter(vitalDevicesManager)
-    };
-
-    initialize();
-
-    return () => {};
-  });
-
+const AppStack = () => {
   return (
-    <NativeBaseProvider>
-      <NavigationContainer>
         <Stack.Navigator initialRouteName="Home">
           <Stack.Group>
             <Stack.Screen
@@ -111,6 +83,38 @@ const App = () => {
             />
           </Stack.Group>
         </Stack.Navigator>
+  );
+};
+
+const App = () => {
+  useEffect(() => {
+    const initialize = async () => {
+      console.log('Starting to initialize App');
+
+      const isHealthSDKAvailable = await VitalHealth.isAvailable();
+      console.log(`HealthKit/HealthConnect available: ${isHealthSDKAvailable}`);
+
+      // Example: Read BLE Glucose Meter
+      // await readBLEGlucoseMeter(vitalDevicesManager)
+
+      // Example: Read Freestyle Libre 1 via NFC
+      // await readLibre1(vitalDevicesManager)
+
+      // Example: Read BLE Blood Pressure
+      // await readBLEBloodPressureMeter(vitalDevicesManager)
+    };
+
+    initialize();
+
+    return () => {};
+  });
+
+  return (
+    <NativeBaseProvider>
+      <NavigationContainer>
+        <SafeAreaProvider>
+          <AppStack />
+        </SafeAreaProvider>
       </NavigationContainer>
     </NativeBaseProvider>
   );
