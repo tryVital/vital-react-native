@@ -64,76 +64,91 @@ class VitalHealthReactNative: RCTEventEmitter {
     return ["Status", "VitalHealthConnectionStatus"]
   }
 
-  @objc(configure:numberOfDaysToBackFill:enableLogs:connectionPolicy:resolver:rejecter:)
+  @objc(configure:backgroundDeliveryEnabled:numberOfDaysToBackFill:enableLogs:connectionPolicy:resolver:rejecter:)
   func configure(
-    _ backgroundDeliveryEnabled: Bool,
+    _ provider: String,
+    backgroundDeliveryEnabled: Bool,
     numberOfDaysToBackFill: Int,
     enableLogs: Bool,
     connectionPolicy: String,
     resolve: @escaping RCTPromiseResolveBlock,
     reject: RCTPromiseRejectBlock
   ) {
+    guard validateAppleHealthKitProvider(provider, reject: reject) else { return }
+
     VitalHealthKitClient.configure(
-        .init(
-            backgroundDeliveryEnabled: backgroundDeliveryEnabled,
-            numberOfDaysToBackFill: numberOfDaysToBackFill,
-            logsEnabled: enableLogs,
-            connectionPolicy: VitalHealthKitClient.ConnectionPolicy(rawValue: connectionPolicy) ?? .autoConnect
-          )
+      .init(
+        backgroundDeliveryEnabled: backgroundDeliveryEnabled,
+        numberOfDaysToBackFill: numberOfDaysToBackFill,
+        logsEnabled: enableLogs,
+        connectionPolicy: VitalHealthKitClient.ConnectionPolicy(rawValue: connectionPolicy) ?? .autoConnect
       )
+    )
     resolve(())
   }
 
-   @objc(setUserId:resolver:rejecter:)
-    func setUserId(_ userId: String, resolve: @escaping RCTPromiseResolveBlock, reject:RCTPromiseRejectBlock) {
-      guard let userId = UUID.init(uuidString: userId) else {
-        reject(nil, "userId must be an UUID", nil)
-        return
-      }
+  @objc(setUserId:userId:resolver:rejecter:)
+  func setUserId(
+    _ provider: String,
+    userId: String,
+    resolve: @escaping RCTPromiseResolveBlock,
+    reject: RCTPromiseRejectBlock
+  ) {
+    guard validateAppleHealthKitProvider(provider, reject: reject) else { return }
 
-      Task {
-        await VitalClient.setUserId(userId)
-        resolve(())
-      }
+    guard let userId = UUID.init(uuidString: userId) else {
+      reject(nil, "userId must be an UUID", nil)
+      return
     }
 
-    @objc(configureClient:environment:region:enableLogs:resolver:rejecter:)
-    func configureClient(
-      _ apiKey: String,
-      environment: String,
-      region: String,
-      enableLogs: Bool,
-      resolve:@escaping RCTPromiseResolveBlock,
-      reject:RCTPromiseRejectBlock
-    ) {
-
-      let env: Environment
-      switch (environment, region) {
-        case ("production", "us"):
-          env = .production(.us)
-        case ("production", "eu"):
-          env = .production(.eu)
-        case ("sandbox", "us"):
-          env = .sandbox(.us)
-        case ("sandbox", "eu"):
-          env = .sandbox(.eu)
-        default:
-          reject(nil, "enviroment / region values not accepted", nil)
-          return
-      }
-
-      VitalClient.configure(apiKey: apiKey, environment: env, configuration: .init(logsEnable: enableLogs))
+    Task {
+      await VitalClient.setUserId(userId)
       resolve(())
     }
+  }
 
-  @objc(ask:writeResources:config:resolver:rejecter:)
+  @objc(configureClient:apiKey:environment:region:enableLogs:resolver:rejecter:)
+  func configureClient(
+    _ provider: String,
+    apiKey: String,
+    environment: String,
+    region: String,
+    enableLogs: Bool,
+    resolve: @escaping RCTPromiseResolveBlock,
+    reject: RCTPromiseRejectBlock
+  ) {
+    guard validateAppleHealthKitProvider(provider, reject: reject) else { return }
+
+    let env: Environment
+    switch (environment, region) {
+      case ("production", "us"):
+        env = .production(.us)
+      case ("production", "eu"):
+        env = .production(.eu)
+      case ("sandbox", "us"):
+        env = .sandbox(.us)
+      case ("sandbox", "eu"):
+        env = .sandbox(.eu)
+      default:
+        reject(nil, "enviroment / region values not accepted", nil)
+        return
+    }
+
+    VitalClient.configure(apiKey: apiKey, environment: env, configuration: .init(logsEnable: enableLogs))
+    resolve(())
+  }
+
+  @objc(ask:readResources:writeResources:config:resolver:rejecter:)
   func ask(
-    _ readResources: [String],
+    _ provider: String,
+    readResources: [String],
     writeResources: [String],
     config: [String: Any]?,
     resolve: @escaping RCTPromiseResolveBlock,
     reject: @escaping RCTPromiseRejectBlock
   ) {
+    guard validateAppleHealthKitProvider(provider, reject: reject) else { return }
+
     Task {
       do {
         let readPermissions = try readResources.map { try mapResourceToReadableVitalResource($0) }
@@ -179,12 +194,15 @@ class VitalHealthReactNative: RCTEventEmitter {
     }
   }
 
-  @objc(syncData:resolver:rejecter:)
+  @objc(syncData:resources:resolver:rejecter:)
   func syncData(
-    _ resources: [String],
+    _ provider: String,
+    resources: [String],
     resolve: RCTPromiseResolveBlock,
     reject: RCTPromiseRejectBlock
   ) {
+    guard validateAppleHealthKitProvider(provider, reject: reject) else { return }
+
     do {
       let vitalResources: [VitalResource]
       if resources.isEmpty {
@@ -203,8 +221,15 @@ class VitalHealthReactNative: RCTEventEmitter {
     }
   }
 
-  @objc(hasAskedForPermission:resolver:rejecter:)
-  func hasAskedForPermission(_ resource: String, resolve: @escaping RCTPromiseResolveBlock, reject: @escaping RCTPromiseRejectBlock) {
+  @objc(hasAskedForPermission:resource:resolver:rejecter:)
+  func hasAskedForPermission(
+    _ provider: String,
+    resource: String,
+    resolve: @escaping RCTPromiseResolveBlock,
+    reject: @escaping RCTPromiseRejectBlock
+  ) {
+    guard validateAppleHealthKitProvider(provider, reject: reject) else { return }
+
     do {
       let vitalResource = try mapResourceToReadableVitalResource(resource)
       Task {
@@ -222,78 +247,110 @@ class VitalHealthReactNative: RCTEventEmitter {
       }
 
     } catch VitalError.UnsupportedResource(let errorMessage) {
-        reject("UnsupportedResource", errorMessage, nil)
+      reject("UnsupportedResource", errorMessage, nil)
 
     } catch {
-        reject(nil, "Unknown error [1]", nil)
+      reject(nil, "Unknown error [1]", nil)
     }
   }
 
-  @objc(writeHealthData:value:startDate:endDate:resolver:rejecter:)
-     func writeHealthData(_ resource: String,
-         value: Double,
-         startDate: Double,
-         endDate: Double,
-         resolve: @escaping RCTPromiseResolveBlock,
-         reject: RCTPromiseRejectBlock
-     ){
-      do {
-        let resource = try mapResourceToReadableVitalResource(resource)
+  @objc(writeHealthData:resource:value:startDate:endDate:resolver:rejecter:)
+  func writeHealthData(
+    _ provider: String,
+    resource: String,
+    value: Double,
+    startDate: Double,
+    endDate: Double,
+    resolve: @escaping RCTPromiseResolveBlock,
+    reject: RCTPromiseRejectBlock
+  ) {
+    guard validateAppleHealthKitProvider(provider, reject: reject) else { return }
 
-        let startDate = Date(timeIntervalSince1970: startDate / 1000)
-        let endDate = Date(timeIntervalSince1970: endDate / 1000)
+    do {
+      let resource = try mapResourceToReadableVitalResource(resource)
 
-        let dataInput: DataInput
+      let startDate = Date(timeIntervalSince1970: startDate / 1000)
+      let endDate = Date(timeIntervalSince1970: endDate / 1000)
 
-        switch resource {
-          case .nutrition(.water):
-            dataInput = .water(milliliters: Int(value))
-          case .nutrition(.caffeine):
-            dataInput = .caffeine(grams: Int(value))
-           case .vitals(.mindfulSession):
-            dataInput = .mindfulSession
-          default:
-            fatalError("\(resource) not supported for writing to HealthKit")
-        }
+      let dataInput: DataInput
 
-        Task {
-          try await VitalHealthKitClient.shared.write(input: dataInput, startDate: startDate, endDate: endDate)
-          resolve(())
-        }
-      } catch VitalError.UnsupportedResource(let errorMessage) {
-        reject("UnsupportedResource", errorMessage, nil)
-      } catch {
-        reject(nil, "Unknown error", nil)
+      switch resource {
+        case .nutrition(.water):
+          dataInput = .water(milliliters: Int(value))
+        case .nutrition(.caffeine):
+          dataInput = .caffeine(grams: Int(value))
+        case .vitals(.mindfulSession):
+          dataInput = .mindfulSession
+        default:
+          fatalError("\(resource) not supported for writing to HealthKit")
       }
+
+      Task {
+        try await VitalHealthKitClient.shared.write(input: dataInput, startDate: startDate, endDate: endDate)
+        resolve(())
+      }
+    } catch VitalError.UnsupportedResource(let errorMessage) {
+      reject("UnsupportedResource", errorMessage, nil)
+    } catch {
+      reject(nil, "Unknown error", nil)
     }
+  }
 
 
-  @objc(getPauseSynchronization:rejecter:)
-  func getPauseSynchronization(_ resolve: RCTPromiseResolveBlock, reject: RCTPromiseRejectBlock) {
+  @objc(getPauseSynchronization:resolver:rejecter:)
+  func getPauseSynchronization(
+    _ provider: String,
+    resolve: RCTPromiseResolveBlock,
+    reject: RCTPromiseRejectBlock
+  ) {
+    guard validateAppleHealthKitProvider(provider, reject: reject) else { return }
     resolve(VitalHealthKitClient.shared.pauseSynchronization)
   }
 
-  @objc(setPauseSynchronization:resolver:rejecter:)
-  func setPauseSynchronization(_ paused: Bool, resolve: RCTPromiseResolveBlock, reject: RCTPromiseRejectBlock) {
+  @objc(setPauseSynchronization:paused:resolver:rejecter:)
+  func setPauseSynchronization(
+    _ provider: String,
+    paused: Bool,
+    resolve: RCTPromiseResolveBlock,
+    reject: RCTPromiseRejectBlock
+  ) {
+    guard validateAppleHealthKitProvider(provider, reject: reject) else { return }
     VitalHealthKitClient.shared.pauseSynchronization = paused
     resolve(())
   }
 
-  @objc(openPlatformHealthApp:rejecter:)
-  func openPlatformHealthApp(_ resolve: @escaping RCTPromiseResolveBlock, reject: RCTPromiseRejectBlock) {
+  @objc(openPlatformHealthApp:resolver:rejecter:)
+  func openPlatformHealthApp(
+    _ provider: String,
+    resolve: @escaping RCTPromiseResolveBlock,
+    reject: RCTPromiseRejectBlock
+  ) {
+    guard validateAppleHealthKitProvider(provider, reject: reject) else { return }
+
     Task { @MainActor in
       await UIApplication.shared.open(URL(string: "x-apple-health://")!)
       resolve(())
     }
   }
 
-  @objc(getConnectionStatus:rejecter:)
-  func getConnectionStatus(_ resolve: RCTPromiseResolveBlock, reject: RCTPromiseRejectBlock) {
+  @objc(getConnectionStatus:resolver:rejecter:)
+  func getConnectionStatus(
+    _ provider: String,
+    resolve: RCTPromiseResolveBlock,
+    reject: RCTPromiseRejectBlock
+  ) {
+    guard validateAppleHealthKitProvider(provider, reject: reject) else { return }
     resolve(VitalHealthKitClient.shared.connectionStatus.rawValue)
   }
 
-  @objc(connect:rejecter:)
-  func connect(_ resolve: @escaping RCTPromiseResolveBlock, reject: @escaping RCTPromiseRejectBlock) {
+  @objc(connect:resolver:rejecter:)
+  func connect(
+    _ provider: String,
+    resolve: @escaping RCTPromiseResolveBlock,
+    reject: @escaping RCTPromiseRejectBlock
+  ) {
+    guard validateAppleHealthKitProvider(provider, reject: reject) else { return }
+
     Task { @MainActor in
       do {
         try await VitalHealthKitClient.shared.connect()
@@ -305,8 +362,14 @@ class VitalHealthReactNative: RCTEventEmitter {
     }
   }
 
-  @objc(disconnect:rejecter:)
-  func disconnect(_ resolve: @escaping RCTPromiseResolveBlock, reject: @escaping RCTPromiseRejectBlock) {
+  @objc(disconnect:resolver:rejecter:)
+  func disconnect(
+    _ provider: String,
+    resolve: @escaping RCTPromiseResolveBlock,
+    reject: @escaping RCTPromiseRejectBlock
+  ) {
+    guard validateAppleHealthKitProvider(provider, reject: reject) else { return }
+
     Task { @MainActor in
       do {
         try await VitalHealthKitClient.shared.disconnect()
@@ -318,8 +381,14 @@ class VitalHealthReactNative: RCTEventEmitter {
     }
   }
 
-  @objc(openSyncProgressView:rejecter:)
-  func openSyncProgressView(_ resolve: @escaping RCTPromiseResolveBlock, reject: RCTPromiseRejectBlock) {
+  @objc(openSyncProgressView:resolver:rejecter:)
+  func openSyncProgressView(
+    _ provider: String,
+    resolve: @escaping RCTPromiseResolveBlock,
+    reject: RCTPromiseRejectBlock
+  ) {
+    guard validateAppleHealthKitProvider(provider, reject: reject) else { return }
+
     DispatchQueue.main.async {
       defer { resolve(()) }
       guard
@@ -333,6 +402,29 @@ class VitalHealthReactNative: RCTEventEmitter {
       )
     }
   }
+}
+
+private let appleHealthKitProvider = "apple_health_kit"
+
+private func validateAppleHealthKitProvider(
+  _ provider: String,
+  reject: RCTPromiseRejectBlock
+) -> Bool {
+  assert(
+    provider == appleHealthKitProvider,
+    "Expected provider \(appleHealthKitProvider), got \(provider)"
+  )
+
+  guard provider == appleHealthKitProvider else {
+    reject(
+      "UnsupportedProvider",
+      "Expected provider \(appleHealthKitProvider), got \(provider)",
+      nil
+    )
+    return false
+  }
+
+  return true
 }
 
 private func mapResourceToReadableVitalResource(_ name: String) throws -> VitalResource {
