@@ -70,7 +70,7 @@ class VitalHealthReactNativeModule(reactContext: ReactApplicationContext) :
   @ReactMethod
   fun isAvailable(provider: String, promise: Promise) = runOnMain {
     val androidProvider = providerOf(provider, promise) ?: return@runOnMain
-    promise.resolve(definitionOf(androidProvider).isAvailable(reactApplicationContext))
+    promise.resolve(definitionOf(androidProvider).isAvailable(reactApplicationContext) == ProviderAvailability.Installed)
   }
 
   @ReactMethod
