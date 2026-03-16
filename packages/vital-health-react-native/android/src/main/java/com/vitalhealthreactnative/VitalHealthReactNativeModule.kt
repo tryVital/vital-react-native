@@ -68,21 +68,24 @@ class VitalHealthReactNativeModule(reactContext: ReactApplicationContext) :
   }
 
   @ReactMethod
-  fun isAvailable(promise: Promise) = runOnMain {
-    promise.resolve(definitionOf(AndroidProvider.HealthConnect).isAvailable(reactApplicationContext))
+  fun isAvailable(provider: String, promise: Promise) = runOnMain {
+    val androidProvider = providerOf(provider, promise) ?: return@runOnMain
+    promise.resolve(definitionOf(androidProvider).isAvailable(reactApplicationContext))
   }
 
   @ReactMethod
   fun configure(
+    provider: String,
     syncOnAppStart: Boolean,
     numberOfDaysToBackFill: Int,
     enableLogs: Boolean,
     connectionPolicy: String,
     promise: Promise,
   ) = runOnMain {
+    val androidProvider = providerOf(provider, promise) ?: return@runOnMain
     logger.enabled = enableLogs
 
-    val providerDefinition = definitionOf(AndroidProvider.HealthConnect)
+    val providerDefinition = definitionOf(androidProvider)
     val availability = providerDefinition.isAvailable(reactApplicationContext)
     if (availability != ProviderAvailability.Installed) {
       return@runOnMain promise.reject(
@@ -106,11 +109,13 @@ class VitalHealthReactNativeModule(reactContext: ReactApplicationContext) :
 
   @ReactMethod
   fun ask(
+    provider: String,
     readResources: ReadableArray,
     writeResources: ReadableArray?,
     config: ReadableMap?,
     promise: Promise,
   ) = runOnMain {
+    val androidProvider = providerOf(provider, promise) ?: return@runOnMain
     config
 
     if (synchronized(this) { askForPermission != null }) {
@@ -132,7 +137,7 @@ class VitalHealthReactNativeModule(reactContext: ReactApplicationContext) :
       )
     }
 
-    val providerDefinition = definitionOf(AndroidProvider.HealthConnect)
+    val providerDefinition = definitionOf(androidProvider)
     val manager = providerDefinition.getOrCreateManager(reactApplicationContext)
 
     val read = readResources.toArrayList().mapTo(mutableSetOf()) {
@@ -206,7 +211,8 @@ class VitalHealthReactNativeModule(reactContext: ReactApplicationContext) :
   }
 
   @ReactMethod
-  fun hasAskedForPermission(resource: String, promise: Promise) = runOnMain {
+  fun hasAskedForPermission(provider: String, resource: String, promise: Promise) = runOnMain {
+    val androidProvider = providerOf(provider, promise) ?: return@runOnMain
     val vitalResource = try {
       VitalResource.valueOf(resource)
     } catch (e: IllegalArgumentException) {
@@ -216,12 +222,13 @@ class VitalHealthReactNativeModule(reactContext: ReactApplicationContext) :
       )
     }
 
-    val manager = managerOf(AndroidProvider.HealthConnect)
+    val manager = managerOf(androidProvider)
     promise.resolve(manager.hasAskedForPermission(vitalResource))
   }
 
   @ReactMethod
-  fun syncData(resources: ReadableArray, promise: Promise) = runOnMain {
+  fun syncData(provider: String, resources: ReadableArray, promise: Promise) = runOnMain {
+    val androidProvider = providerOf(provider, promise) ?: return@runOnMain
     val vitalResources = resources.toArrayList()
       .mapNotNull {
         try {
@@ -233,7 +240,7 @@ class VitalHealthReactNativeModule(reactContext: ReactApplicationContext) :
       }
       .toSet()
 
-    val manager = managerOf(AndroidProvider.HealthConnect)
+    val manager = managerOf(androidProvider)
 
     try {
       manager.syncData(resources = vitalResources.ifEmpty { null })
@@ -244,13 +251,15 @@ class VitalHealthReactNativeModule(reactContext: ReactApplicationContext) :
   }
 
   @ReactMethod
-  private fun writeHealthData(
+  fun writeHealthData(
+    provider: String,
     resource: String,
+    value: Double,
     startDate: Double,
     endDate: Double,
-    value: Double,
     promise: Promise,
   ) = runOnMain {
+    val androidProvider = providerOf(provider, promise) ?: return@runOnMain
     val writableResource = try {
       WritableVitalResource.valueOf(resource)
     } catch (e: IllegalArgumentException) {
@@ -260,7 +269,7 @@ class VitalHealthReactNativeModule(reactContext: ReactApplicationContext) :
       )
     }
 
-    val providerDefinition = definitionOf(AndroidProvider.HealthConnect)
+    val providerDefinition = definitionOf(androidProvider)
     if (writableResource !in providerDefinition.supportedWriteResources) {
       return@runOnMain promise.reject(
         VITAL_HEALTH_ERROR,
@@ -288,7 +297,8 @@ class VitalHealthReactNativeModule(reactContext: ReactApplicationContext) :
   }
 
   @ReactMethod
-  fun enableBackgroundSync(promise: Promise) = runOnMain {
+  fun enableBackgroundSync(provider: String, promise: Promise) = runOnMain {
+    val androidProvider = providerOf(provider, promise) ?: return@runOnMain
     if (synchronized(this) { enableBackgroundSync != null }) {
       return@runOnMain promise.reject(
         VITAL_HEALTH_ERROR,
@@ -308,7 +318,7 @@ class VitalHealthReactNativeModule(reactContext: ReactApplicationContext) :
       )
     }
 
-    val manager = managerOf(AndroidProvider.HealthConnect)
+    val manager = managerOf(androidProvider)
     val contract = manager.enableBackgroundSyncContract()
 
     synchronized(this) {
@@ -335,15 +345,17 @@ class VitalHealthReactNativeModule(reactContext: ReactApplicationContext) :
   }
 
   @ReactMethod
-  fun disableBackgroundSync(promise: Promise) = runOnMain {
-    managerOf(AndroidProvider.HealthConnect)
+  fun disableBackgroundSync(provider: String, promise: Promise) = runOnMain {
+    val androidProvider = providerOf(provider, promise) ?: return@runOnMain
+    managerOf(androidProvider)
       .disableBackgroundSync()
     promise.resolve(null)
   }
 
   @ReactMethod
-  fun setSyncNotificationContent(content: String, promise: Promise) = runOnMain {
-    val manager = managerOf(AndroidProvider.HealthConnect)
+  fun setSyncNotificationContent(provider: String, content: String, promise: Promise) = runOnMain {
+    val androidProvider = providerOf(provider, promise) ?: return@runOnMain
+    val manager = managerOf(androidProvider)
 
     try {
       val payload = Json.decodeFromString<JsonObject>(content).let {
@@ -363,58 +375,74 @@ class VitalHealthReactNativeModule(reactContext: ReactApplicationContext) :
   }
 
   @ReactMethod
-  fun setPauseSynchronization(paused: Boolean, promise: Promise) = runOnMain {
-    val manager = managerOf(AndroidProvider.HealthConnect)
+  fun setPauseSynchronization(provider: String, paused: Boolean, promise: Promise) = runOnMain {
+    val androidProvider = providerOf(provider, promise) ?: return@runOnMain
+    val manager = managerOf(androidProvider)
     manager.pauseSynchronization = paused
     promise.resolve(null)
   }
 
   @ReactMethod
-  fun getPauseSynchronization(promise: Promise) = runOnMain {
-    val manager = managerOf(AndroidProvider.HealthConnect)
+  fun getPauseSynchronization(provider: String, promise: Promise) = runOnMain {
+    val androidProvider = providerOf(provider, promise) ?: return@runOnMain
+    val manager = managerOf(androidProvider)
     promise.resolve(manager.pauseSynchronization)
   }
 
   @ReactMethod
-  fun isBackgroundSyncEnabled(promise: Promise) = runOnMain {
-    val manager = managerOf(AndroidProvider.HealthConnect)
+  fun isBackgroundSyncEnabled(provider: String, promise: Promise) = runOnMain {
+    val androidProvider = providerOf(provider, promise) ?: return@runOnMain
+    val manager = managerOf(androidProvider)
     promise.resolve(manager.isBackgroundSyncEnabled)
   }
 
   @ReactMethod
-  fun autoSyncThrottle(promise: Promise) = runOnMain {
-    val manager = managerOf(AndroidProvider.HealthConnect)
+  fun autoSyncThrottle(provider: String, promise: Promise) = runOnMain {
+    val androidProvider = providerOf(provider, promise) ?: return@runOnMain
+    val manager = managerOf(androidProvider)
     promise.resolve(manager.autoSyncThrottle.inWholeMilliseconds.toDouble())
   }
 
   @ReactMethod
-  fun backgroundSyncMinimumInterval(promise: Promise) = runOnMain {
-    val manager = managerOf(AndroidProvider.HealthConnect)
+  fun backgroundSyncMinimumInterval(provider: String, promise: Promise) = runOnMain {
+    val androidProvider = providerOf(provider, promise) ?: return@runOnMain
+    val manager = managerOf(androidProvider)
     promise.resolve(manager.backgroundSyncMinimumInterval.inWholeMilliseconds.toDouble())
   }
 
   @ReactMethod
-  fun setBackgroundSyncMinimumInterval(intervalInMilliseconds: Double, promise: Promise) = runOnMain {
-    val manager = managerOf(AndroidProvider.HealthConnect)
+  fun setBackgroundSyncMinimumInterval(
+    provider: String,
+    intervalInMilliseconds: Double,
+    promise: Promise,
+  ) = runOnMain {
+    val androidProvider = providerOf(provider, promise) ?: return@runOnMain
+    val manager = managerOf(androidProvider)
     manager.backgroundSyncMinimumInterval = intervalInMilliseconds.milliseconds
     promise.resolve(null)
   }
 
   @ReactMethod
-  fun setAutoSyncThrottle(thresholdInMilliseconds: Double, promise: Promise) = runOnMain {
-    val manager = definitionOf(AndroidProvider.HealthConnect).getOrCreateManager(reactApplicationContext)
+  fun setAutoSyncThrottle(
+    provider: String,
+    thresholdInMilliseconds: Double,
+    promise: Promise,
+  ) = runOnMain {
+    val androidProvider = providerOf(provider, promise) ?: return@runOnMain
+    val manager = definitionOf(androidProvider).getOrCreateManager(reactApplicationContext)
     manager.autoSyncThrottle = thresholdInMilliseconds.milliseconds
     promise.resolve(null)
   }
 
   @ReactMethod
-  fun openPlatformHealthApp(promise: Promise) = runOnMain {
+  fun openPlatformHealthApp(provider: String, promise: Promise) = runOnMain {
+    val androidProvider = providerOf(provider, promise) ?: return@runOnMain
     val activity = reactApplicationContext.currentActivity ?: return@runOnMain promise.reject(
       VITAL_HEALTH_ERROR,
       "No active Android Activity",
     )
 
-    definitionOf(AndroidProvider.HealthConnect)
+    definitionOf(androidProvider)
       .openPlatformHealthAppIntent(reactApplicationContext)
       ?.let(activity::startActivity)
 
@@ -422,17 +450,19 @@ class VitalHealthReactNativeModule(reactContext: ReactApplicationContext) :
   }
 
   @ReactMethod
-  fun getConnectionStatus(promise: Promise) = runOnMain {
-    val manager = managerOf(AndroidProvider.HealthConnect)
+  fun getConnectionStatus(provider: String, promise: Promise) = runOnMain {
+    val androidProvider = providerOf(provider, promise) ?: return@runOnMain
+    val manager = managerOf(androidProvider)
     promise.resolve(
       manager.connectionStatus.value.name.replaceFirstChar { it.lowercase() },
     )
   }
 
   @ReactMethod
-  fun connect(promise: Promise) = runOnMain {
+  fun connect(provider: String, promise: Promise) = runOnMain {
+    val androidProvider = providerOf(provider, promise) ?: return@runOnMain
     try {
-      managerOf(AndroidProvider.HealthConnect)
+      managerOf(androidProvider)
         .connect()
       promise.resolve(null)
     } catch (e: Throwable) {
@@ -441,9 +471,10 @@ class VitalHealthReactNativeModule(reactContext: ReactApplicationContext) :
   }
 
   @ReactMethod
-  fun disconnect(promise: Promise) = runOnMain {
+  fun disconnect(provider: String, promise: Promise) = runOnMain {
+    val androidProvider = providerOf(provider, promise) ?: return@runOnMain
     try {
-      managerOf(AndroidProvider.HealthConnect)
+      managerOf(androidProvider)
         .disconnect()
       promise.resolve(null)
     } catch (e: Throwable) {
@@ -524,6 +555,15 @@ class VitalHealthReactNativeModule(reactContext: ReactApplicationContext) :
         .emit(event.value, params)
     } catch (e: Exception) {
       Log.e("VitalHealth", "sendEvent: $e")
+    }
+  }
+
+  private fun providerOf(rawProvider: String, promise: Promise): AndroidProvider? {
+    return try {
+      AndroidProvider.of(rawProvider)
+    } catch (e: IllegalArgumentException) {
+      promise.reject(VITAL_HEALTH_ERROR, e.message, e)
+      null
     }
   }
 
