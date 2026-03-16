@@ -1,21 +1,16 @@
 package com.vitalhealthreactnative
 
 sealed class VitalHealthEvent(val value: String) {
-  object Status : VitalHealthEvent("Status")
-  object ConnectionStatus : VitalHealthEvent("VitalHealthConnectionStatus")
+  object HealthConnectSyncStatus : VitalHealthEvent("HealthConnectSyncStatus")
+  object HealthConnectConnectionStatus : VitalHealthEvent("HealthConnectConnectionStatus")
+  object SamsungHealthSyncStatus : VitalHealthEvent("SamsungHealthSyncStatus")
+  object SamsungHealthConnectionStatus : VitalHealthEvent("VitalHealthConnectConnectionStatus")
 
   companion object {
     fun values(): Array<VitalHealthEvent> {
-      return arrayOf(Status, ConnectionStatus)
+      return arrayOf(HealthConnectSyncStatus, HealthConnectConnectionStatus, SamsungHealthSyncStatus, SamsungHealthConnectionStatus)
     }
 
-    fun valueOf(value: String): VitalHealthEvent {
-      return when (value) {
-        "Status" -> Status
-        "VitalHealthConnectionStatus" -> ConnectionStatus
-        else -> throw IllegalArgumentException("Invalid VitalHealthEvent value: $value")
-      }
-    }
+    fun valueOf(value: String): VitalHealthEvent = values().first { it.value == value }
   }
-
 }
