@@ -52,6 +52,12 @@
           }
         }
       ],
+      [
+        "./plugins/with-gradle-jvmargs",
+        {
+          "jvmArgs": "-Xmx2048m -XX:MaxMetaspaceSize=1024m"
+        }
+      ],
       "@tryvital/vital-core-react-native",
       [
         "@tryvital/vital-health-react-native",
