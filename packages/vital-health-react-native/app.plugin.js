@@ -13,6 +13,7 @@ const { addWarningAndroid } = require('@expo/config-plugins/build/utils/warnings
 const { updateAndroidBuildProperty } = require('@expo/config-plugins/build/android/BuildProperties');
 
 const HEALTH_SHARE = 'Allow $(PRODUCT_NAME) to check health info';
+const ANDROID_HEALTH_PERMISSION_PREFIX = 'android.permission.health.';
 const SAMSUNG_HEALTH_SETTINGS_PLUGIN = 'io.tryvital.shealth-settings-plugin';
 const SAMSUNG_HEALTH_PROJECT_PLUGIN = 'io.tryvital.shealth-project-plugin';
 const SAMSUNG_HEALTH_PLUGIN_VERSION = '5.0.0-beta.4';
@@ -26,6 +27,24 @@ const escapeRegExp = (value) => value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 const getSamsungHealthAarPath = ({ samsungHealth } = {}) => {
   const aarPath = samsungHealth?.aarPath;
   return typeof aarPath === 'string' && aarPath.trim() ? aarPath.trim() : null;
+};
+
+const assertAndroidHealthPermissions = (config) => {
+  const permissions = Array.isArray(config.android?.permissions)
+    ? config.android.permissions
+    : [];
+
+  const hasHealthPermission = permissions.some(
+    (permission) =>
+      typeof permission === 'string' &&
+      permission.startsWith(ANDROID_HEALTH_PERMISSION_PREFIX)
+  );
+
+  if (!hasHealthPermission) {
+    throw new Error(
+      'The @tryvital/vital-health-react-native Expo plugin requires at least one `android.permission.health.*` entry in `expo.android.permissions`.'
+    );
+  }
 };
 
 const withHealthKit = (config, { healthSharePermission } = {}) => {
@@ -117,6 +136,8 @@ const withHealthKit = (config, { healthSharePermission } = {}) => {
 };
 
 const withHealthConnect = function androidManifestPlugin(config) {
+  assertAndroidHealthPermissions(config);
+
   return withAndroidManifest(config, async (config) => {
     let androidManifest = config.modResults.manifest;
 

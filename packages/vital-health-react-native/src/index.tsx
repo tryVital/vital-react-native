@@ -24,6 +24,19 @@ const VitalHealthReactNative = NativeModules.VitalHealthReactNative
       }
     );
 
+const eventNames = {
+  syncStatus: {
+    apple_health_kit: 'Status',
+    health_connect: 'Status',
+    samsung_health: 'SamsungHealthSyncStatus',
+  } satisfies Record<HealthProvider, string>,
+  connectionStatus: {
+    apple_health_kit: 'VitalHealthConnectionStatus',
+    health_connect: 'HealthConnectConnectionStatus',
+    samsung_health: 'SamsungHealthConnectionStatus',
+  } satisfies Record<HealthProvider, string>,
+};
+
 function defaultHealthProvider(): HealthProvider {
   return Platform.OS === 'android'
     ? AndroidHealthProvider.HealthConnect
@@ -66,7 +79,7 @@ function validateHealthProvider(provider: HealthProvider): HealthProvider {
 export const VitalHealthReactNativeModule = VitalHealthReactNative;
 
 export const VitalHealthEvents = {
-  statusEvent: 'Status',
+  statusEvent: eventNames.syncStatus[defaultHealthProvider()],
 };
 
 export interface SyncNotificationContent {
@@ -82,6 +95,19 @@ export type ConnectionStatus =
   | 'disconnected'
   | 'connectionPaused';
 
+export interface SyncStatus {
+  status:
+    | 'failedSyncing'
+    | 'nothingToSync'
+    | 'syncing'
+    | 'successSyncing'
+    | 'syncingCompleted'
+    | 'completed'
+    | 'unknown';
+  resource?: string;
+  extra?: string;
+}
+
 export class VitalHealth {
   static status = new NativeEventEmitter(VitalHealthReactNative);
   private static eventEmitter = new NativeEventEmitter(VitalHealthReactNative);
@@ -90,15 +116,8 @@ export class VitalHealth {
     this.eventEmitter = emitter;
   }
 
-  static getCanEnableBackgroundSyncNoninteractively(): boolean {
-    return Platform.OS !== 'android';
-  }
-
-  /**
-   * @deprecated Use `getCanEnableBackgroundSyncNoninteractively()` instead.
-   */
   static get canEnableBackgroundSyncNoninteractively(): boolean {
-    return this.getCanEnableBackgroundSyncNoninteractively();
+    return Platform.OS !== 'android';
   }
 
   static getConnectionStatus(
@@ -116,8 +135,10 @@ export class VitalHealth {
   }
 
   static observeConnectionStatusChange(
-    listener: (status: ConnectionStatus) => void
+    listener: (status: ConnectionStatus) => void,
+    provider: HealthProvider = defaultHealthProvider()
   ): Subscription {
+    provider = validateHealthProvider(provider);
     var isCancelled = false;
 
     const wrappedListener = (status: ConnectionStatus) => {
@@ -127,10 +148,10 @@ export class VitalHealth {
       listener(status);
     };
     const subscription = this.eventEmitter.addListener(
-      'VitalHealthConnectionStatus',
+      eventNames.connectionStatus[provider],
       wrappedListener
     );
-    this.getConnectionStatus().then(wrappedListener);
+    this.getConnectionStatus(provider).then(wrappedListener);
 
     return {
       remove() {
@@ -140,10 +161,41 @@ export class VitalHealth {
     };
   }
 
+  static observeSyncStatusChange(
+    listener: (status: SyncStatus) => void,
+    provider: HealthProvider = defaultHealthProvider()
+  ): Subscription {
+    provider = validateHealthProvider(provider);
+    var isCancelled = false;
+
+    const wrappedListener = (status: SyncStatus) => {
+      if (isCancelled) {
+        return;
+      }
+      listener(status);
+    };
+    const subscription = this.eventEmitter.addListener(
+      eventNames.syncStatus[provider],
+      wrappedListener
+    );
+
+    return {
+      remove() {
+        isCancelled = true;
+        subscription.remove();
+      },
+    };
+  }
   /**
    * Whether health data sync is paused at the moment.
+   *
+   * To pause or unpause synchronization client-side, use `setPauseSynchronization`.
+   *
+   * Note that this has no effect on the Junction API side. This is intended as a temporary pause switch.
+   * Consider using [Explicit Connect mode](https://docs.junction.com/wearables/sdks/health/connection-policies#explicit-connect-mode)
+   * if you need the Junction API to track and persist disconnections.
    */
-  static getPauseSynchronization(
+  static isProviderSynchronizationPaused(
     provider: HealthProvider = defaultHealthProvider()
   ): Promise<boolean> {
     provider = validateHealthProvider(provider);
@@ -151,10 +203,10 @@ export class VitalHealth {
   }
 
   /**
-   * @deprecated Use `getPauseSynchronization()` instead.
+   * @deprecated Use `isProviderSynchronizationPaused()` instead.
    */
   static get pauseSynchronization(): Promise<boolean> {
-    return this.getPauseSynchronization();
+    return this.isProviderSynchronizationPaused();
   }
 
   /**
@@ -167,7 +219,7 @@ export class VitalHealth {
    *
    * Whether Background Sync on Android is enabled at the moment.
    */
-  static getIsBackgroundSyncEnabled(
+  static isBackgroundSyncEnabledForProvider(
     provider: HealthProvider = defaultHealthProvider()
   ): Promise<boolean> {
     provider = validateHealthProvider(provider);
@@ -180,10 +232,10 @@ export class VitalHealth {
   }
 
   /**
-   * @deprecated Use `getIsBackgroundSyncEnabled()` instead.
+   * @deprecated Use `isBackgroundSyncEnabledForProvider()` instead.
    */
   static get isBackgroundSyncEnabled(): Promise<boolean> {
-    return this.getIsBackgroundSyncEnabled();
+    return this.isBackgroundSyncEnabledForProvider();
   }
 
   /**
@@ -464,6 +516,10 @@ export class VitalHealth {
 
   /**
    * Pause or unpause health data sync.
+   *
+   * Note that this has no effect on the Junction API side. This is intended as a temporary client-side pause switch.
+   * Consider using [Explicit Connect mode](https://docs.junction.com/wearables/sdks/health/connection-policies#explicit-connect-mode)
+   * if you need the Junction API to track and persist disconnections.
    */
   static async setPauseSynchronization(
     paused: boolean,
