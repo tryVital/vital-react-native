@@ -14,9 +14,10 @@ const { updateAndroidBuildProperty } = require('@expo/config-plugins/build/andro
 
 const HEALTH_SHARE = 'Allow $(PRODUCT_NAME) to check health info';
 const ANDROID_HEALTH_PERMISSION_PREFIX = 'android.permission.health.';
+const HEALTH_CONNECT_PERMISSIONS_RATIONALE_ACTION = 'androidx.health.ACTION_SHOW_PERMISSIONS_RATIONALE';
 const SAMSUNG_HEALTH_SETTINGS_PLUGIN = 'io.tryvital.shealth-settings-plugin';
 const SAMSUNG_HEALTH_PROJECT_PLUGIN = 'io.tryvital.shealth-project-plugin';
-const SAMSUNG_HEALTH_PLUGIN_VERSION = '5.0.0-beta.4';
+const SAMSUNG_HEALTH_PLUGIN_VERSION = '5.0.0-rc.1';
 const SAMSUNG_HEALTH_SETTINGS_PLUGIN_DECLARATION =
   `id("${SAMSUNG_HEALTH_SETTINGS_PLUGIN}") version "${SAMSUNG_HEALTH_PLUGIN_VERSION}"`;
 const SAMSUNG_HEALTH_PLUGIN_CLASSPATH =
@@ -139,17 +140,50 @@ const withHealthConnect = function androidManifestPlugin(config) {
   assertAndroidHealthPermissions(config);
 
   return withAndroidManifest(config, async (config) => {
-    let androidManifest = config.modResults.manifest;
+    const androidManifest = config.modResults.manifest;
+    const mainActivity = androidManifest.application?.[0]?.activity?.[0];
 
-    androidManifest.application[0].activity[0]['intent-filter'].push({
-      action: [
-        {
-          $: {
-            'android:name': 'androidx.health.ACTION_SHOW_PERMISSIONS_RATIONALE',
-          },
-        },
-      ],
+    if (!mainActivity) {
+      return config;
+    }
+
+    const intentFilters = Array.isArray(mainActivity['intent-filter'])
+      ? mainActivity['intent-filter']
+      : [];
+
+    let hasPermissionsRationaleIntentFilter = false;
+    const dedupedIntentFilters = intentFilters.filter((intentFilter) => {
+      const hasRationaleAction =
+        Array.isArray(intentFilter?.action) &&
+        intentFilter.action.some(
+          (action) => action?.$?.['android:name'] === HEALTH_CONNECT_PERMISSIONS_RATIONALE_ACTION
+        );
+
+      if (!hasRationaleAction) {
+        return true;
+      }
+
+      if (hasPermissionsRationaleIntentFilter) {
+        return false;
+      }
+
+      hasPermissionsRationaleIntentFilter = true;
+      return true;
     });
+
+    if (!hasPermissionsRationaleIntentFilter) {
+      dedupedIntentFilters.push({
+        action: [
+          {
+            $: {
+              'android:name': HEALTH_CONNECT_PERMISSIONS_RATIONALE_ACTION,
+            },
+          },
+        ],
+      });
+    }
+
+    mainActivity['intent-filter'] = dedupedIntentFilters;
 
     return config;
   });
