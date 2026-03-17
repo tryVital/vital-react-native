@@ -51,6 +51,7 @@ class VitalHealthReactNativeModule(reactContext: ReactApplicationContext) :
 
   private var askForPermission: AskForPermissionContinuation? = null
   private var enableBackgroundSync: EnableBackgroundSyncContinuation? = null
+  private var listenerCount = 0
 
   private val managers = mutableMapOf<AndroidProvider, VitalHealthManagerBridge>()
   private var statusObservationJobs = mutableMapOf<AndroidProvider, Job>()
@@ -63,6 +64,7 @@ class VitalHealthReactNativeModule(reactContext: ReactApplicationContext) :
   }
 
   override fun invalidate() {
+    destroyStatusUpdates()
     mainScope.cancel()
     super.invalidate()
   }
@@ -95,7 +97,6 @@ class VitalHealthReactNativeModule(reactContext: ReactApplicationContext) :
     }
 
     val manager = providerDefinition.getOrCreateManager(reactApplicationContext)
-    startStatusUpdate(providerDefinition, manager)
 
     manager.configure(
       syncOnAppStart = syncOnAppStart,
@@ -485,15 +486,59 @@ class VitalHealthReactNativeModule(reactContext: ReactApplicationContext) :
   @ReactMethod
   fun addListener(eventName: String?) {
     eventName
+    val shouldInitialize = synchronized(this) {
+      val shouldInitialize = listenerCount == 0
+      listenerCount += 1
+      shouldInitialize
+    }
+
+    if (shouldInitialize) {
+      runOnMain { initializeStatusUpdatesIfSubscribed() }
+    }
   }
 
   @ReactMethod
   fun removeListeners(count: Int) {
-    count
+    val shouldDestroy = synchronized(this) {
+      val nextCount = (listenerCount - count.coerceAtLeast(0)).coerceAtLeast(0)
+      val shouldDestroy = listenerCount > 0 && nextCount == 0
+      listenerCount = nextCount
+      shouldDestroy
+    }
+
+    if (shouldDestroy) {
+      runOnMain { destroyStatusUpdates() }
+    }
   }
 
   override fun getConstants(): MutableMap<String, Any> {
     return VitalHealthEvent.values().associate { it.value to it.value }.toMutableMap()
+  }
+
+  private fun initializeStatusUpdatesIfSubscribed() {
+    val hasListeners = synchronized(this) { listenerCount > 0 }
+    if (!hasListeners) {
+      return
+    }
+
+    AndroidProvider.values().forEach(::initializeStatusUpdate)
+  }
+
+  private fun initializeStatusUpdate(provider: AndroidProvider) {
+    val providerDefinition = definitionOf(provider)
+    if (providerDefinition === UnavailableVitalHealthProviderDefinition) {
+      return
+    }
+
+    val manager = providerDefinition.getOrCreateManager(reactApplicationContext)
+    startStatusUpdate(providerDefinition, manager)
+  }
+
+  private fun destroyStatusUpdates() {
+    statusObservationJobs.values.forEach(Job::cancel)
+    connectionObservationJobs.values.forEach(Job::cancel)
+    statusObservationJobs.clear()
+    connectionObservationJobs.clear()
   }
 
   private fun startStatusUpdate(
