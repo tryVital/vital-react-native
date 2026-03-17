@@ -38,7 +38,10 @@ It requires the following toolchains being present in the environment:
 
 The Example app can be built and launched in three simple steps:
 
-```
+```bash
+# Build the Junction SDK packages
+yarn syncpkg
+
 # Resolve and install dependencies.
 npx expo install
 
