@@ -16,7 +16,7 @@ const HEALTH_SHARE = 'Allow $(PRODUCT_NAME) to check health info';
 const ANDROID_HEALTH_PERMISSION_PREFIX = 'android.permission.health.';
 const SAMSUNG_HEALTH_SETTINGS_PLUGIN = 'io.tryvital.shealth-settings-plugin';
 const SAMSUNG_HEALTH_PROJECT_PLUGIN = 'io.tryvital.shealth-project-plugin';
-const SAMSUNG_HEALTH_PLUGIN_VERSION = '5.0.0-beta.4';
+const SAMSUNG_HEALTH_PLUGIN_VERSION = '5.0.0-rc.1';
 const SAMSUNG_HEALTH_SETTINGS_PLUGIN_DECLARATION =
   `id("${SAMSUNG_HEALTH_SETTINGS_PLUGIN}") version "${SAMSUNG_HEALTH_PLUGIN_VERSION}"`;
 const SAMSUNG_HEALTH_PLUGIN_CLASSPATH =

@@ -8,8 +8,8 @@ buildscript {
     mavenCentral()
   }
   dependencies {
-    classpath 'io.tryvital:shealth-plugins:5.0.0-beta.4'
-classpath('com.android.tools.build:gradle')
+    classpath 'io.tryvital:shealth-plugins:5.0.0-rc.1'
+    classpath('com.android.tools.build:gradle')
     classpath('com.facebook.react:react-native-gradle-plugin')
     classpath('org.jetbrains.kotlin:kotlin-gradle-plugin')
   }
