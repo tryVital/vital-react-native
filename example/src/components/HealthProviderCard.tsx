@@ -8,7 +8,7 @@ import {
 } from '@tryvital/vital-health-react-native';
 import type { HealthProvider } from '@tryvital/vital-health-react-native';
 import { Button, VStack, HStack, Box } from 'native-base';
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { ActivityIndicator, Platform, Switch, Text } from 'react-native';
 import { AskConfig } from '@tryvital/vital-health-react-native/lib/typescript/ask_config';
 
@@ -18,12 +18,6 @@ const requestedResources = [
   VitalResource.Sleep,
   VitalResource.HeartRate,
 ];
-
-const connectionStatusEventNames = {
-  apple_health_kit: 'VitalHealthConnectionStatus',
-  health_connect: 'HealthConnectConnectionStatus',
-  samsung_health: 'SamsungHealthConnectionStatus',
-} satisfies Record<HealthProvider, string>;
 
 function providerLabel(provider: HealthProvider): string {
   switch (provider) {
@@ -36,6 +30,22 @@ function providerLabel(provider: HealthProvider): string {
   }
 
   return provider;
+}
+
+type ObservedSyncStatus = {
+  status: string;
+  resource?: string;
+  extra?: string;
+};
+
+function normalizeSyncStatus(
+  status: ObservedSyncStatus | ConnectionStatus
+): ObservedSyncStatus {
+  if (typeof status === 'string') {
+    return { status };
+  }
+
+  return status;
 }
 
 type HealthProviderCardProps = {
@@ -55,6 +65,7 @@ export function HealthProviderCard({
   const [isAvailable, setIsAvailable] = useState<boolean>(true);
   const [connectionStatus, setConnectionStatus] =
     useState<ConnectionStatus | null>(null);
+  const [syncStatus, setSyncStatus] = useState<ObservedSyncStatus | null>(null);
   const [isConnectingDisconnecting, setConnectingDisconnecting] =
     useState<boolean>(false);
   const [isBackgroundSyncEnabled, setBackgroundSyncEnabled] = useState<
@@ -63,7 +74,7 @@ export function HealthProviderCard({
   const [isUpdatingBackgroundSync, setUpdatingBackgroundSync] =
     useState<boolean>(true);
 
-  const refreshPermissionAsked = async () => {
+  const refreshPermissionAsked = useCallback(async () => {
     const asked = await Promise.all(
       requestedResources.map(resource =>
         VitalHealth.hasAskedForPermission(resource, provider),
@@ -75,9 +86,9 @@ export function HealthProviderCard({
       .sort((lhs, rhs) => lhs.localeCompare(rhs));
 
     setPermissionAsked(sortedResources);
-  };
+  }, [provider]);
 
-  const refreshBackgroundSync = async () => {
+  const refreshBackgroundSync = useCallback(async () => {
     if (VitalHealth.canEnableBackgroundSyncNoninteractively) {
       setUpdatingBackgroundSync(false);
       return;
@@ -88,21 +99,21 @@ export function HealthProviderCard({
     );
     setBackgroundSyncEnabled(enabled);
     setUpdatingBackgroundSync(false);
-  };
+  }, [provider]);
 
   useEffect(() => {
     let isCancelled = false;
-    const subscription = VitalHealth.status.addListener(
-      connectionStatusEventNames[provider],
-      (status: ConnectionStatus) => {
-        if (!isCancelled) {
-          setConnectionStatus(status);
-        }
-      },
-    );
+    let connectionSubscription:
+      | ReturnType<typeof VitalHealth.observeConnectionStatusChange>
+      | undefined;
+    let syncSubscription:
+      | ReturnType<typeof VitalHealth.observeSyncStatusChange>
+      | undefined;
 
     const refresh = async () => {
       try {
+        setUpdatingBackgroundSync(true);
+
         const available = await VitalHealth.isAvailable(provider);
         if (isCancelled) {
           return;
@@ -113,20 +124,34 @@ export function HealthProviderCard({
         if (!available) {
           setPermissionAsked([]);
           setConnectionStatus(null);
+          setSyncStatus(null);
           setBackgroundSyncEnabled(undefined);
           setUpdatingBackgroundSync(false);
           return;
         }
 
-        const [status] = await Promise.all([
-          VitalHealth.getConnectionStatus(provider),
+        connectionSubscription = VitalHealth.observeConnectionStatusChange(
+          status => {
+            if (!isCancelled) {
+              setConnectionStatus(status);
+            }
+          },
+          provider,
+        );
+
+        syncSubscription = VitalHealth.observeSyncStatusChange(
+          status => {
+            if (!isCancelled) {
+              setSyncStatus(normalizeSyncStatus(status));
+            }
+          },
+          provider,
+        );
+
+        await Promise.all([
           refreshPermissionAsked(),
           refreshBackgroundSync(),
         ]);
-
-        if (!isCancelled) {
-          setConnectionStatus(status);
-        }
       } catch (error) {
         console.error(`Failed to refresh ${provider} card state`, error);
         if (!isCancelled) {
@@ -139,9 +164,10 @@ export function HealthProviderCard({
 
     return () => {
       isCancelled = true;
-      subscription.remove();
+      connectionSubscription?.remove();
+      syncSubscription?.remove();
     };
-  }, [provider, userId]);
+  }, [provider, refreshBackgroundSync, refreshPermissionAsked, userId]);
 
   const handleAskForPermission = () => {
     let config: AskConfig | undefined;
@@ -246,6 +272,13 @@ export function HealthProviderCard({
             </Text>
           )}
 
+          {syncStatus !== null && (
+            <Text style={{ color: 'black', fontSize: 16, paddingBottom: 16 }}>
+              Latest Sync Status: {syncStatus.status}
+              {syncStatus.resource ? ` (${syncStatus.resource})` : ''}
+            </Text>
+          )}
+
           <Button onPress={handleAskForPermission}>
             Ask for permission (Activity, Workout, Sleep)
           </Button>
@@ -276,7 +309,9 @@ export function HealthProviderCard({
 
           <HStack alignItems={'center'} style={{ marginTop: 8 }}>
             <Text style={{ flexGrow: 1 }}>Force Sync</Text>
-            <Button onPress={() => VitalHealth.syncData([], provider)}>Sync</Button>
+            <Button onPress={() => VitalHealth.syncData([], provider)}>
+              Sync
+            </Button>
           </HStack>
 
           {!VitalHealth.canEnableBackgroundSyncNoninteractively && (

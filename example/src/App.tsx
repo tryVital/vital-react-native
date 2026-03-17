@@ -6,15 +6,10 @@ import { VitalClient, VitalEnvironment } from '@tryvital/vital-node';
 import HomeScreen from './screens/HomeScreen';
 import { ConnectSource } from './screens/ConnectScreen';
 import { UserScreen } from './screens/UserScreen';
-import {
-  VitalHealth,
-  VitalHealthEvents,
-  VitalHealthReactNativeModule,
-} from '@tryvital/vital-health-react-native';
+import { VitalHealth } from '@tryvital/vital-health-react-native';
 // import { VitalDevicesManager } from '@tryvital/vital-devices-react-native';
-import { NativeEventEmitter } from 'react-native';
 import { VITAL_API_KEY, VITAL_ENVIRONMENT, VITAL_REGION } from './Environment';
-import {SafeAreaView, SafeAreaProvider} from 'react-native-safe-area-context';
+import { SafeAreaProvider } from 'react-native-safe-area-context';
 
 // import {
 //   readBLEGlucoseMeter,
@@ -56,33 +51,33 @@ const Stack = createNativeStackNavigator();
 
 const AppStack = () => {
   return (
-        <Stack.Navigator initialRouteName="Home">
-          <Stack.Group>
-            <Stack.Screen
-              name="Home"
-              component={HomeScreen}
-              options={() => ({
-                title: 'Users',
-              })}
-            />
-          </Stack.Group>
+    <Stack.Navigator initialRouteName="Home">
+      <Stack.Group>
+        <Stack.Screen
+          name="Home"
+          component={HomeScreen}
+          options={() => ({
+            title: 'Users',
+          })}
+        />
+      </Stack.Group>
 
-          <Stack.Group>
-            <Stack.Screen
-              name="User"
-              component={UserScreen}
-              options={() => ({ title: 'User' })}
-            />
-          </Stack.Group>
+      <Stack.Group>
+        <Stack.Screen
+          name="User"
+          component={UserScreen}
+          options={() => ({ title: 'User' })}
+        />
+      </Stack.Group>
 
-          <Stack.Group screenOptions={{ presentation: 'modal' }}>
-            <Stack.Screen
-              name="ConnectSource"
-              component={ConnectSource}
-              options={{ headerShown: false }}
-            />
-          </Stack.Group>
-        </Stack.Navigator>
+      <Stack.Group screenOptions={{ presentation: 'modal' }}>
+        <Stack.Screen
+          name="ConnectSource"
+          component={ConnectSource}
+          options={{ headerShown: false }}
+        />
+      </Stack.Group>
+    </Stack.Navigator>
   );
 };
 

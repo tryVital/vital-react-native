@@ -114,7 +114,7 @@ const HomeScreen = ({ navigation }) => {
     setLoading(true);
     vitalNodeClient.user
       .create({ clientUserId: newUserClientId })
-      .then(_ => {
+      .then(() => {
         return vitalNodeClient.user.getAll();
       })
       .then(response => {
@@ -142,7 +142,7 @@ const HomeScreen = ({ navigation }) => {
     setLoading(true);
     vitalNodeClient.user
       .delete(user_id)
-      .then(_ => {
+      .then(() => {
         return vitalNodeClient.user.getAll();
       })
       .then(response => {
@@ -187,15 +187,15 @@ const HomeScreen = ({ navigation }) => {
                 >
                   <VStack flexShrink={1}>
                     <Text style={styles.itemTitle}>{item.clientUserId}</Text>
-                    {item.userId.toLowerCase() ==
+                    {item.userId.toLowerCase() ===
                       sdkCurrentUserId?.toLowerCase() && (
-                        <HStack alignItems={'center'}>
-                          <Icon name="arrow-up" size={14} color={'green'} />
-                          <Text style={styles.itemSubtitle}>
-                            Current SDK User
-                          </Text>
-                        </HStack>
-                      )}
+                      <HStack alignItems={'center'}>
+                        <Icon name="arrow-up" size={14} color={'green'} />
+                        <Text style={styles.itemSubtitle}>
+                          Current SDK User
+                        </Text>
+                      </HStack>
+                    )}
                   </VStack>
                   <HStack alignItems={'center'}>
                     <Icon
@@ -204,13 +204,13 @@ const HomeScreen = ({ navigation }) => {
                       color={'grey'}
                       style={{ marginLeft: 4 }}
                     />
-                    {item.userId.toLowerCase() ==
+                    {item.userId.toLowerCase() ===
                       sdkCurrentUserId?.toLowerCase() && (
-                        <LinkButton
-                          onPress={() => handlePressOnConnectDevice(item.userId)}
-                          isLoading={isLoading}
-                        />
-                      )}
+                      <LinkButton
+                        onPress={() => handlePressOnConnectDevice(item.userId)}
+                        isLoading={isLoading}
+                      />
+                    )}
                     <DeleteButton
                       onPress={() => handlePressDeleteUser(item.userId)}
                     />

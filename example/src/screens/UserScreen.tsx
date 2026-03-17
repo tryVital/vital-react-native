@@ -8,13 +8,12 @@ import {
 } from '@tryvital/vital-health-react-native';
 import React from 'react';
 import { Vital } from '@tryvital/vital-node';
-import { Button, VStack, HStack, ScrollView, Box } from 'native-base';
+import { Button, VStack, HStack, Box } from 'native-base';
 import { useEffect, useState } from 'react';
 import { Platform, Switch, Text } from 'react-native';
 import { VITAL_API_KEY, VITAL_ENVIRONMENT, VITAL_REGION } from '../Environment';
 import { vitalNodeClient } from '../App';
 import { HealthProviderCard } from '../components/HealthProviderCard';
-import { SafeAreaView } from 'react-native-safe-area-context';
 import { ScreenWrapper } from './ScreenWrapper';
 
 const supportedProviders =
@@ -58,7 +57,10 @@ export const UserScreen = ({ route }) => {
       : 'autoConnect';
 
     for (const provider of supportedProviders) {
-      if (Platform.OS === 'android' && !(await VitalHealth.isAvailable(provider))) {
+      if (
+        Platform.OS === 'android' &&
+        !(await VitalHealth.isAvailable(provider))
+      ) {
         continue;
       }
 

@@ -95,6 +95,19 @@ export type ConnectionStatus =
   | 'disconnected'
   | 'connectionPaused';
 
+export interface SyncStatus {
+  status:
+    | 'failedSyncing'
+    | 'nothingToSync'
+    | 'syncing'
+    | 'successSyncing'
+    | 'syncingCompleted'
+    | 'completed'
+    | 'unknown';
+  resource?: string;
+  extra?: string;
+}
+
 export class VitalHealth {
   static status = new NativeEventEmitter(VitalHealthReactNative);
   private static eventEmitter = new NativeEventEmitter(VitalHealthReactNative);
@@ -125,6 +138,7 @@ export class VitalHealth {
     listener: (status: ConnectionStatus) => void,
     provider: HealthProvider = defaultHealthProvider()
   ): Subscription {
+    provider = validateHealthProvider(provider);
     var isCancelled = false;
 
     const wrappedListener = (status: ConnectionStatus) => {
@@ -137,7 +151,7 @@ export class VitalHealth {
       eventNames.connectionStatus[provider],
       wrappedListener
     );
-    this.getConnectionStatus().then(wrappedListener);
+    this.getConnectionStatus(provider).then(wrappedListener);
 
     return {
       remove() {
@@ -148,22 +162,22 @@ export class VitalHealth {
   }
 
   static observeSyncStatusChange(
-    listener: (status: ConnectionStatus) => void,
+    listener: (status: SyncStatus) => void,
     provider: HealthProvider = defaultHealthProvider()
   ): Subscription {
+    provider = validateHealthProvider(provider);
     var isCancelled = false;
 
-    const wrappedListener = (status: ConnectionStatus) => {
+    const wrappedListener = (status: SyncStatus) => {
       if (isCancelled) {
         return;
       }
       listener(status);
     };
     const subscription = this.eventEmitter.addListener(
-      eventNames.connectionStatus[provider],
+      eventNames.syncStatus[provider],
       wrappedListener
     );
-    this.getConnectionStatus().then(wrappedListener);
 
     return {
       remove() {
