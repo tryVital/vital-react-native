@@ -1,3 +1,4 @@
 package com.vitalhealthreactnative
 
-val SamsungHealthVitalHealthProviderDefinition get() = UnavailableVitalHealthProviderDefinition
+internal val SamsungHealthVitalHealthProviderDefinition: VitalHealthProviderDefinition
+    get() = UnavailableVitalHealthProviderDefinition
