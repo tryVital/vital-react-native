@@ -2785,42 +2785,42 @@
   dependencies:
     tslib "^2.8.0"
 
-"@tryvital/vital-core-react-native@6.0.0-rc.1", "@tryvital/vital-core-react-native@file:../lib/tryvital-vital-core-react-native-740e605a-6.0.0-rc.1.tgz":
-  version "6.0.0-rc.1"
-  uid d133bc70616cf86611297d56ca28e83fc0e55fbf
-  resolved "file:../lib/tryvital-vital-core-react-native-740e605a-6.0.0-rc.1.tgz#d133bc70616cf86611297d56ca28e83fc0e55fbf"
+"@tryvital/vital-core-react-native@6.0.0-rc.2", "@tryvital/vital-core-react-native@file:../lib/tryvital-vital-core-react-native-2319e832-6.0.0-rc.2.tgz":
+  version "6.0.0-rc.2"
+  uid "7c47214a6beac4199199ca7077242675219cf8d5"
+  resolved "file:../lib/tryvital-vital-core-react-native-2319e832-6.0.0-rc.2.tgz#7c47214a6beac4199199ca7077242675219cf8d5"
 
-"@tryvital/vital-core-react-native@file:../lib/tryvital-vital-core-react-native-5655bb28-6.0.0-rc.1.tgz":
-  version "6.0.0-rc.1"
-  uid d133bc70616cf86611297d56ca28e83fc0e55fbf
-  resolved "file:../lib/tryvital-vital-core-react-native-5655bb28-6.0.0-rc.1.tgz#d133bc70616cf86611297d56ca28e83fc0e55fbf"
+"@tryvital/vital-core-react-native@file:../lib/tryvital-vital-core-react-native-c65e7b53-6.0.0-rc.2.tgz":
+  version "6.0.0-rc.2"
+  uid "7c47214a6beac4199199ca7077242675219cf8d5"
+  resolved "file:../lib/tryvital-vital-core-react-native-c65e7b53-6.0.0-rc.2.tgz#7c47214a6beac4199199ca7077242675219cf8d5"
 
-"@tryvital/vital-devices-react-native@file:../lib/tryvital-vital-devices-react-native-5655bb28-6.0.0-rc.1.tgz":
-  version "6.0.0-rc.1"
-  resolved "file:../lib/tryvital-vital-devices-react-native-5655bb28-6.0.0-rc.1.tgz#c3a09710344005f7398a111c2546bcdecd74abe9"
+"@tryvital/vital-devices-react-native@file:../lib/tryvital-vital-devices-react-native-2319e832-6.0.0-rc.2.tgz":
+  version "6.0.0-rc.2"
+  uid "01275ae68a3a53d28bf0f07e92c7a0e7e083dc78"
+  resolved "file:../lib/tryvital-vital-devices-react-native-2319e832-6.0.0-rc.2.tgz#01275ae68a3a53d28bf0f07e92c7a0e7e083dc78"
   dependencies:
-    "@tryvital/vital-core-react-native" "6.0.0-rc.1"
+    "@tryvital/vital-core-react-native" "6.0.0-rc.2"
     react-native-permissions "^3.6.1"
 
-"@tryvital/vital-devices-react-native@file:../lib/tryvital-vital-devices-react-native-740e605a-6.0.0-rc.1.tgz":
-  version "6.0.0-rc.1"
-  uid c3a09710344005f7398a111c2546bcdecd74abe9
-  resolved "file:../lib/tryvital-vital-devices-react-native-740e605a-6.0.0-rc.1.tgz#c3a09710344005f7398a111c2546bcdecd74abe9"
+"@tryvital/vital-devices-react-native@file:../lib/tryvital-vital-devices-react-native-c65e7b53-6.0.0-rc.2.tgz":
+  version "6.0.0-rc.2"
+  resolved "file:../lib/tryvital-vital-devices-react-native-c65e7b53-6.0.0-rc.2.tgz#01275ae68a3a53d28bf0f07e92c7a0e7e083dc78"
   dependencies:
-    "@tryvital/vital-core-react-native" "6.0.0-rc.1"
+    "@tryvital/vital-core-react-native" "6.0.0-rc.2"
     react-native-permissions "^3.6.1"
 
-"@tryvital/vital-health-react-native@file:../lib/tryvital-vital-health-react-native-5655bb28-6.0.0-rc.1.tgz":
-  version "6.0.0-rc.1"
-  resolved "file:../lib/tryvital-vital-health-react-native-5655bb28-6.0.0-rc.1.tgz#8111d5dcf6cdaa148af581e0ee960e101cc8a973"
+"@tryvital/vital-health-react-native@file:../lib/tryvital-vital-health-react-native-2319e832-6.0.0-rc.2.tgz":
+  version "6.0.0-rc.2"
+  resolved "file:../lib/tryvital-vital-health-react-native-2319e832-6.0.0-rc.2.tgz#517002803ced2e1257920058bc080f3ff066892f"
   dependencies:
-    "@tryvital/vital-core-react-native" "6.0.0-rc.1"
+    "@tryvital/vital-core-react-native" "6.0.0-rc.2"
 
-"@tryvital/vital-health-react-native@file:../lib/tryvital-vital-health-react-native-740e605a-6.0.0-rc.1.tgz":
-  version "6.0.0-rc.1"
-  resolved "file:../lib/tryvital-vital-health-react-native-740e605a-6.0.0-rc.1.tgz#b92bea94f321c4402b63c5d4e25c1b755806d15f"
+"@tryvital/vital-health-react-native@file:../lib/tryvital-vital-health-react-native-c65e7b53-6.0.0-rc.2.tgz":
+  version "6.0.0-rc.2"
+  resolved "file:../lib/tryvital-vital-health-react-native-c65e7b53-6.0.0-rc.2.tgz#ee01342fc0897c352f072cddf53cb131211903bb"
   dependencies:
-    "@tryvital/vital-core-react-native" "6.0.0-rc.1"
+    "@tryvital/vital-core-react-native" "6.0.0-rc.2"
 
 "@tryvital/vital-node@^3.1.544":
   version "3.1.551"

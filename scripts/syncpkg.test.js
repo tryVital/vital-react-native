@@ -11,7 +11,7 @@ const managedPackages = [
   '@tryvital/vital-devices-react-native',
 ];
 
-const packageVersion = '6.0.0-rc.1';
+const packageVersion = '6.0.0-rc.2';
 const scriptSourcePath = path.resolve(__dirname, 'syncpkg.js');
 
 function archivePrefixForPackage(packageName) {
