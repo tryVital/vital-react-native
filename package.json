@@ -17,9 +17,5 @@
         "syncpkg": "node ./scripts/syncpkg.js"
     },
     "version": "6.0.0-rc.2",
-    "resolutions": {
-        "@babel/traverse": "^7.29.0",
-        "fast-xml-parser": "^5.5.7"
-    },
     "packageManager": "yarn@1.22.19+sha1.4ba7fc5c6e704fce2066ecbfb0b0d8976fe62447"
 }
