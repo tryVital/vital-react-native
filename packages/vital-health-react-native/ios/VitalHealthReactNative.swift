@@ -402,6 +402,54 @@ class VitalHealthReactNative: RCTEventEmitter {
       )
     }
   }
+
+  @objc(isPersistentLoggingEnabled:resolver:rejecter:)
+  func isPersistentLoggingEnabled(
+    _ provider: String,
+    resolve: @escaping RCTPromiseResolveBlock,
+    reject: RCTPromiseRejectBlock
+  ) {
+    guard validateAppleHealthKitProvider(provider, reject: reject) else { return }
+
+    Task { @MainActor in
+      resolve(VitalPersistentLogger.isEnabled)
+    }
+  }
+
+  @objc(setPersistentLoggingEnabled:enabled:resolver:rejecter:)
+  func setPersistentLoggingEnabled(
+    _ provider: String,
+    enabled: Bool,
+    resolve: @escaping RCTPromiseResolveBlock,
+    reject: RCTPromiseRejectBlock
+  ) {
+    guard validateAppleHealthKitProvider(provider, reject: reject) else { return }
+
+    Task { @MainActor in
+      defer { resolve(()) }
+      VitalPersistentLogger.isEnabled = enabled
+
+      if !enabled {
+        do {
+          try await VitalHealthKitClient.clearLogs()
+        } catch {}
+      }
+    }
+  }
+
+  @objc(sharePersistentLogArchive:resolver:rejecter:)
+  func sharePersistentLogArchive(
+    _ provider: String,
+    resolve: @escaping RCTPromiseResolveBlock,
+    reject: RCTPromiseRejectBlock
+  ) {
+    guard validateAppleHealthKitProvider(provider, reject: reject) else { return }
+
+    Task { @MainActor in
+      defer { resolve(()) }
+      VitalHealthKitClient.createAndShareLogArchive()
+    }
+  }
 }
 
 private let appleHealthKitProvider = "apple_health_kit"
