@@ -10,12 +10,13 @@ import {
 import React, { useEffect, useState } from 'react';
 import { vitalNodeClient } from '../App';
 import { VITAL_ENVIRONMENT, VITAL_REGION } from '../Environment';
-import { HStack, VStack } from 'native-base';
+import { Box, HStack, VStack } from 'native-base';
 import { FontAwesome5 as Icon } from '@expo/vector-icons';
 import Dialog from 'react-native-dialog';
 import styles from '../Styles';
 import { VitalCore } from '@tryvital/vital-core-react-native';
 import { VitalHealth } from '@tryvital/vital-health-react-native';
+import { PersistentLoggingToggle } from '../components/PersistentLoggingToggle';
 
 const DeleteButton = ({ onPress }) => (
   <Icon onPress={onPress} name="trash" style={styles.iconButtonDestructive} />
@@ -225,6 +226,8 @@ const HomeScreen = ({ navigation }) => {
 
   return (
     <View style={styles.container}>
+      <PersistentLoggingToggle />
+      <Box height="2" />
       <UserList state={getUsers} sdkCurrentUserId={sdkCurrentUserId} />
       <View>
         <Dialog.Container visible={isOpen}>

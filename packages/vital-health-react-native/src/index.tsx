@@ -611,16 +611,71 @@ export class VitalHealth {
     return await VitalHealthReactNative.openPlatformHealthApp(provider);
   }
 
+  /**
+   * On iOS, this opens the Junction SDK in-built Sync Progress UI as a modal over your top view controller.
+   * On Android, this is a no-op.
+   */
   static async openSyncProgressView(
     provider: HealthProvider = defaultHealthProvider()
   ): Promise<void> {
     provider = validateHealthProvider(provider);
 
     if (Platform.OS !== 'ios') {
+      // Not supported on Android
       return;
     }
 
     return await VitalHealthReactNative.openSyncProgressView(provider);
+  }
+
+  /**
+   * On iOS, this reports whether Junction SDK Persistent Logging is currently enabled. To enable or disable persistent
+   * logging, use [setPersistentLoggingEnabled].
+   * 
+   * On Android, this always reports `false` since the feature is unavailable.
+   */
+  static async isPersistentLoggingEnabled(provider: HealthProvider = defaultHealthProvider()): Promise<boolean> {
+    provider = validateHealthProvider(provider);
+
+    if (Platform.OS !== 'ios') {
+      // Not supported on Android
+      return false;
+    }
+
+    return await VitalHealthReactNative.isPersistentLoggingEnabled(provider);
+  }
+
+  /**
+   * On iOS, this enables or disables the Junction SDK Persistent Logging feature. The preference is persistent across application launches
+   * until you change it again.
+   * 
+   * On Android, this is a no-op.
+   */
+  static async setPersistentLoggingEnabled(enabled: boolean, provider: HealthProvider = defaultHealthProvider()): Promise<void> {
+    provider = validateHealthProvider(provider);
+
+    if (Platform.OS !== 'ios') {
+      // Not supported on Android
+      return;
+    }
+
+    return await VitalHealthReactNative.setPersistentLoggingEnabled(provider, enabled);
+  }
+
+  /**
+   * On iOS, this packs the current Persistent Logging stash into an archive file, and opens the iOS Share Sheet.
+   * 
+   * On Android, this is a no-op.
+   */
+  static async sharePersistentLogArchive(provider: HealthProvider = defaultHealthProvider()): Promise<void> {
+    provider = validateHealthProvider(provider);
+
+    if (Platform.OS !== 'ios') {
+      // Not supported on Android
+      return;
+    }
+
+    return await VitalHealthReactNative.sharePersistentLogArchive(provider);
   }
 }
 

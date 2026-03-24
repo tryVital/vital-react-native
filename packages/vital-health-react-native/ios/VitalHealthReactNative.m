@@ -77,6 +77,19 @@ RCT_EXTERN_METHOD(openSyncProgressView:(NSString *)provider
                   resolver:(RCTPromiseResolveBlock)resolve
                   rejecter:(RCTPromiseRejectBlock)reject)
 
+RCT_EXTERN_METHOD(isPersistentLoggingEnabled:(NSString *)provider
+                  resolver:(RCTPromiseResolveBlock)resolve
+                  rejecter:(RCTPromiseRejectBlock)reject)
+
+RCT_EXTERN_METHOD(setPersistentLoggingEnabled:(NSString *)provider
+                  enabled:(BOOL)enabled
+                  resolver:(RCTPromiseResolveBlock)resolve
+                  rejecter:(RCTPromiseRejectBlock)reject)
+
+RCT_EXTERN_METHOD(sharePersistentLogArchive:(NSString *)provider
+                  resolver:(RCTPromiseResolveBlock)resolve
+                  rejecter:(RCTPromiseRejectBlock)reject)
+
 RCT_EXTERN_METHOD(status)
 
 + (BOOL)requiresMainQueueSetup
