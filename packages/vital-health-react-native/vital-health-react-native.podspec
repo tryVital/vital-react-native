@@ -15,7 +15,7 @@ Pod::Spec.new do |s|
 
   s.source_files = "ios/**/*.{h,m,mm,swift}"
 
-  s.dependency "VitalHealthKit", "~> 1.8.7"
+  s.dependency "VitalHealthKit", "~> 1.8.8"
 
   install_modules_dependencies(s)
 end
