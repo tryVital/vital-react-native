@@ -7,6 +7,7 @@ RCT_EXTERN_METHOD(configure:(NSString *)provider
                   numberOfDaysToBackFill:(int)numberOfDaysToBackFill
                   enableLogs:(BOOL)enableLogs
                   connectionPolicy:(NSString *)connectionPolicy
+                  sleepDataAllowlist:(id)sleepDataAllowlist
                   resolver:(RCTPromiseResolveBlock)resolve
                   rejecter:(RCTPromiseRejectBlock)reject)
 
