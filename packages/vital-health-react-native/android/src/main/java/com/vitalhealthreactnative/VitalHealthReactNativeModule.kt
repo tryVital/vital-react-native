@@ -72,7 +72,18 @@ class VitalHealthReactNativeModule(reactContext: ReactApplicationContext) :
   @ReactMethod
   fun isAvailable(provider: String, promise: Promise) = runOnMain {
     val androidProvider = providerOf(provider, promise) ?: return@runOnMain
-    promise.resolve(definitionOf(androidProvider).isAvailable(reactApplicationContext) == ProviderAvailability.Installed)
+    val availability = definitionOf(androidProvider).providerAvailability(reactApplicationContext)
+    promise.resolve(availability == ProviderAvailability.Installed)
+  }
+
+  @ReactMethod
+  fun providerAvailability(provider: String, promise: Promise) = runOnMain {
+    val androidProvider = providerOf(provider, promise) ?: return@runOnMain
+    promise.resolve(
+      definitionOf(androidProvider)
+        .providerAvailability(reactApplicationContext)
+        .name,
+    )
   }
 
   @ReactMethod
@@ -88,7 +99,7 @@ class VitalHealthReactNativeModule(reactContext: ReactApplicationContext) :
     logger.enabled = enableLogs
 
     val providerDefinition = definitionOf(androidProvider)
-    val availability = providerDefinition.isAvailable(reactApplicationContext)
+    val availability = providerDefinition.providerAvailability(reactApplicationContext)
     if (availability != ProviderAvailability.Installed) {
       return@runOnMain promise.reject(
         VITAL_HEALTH_ERROR,

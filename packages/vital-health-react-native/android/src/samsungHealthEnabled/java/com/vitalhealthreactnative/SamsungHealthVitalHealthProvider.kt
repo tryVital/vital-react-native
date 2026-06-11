@@ -30,6 +30,10 @@ internal object SamsungHealthVitalHealthProviderDefinition : VitalHealthProvider
     return VitalSamsungHealthManager.isAvailable(context)
   }
 
+  override suspend fun providerAvailability(context: Context): ProviderAvailability {
+    return VitalSamsungHealthManager.providerAvailability(context)
+  }
+
   override fun openPlatformHealthAppIntent(context: Context) =
     VitalSamsungHealthManager.openSamsungHealthIntent(context)
 
