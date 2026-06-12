@@ -35,6 +35,7 @@ internal interface VitalHealthProviderDefinition {
   val connectionStatusEvent: VitalHealthEvent
 
   fun isAvailable(context: Context): ProviderAvailability
+  suspend fun providerAvailability(context: Context): ProviderAvailability
   fun openPlatformHealthAppIntent(context: Context): Intent?
   fun getOrCreateManager(context: Context): VitalHealthManagerBridge
 }

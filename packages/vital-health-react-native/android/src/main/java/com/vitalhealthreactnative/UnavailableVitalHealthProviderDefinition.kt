@@ -27,6 +27,10 @@ internal object UnavailableVitalHealthProviderDefinition : VitalHealthProviderDe
     return ProviderAvailability.NotInstalled
   }
 
+  override suspend fun providerAvailability(context: Context): ProviderAvailability {
+    return ProviderAvailability.NotInstalled
+  }
+
   override fun openPlatformHealthAppIntent(context: Context): Intent? {
     raiseUnimplemented()
   }

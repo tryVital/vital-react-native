@@ -33,6 +33,10 @@ internal object HealthConnectVitalHealthProviderDefinition : VitalHealthProvider
     return VitalHealthConnectManager.isAvailable(context)
   }
 
+  override suspend fun providerAvailability(context: Context): ProviderAvailability {
+    return isAvailable(context)
+  }
+
   override fun openPlatformHealthAppIntent(context: Context) =
     VitalHealthConnectManager.openHealthConnectIntent(context)
 

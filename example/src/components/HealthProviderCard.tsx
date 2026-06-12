@@ -1,16 +1,23 @@
 /* eslint-disable react-native/no-inline-styles */
 import {
   AndroidHealthProvider,
+  AskConfig,
   ConnectionStatus,
   IOSHealthProvider,
+  ProviderAvailability,
   VitalHealth,
   VitalResource,
 } from '@tryvital/vital-health-react-native';
-import type { HealthProvider } from '@tryvital/vital-health-react-native';
+import { HealthProvider } from '@tryvital/vital-health-react-native';
 import { Button, VStack, HStack, Box } from 'native-base';
 import React, { useCallback, useEffect, useState } from 'react';
-import { ActivityIndicator, Platform, Switch, Text } from 'react-native';
-import { AskConfig } from '@tryvital/vital-health-react-native/lib/typescript/ask_config';
+import {
+  ActivityIndicator,
+  AppState,
+  Platform,
+  Switch,
+  Text,
+} from 'react-native';
 
 const requestedResources = [
   VitalResource.Activity,
@@ -62,7 +69,7 @@ export function HealthProviderCard({
   userId,
 }: HealthProviderCardProps) {
   const [permissionAsked, setPermissionAsked] = useState<VitalResource[]>([]);
-  const [isAvailable, setIsAvailable] = useState<boolean>(true);
+  const [providerAvailability, setProviderAvailability] = useState<ProviderAvailability | null>(null);
   const [connectionStatus, setConnectionStatus] =
     useState<ConnectionStatus | null>(null);
   const [syncStatus, setSyncStatus] = useState<ObservedSyncStatus | null>(null);
@@ -109,19 +116,22 @@ export function HealthProviderCard({
     let syncSubscription:
       | ReturnType<typeof VitalHealth.observeSyncStatusChange>
       | undefined;
+    let appStateSubscription:
+      | ReturnType<typeof AppState.addEventListener>
+      | undefined;
 
     const refresh = async () => {
       try {
         setUpdatingBackgroundSync(true);
 
-        const available = await VitalHealth.isAvailable(provider);
+        const availability = await VitalHealth.providerAvailability(provider);
         if (isCancelled) {
           return;
         }
 
-        setIsAvailable(available);
+        setProviderAvailability(availability);
 
-        if (!available) {
+        if (availability !== ProviderAvailability.Installed) {
           setPermissionAsked([]);
           setConnectionStatus(null);
           setSyncStatus(null);
@@ -148,6 +158,20 @@ export function HealthProviderCard({
           provider,
         );
 
+        appStateSubscription = AppState.addEventListener(
+          'change',
+          async next => {
+            if (next !== 'active' || isCancelled) {
+              return;
+            }
+
+            const newAvailability = await VitalHealth.providerAvailability(
+              provider,
+            );
+            setProviderAvailability(newAvailability);
+          },
+        );
+
         await Promise.all([
           refreshPermissionAsked(),
           refreshBackgroundSync(),
@@ -166,6 +190,7 @@ export function HealthProviderCard({
       isCancelled = true;
       connectionSubscription?.remove();
       syncSubscription?.remove();
+      appStateSubscription?.remove();
     };
   }, [provider, refreshBackgroundSync, refreshPermissionAsked, userId]);
 
@@ -235,13 +260,36 @@ export function HealthProviderCard({
         {providerLabel(provider)}
       </Text>
 
-      {!isAvailable && (
-        <Text style={{ color: 'black', fontSize: 16 }}>
-          {providerLabel(provider)} is unavailable on this device.
-        </Text>
+      {providerAvailability &&
+        providerAvailability !== ProviderAvailability.Installed && (
+          <Text style={{ color: 'black', fontSize: 16 }}>
+            {providerAvailability === ProviderAvailability.NotInstalled &&
+              `${providerLabel(provider)} is not installed on this device.`}
+            {providerAvailability === ProviderAvailability.AppNotAllowed &&
+              `${providerLabel(
+                provider,
+              )} is installed, but your app has not been allowlisted by ${providerLabel(
+                provider,
+              )}.`}
+            {providerAvailability === ProviderAvailability.NotSupportedSDK &&
+              `${providerLabel(
+                provider,
+              )} is installed, but your app is using an incompatible version of the SDK.`}
+            {providerAvailability ===
+              ProviderAvailability.OnboardingIncomplete &&
+              `${providerLabel(
+                provider,
+              )} is installed, but the user has not completed the ${providerLabel(
+                provider,
+              )} onboarding experience.`}
+            {providerAvailability === ProviderAvailability.ServiceUnavailable &&
+              `${providerLabel(
+                provider,
+              )} is installed, but your app fails to establish a local service connection. Close and re-launch your app.`}
+          </Text>
       )}
 
-      {isAvailable && (
+      {providerAvailability && providerAvailability === ProviderAvailability.Installed && (
         <>
           {connectionStatus !== null && connectionStatus !== 'autoConnect' && (
             <>

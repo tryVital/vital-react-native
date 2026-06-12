@@ -3,9 +3,12 @@ import { AndroidHealthProvider, IOSHealthProvider } from './health_config';
 import type { HealthConfig, HealthProvider } from './health_config';
 import type { AskConfig } from './ask_config';
 import type { Subscription } from '@tryvital/vital-core-react-native';
+import { ProviderAvailability } from './providerAvailability';
 
 // Reexports
 export * from './health_config';
+export * from './ask_config';
+export * from './providerAvailability';
 
 const LINKING_ERROR =
   `The package 'vital-health-react-native' doesn't seem to be linked. Make sure: \n\n` +
@@ -296,13 +299,30 @@ export class VitalHealth {
   static async isAvailable(
     provider: HealthProvider = defaultHealthProvider()
   ): Promise<boolean> {
+    return (
+      (await this.providerAvailability(provider)) === ProviderAvailability.Installed
+    );
+  }
+
+  /**
+   * Returns the platform provider availability.
+   *
+   * Apple HealthKit is treated as always installed when requested on iOS.
+   * Health Connect and Samsung Health return the native Android SDK availability.
+   */
+  static async providerAvailability(
+    provider: HealthProvider = defaultHealthProvider()
+  ): Promise<ProviderAvailability> {
     if (Platform.OS === 'android') {
       if (!isAndroidHealthProvider(provider)) {
-        return false;
+        return ProviderAvailability.NotInstalled;
       }
-      return await VitalHealthReactNative.isAvailable(provider);
+
+      return await VitalHealthReactNative.providerAvailability(provider);
     } else {
-      return provider === 'apple_health_kit' && Platform.OS === 'ios';
+      return provider === IOSHealthProvider.AppleHealthKit && Platform.OS === 'ios'
+        ? ProviderAvailability.Installed
+        : ProviderAvailability.NotInstalled;
     }
   }
 
