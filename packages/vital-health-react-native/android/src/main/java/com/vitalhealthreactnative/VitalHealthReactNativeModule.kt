@@ -84,7 +84,8 @@ class VitalHealthReactNativeModule(reactContext: ReactApplicationContext) :
     promise.resolve(
       definitionOf(androidProvider)
         .providerAvailability(reactApplicationContext)
-        .name,
+        .name
+        .replaceFirstChar { it.lowercaseChar() },
     )
   }
 

@@ -3,9 +3,12 @@ import { AndroidHealthProvider, IOSHealthProvider } from './health_config';
 import type { HealthConfig, HealthProvider } from './health_config';
 import type { AskConfig } from './ask_config';
 import type { Subscription } from '@tryvital/vital-core-react-native';
+import { ProviderAvailability } from './providerAvailability';
 
 // Reexports
 export * from './health_config';
+export * from './ask_config';
+export * from './providerAvailability';
 
 const LINKING_ERROR =
   `The package 'vital-health-react-native' doesn't seem to be linked. Make sure: \n\n` +
@@ -106,78 +109,6 @@ export interface SyncStatus {
     | 'unknown';
   resource?: string;
   extra?: string;
-}
-
-export enum ProviderAvailability {
-  /**
-   * Apple HealthKit, Health Connect, or Samsung Health.
-   *
-   * There is an active Apple HealthKit, Samsung Health, or Health Connect installation
-   * on this device.
-   */
-  Installed = 'installed',
-
-  /**
-   * Health Connect or Samsung Health.
-   *
-   * No Samsung Health or Health Connect installation has been detected on this device.
-   */
-  NotInstalled = 'notInstalled',
-
-  /**
-   * Health Connect or Samsung Health.
-   *
-   * The SDK being used is incompatible with the Samsung Health or Health Connect installation.
-   */
-  NotSupportedSDK = 'notSupportedSDK',
-
-  /**
-   * Samsung Health only.
-   *
-   * Samsung Health has been installed, but the onboarding experience is incomplete.
-   * So all the SDK methods are blocked.
-   */
-  OnboardingIncomplete = 'onboardingIncomplete',
-
-  /**
-   * Samsung Health only.
-   *
-   * Samsung Health has been installed. But your App Package ID has not yet been allowlisted
-   * by Samsung. Contact Samsumg Developer Support.
-   *
-   * If you are testing on your device, you can enable Samsung Health developer mode.
-   * See https://developer.samsung.com/health/data/guide/developer-mode.html for the instructions.
-   */
-  AppNotAllowed = 'appNotAllowed',
-
-  /**
-   * Samsung Health only.
-   *
-   * Samsung Health has been installed, but we fail to estsblish a functional service connection
-   * to Samsung Health. This edge case can happen when Samsung Health is installed while your app
-   * is active. The only solution today as of June 10, 2026 appears to be closing and restarting
-   * your app.
-   */
-  ServiceUnavailable = 'serviceUnavailable',
-}
-
-function mapProviderAvailability(availability: string): ProviderAvailability {
-  switch (availability) {
-    case 'Installed':
-      return ProviderAvailability.Installed;
-    case 'NotInstalled':
-      return ProviderAvailability.NotInstalled;
-    case 'NotSupportedSDK':
-      return ProviderAvailability.NotSupportedSDK;
-    case 'OnboardingIncomplete':
-      return ProviderAvailability.OnboardingIncomplete;
-    case 'AppNotAllowed':
-      return ProviderAvailability.AppNotAllowed;
-    case 'ServiceUnavailable':
-      return ProviderAvailability.ServiceUnavailable;
-    default:
-      throw new Error(`Unrecognized ProviderAvailability: ${availability}`);
-  }
 }
 
 export class VitalHealth {
@@ -387,9 +318,7 @@ export class VitalHealth {
         return ProviderAvailability.NotInstalled;
       }
 
-      return mapProviderAvailability(
-        await VitalHealthReactNative.providerAvailability(provider)
-      );
+      return await VitalHealthReactNative.providerAvailability(provider);
     } else {
       return provider === IOSHealthProvider.AppleHealthKit && Platform.OS === 'ios'
         ? ProviderAvailability.Installed

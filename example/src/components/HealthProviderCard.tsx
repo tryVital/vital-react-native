@@ -1,16 +1,23 @@
 /* eslint-disable react-native/no-inline-styles */
 import {
   AndroidHealthProvider,
+  AskConfig,
   ConnectionStatus,
   IOSHealthProvider,
+  ProviderAvailability,
   VitalHealth,
   VitalResource,
 } from '@tryvital/vital-health-react-native';
-import { HealthProvider, ProviderAvailability } from '@tryvital/vital-health-react-native';
+import { HealthProvider } from '@tryvital/vital-health-react-native';
 import { Button, VStack, HStack, Box } from 'native-base';
 import React, { useCallback, useEffect, useState } from 'react';
-import { ActivityIndicator, AppState, Platform, Switch, Text } from 'react-native';
-import { AskConfig } from '@tryvital/vital-health-react-native/lib/typescript/ask_config';
+import {
+  ActivityIndicator,
+  AppState,
+  Platform,
+  Switch,
+  Text,
+} from 'react-native';
 
 const requestedResources = [
   VitalResource.Activity,
