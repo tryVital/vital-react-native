@@ -346,7 +346,8 @@ export class VitalHealth {
         healthConfig.iOSConfig.backgroundDeliveryEnabled,
         healthConfig.numberOfDaysToBackFill,
         healthConfig.logsEnabled,
-        healthConfig.connectionPolicy
+        healthConfig.connectionPolicy,
+        healthConfig.iOSConfig.sleepDataAllowlist ?? null
       );
     }
   }

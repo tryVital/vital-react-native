@@ -141,8 +141,8 @@ export const UserScreen = ({ route }) => {
         )}
       </VStack>
 
-      {!isCurrentSDKUser && isSDKConfigured && (
-        <Button onPress={() => VitalCore.signOut()}>Reset SDK</Button>
+      {isSDKConfigured && (
+        <Button onPress={() => VitalCore.signOut()}>Sign Out</Button>
       )}
 
       {!isSDKConfigured && (

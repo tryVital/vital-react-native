@@ -64,13 +64,14 @@ class VitalHealthReactNative: RCTEventEmitter {
     return ["Status", "VitalHealthConnectionStatus"]
   }
 
-  @objc(configure:backgroundDeliveryEnabled:numberOfDaysToBackFill:enableLogs:connectionPolicy:resolver:rejecter:)
+  @objc(configure:backgroundDeliveryEnabled:numberOfDaysToBackFill:enableLogs:connectionPolicy:sleepDataAllowlist:resolver:rejecter:)
   func configure(
     _ provider: String,
     backgroundDeliveryEnabled: Bool,
     numberOfDaysToBackFill: Int,
     enableLogs: Bool,
     connectionPolicy: String,
+    sleepDataAllowlist: Any?,
     resolve: @escaping RCTPromiseResolveBlock,
     reject: RCTPromiseRejectBlock
   ) {
@@ -81,10 +82,24 @@ class VitalHealthReactNative: RCTEventEmitter {
         backgroundDeliveryEnabled: backgroundDeliveryEnabled,
         numberOfDaysToBackFill: numberOfDaysToBackFill,
         logsEnabled: enableLogs,
+        sleepDataAllowlist: decodeSleepAllowlist(sleepDataAllowlist),
         connectionPolicy: VitalHealthKitClient.ConnectionPolicy(rawValue: connectionPolicy) ?? .autoConnect
       )
     )
     resolve(())
+  }
+
+  /// Maps the value bridged from JS into the iOS SDK `AppAllowlist`.
+  /// `"all"` -> `.all`; `[String]` of bundle identifiers -> `.specific`; anything else
+  /// (incl. `nil`/`NSNull` for an unset value) falls back to the SDK default allow list.
+  private func decodeSleepAllowlist(_ value: Any?) -> AppAllowlist {
+    if let string = value as? String, string == "all" {
+      return .all
+    }
+    if let bundleIdentifiers = value as? [String] {
+      return .specific(bundleIdentifiers.map { AppIdentifier(rawValue: $0) })
+    }
+    return .specific(AppIdentifier.defaultsleepDataAllowlist)
   }
 
   @objc(setUserId:userId:resolver:rejecter:)
