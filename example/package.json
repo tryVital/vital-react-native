@@ -13,9 +13,9 @@
     "@expo/vector-icons": "^15.0.3",
     "@react-navigation/native": "^7.1.14",
     "@react-navigation/native-stack": "^6.9.17",
-    "@tryvital/vital-core-react-native": "file:../lib/tryvital-vital-core-react-native-c4412fbb-6.0.1.tgz",
-    "@tryvital/vital-devices-react-native": "file:../lib/tryvital-vital-devices-react-native-c4412fbb-6.0.1.tgz",
-    "@tryvital/vital-health-react-native": "file:../lib/tryvital-vital-health-react-native-c4412fbb-6.0.1.tgz",
+    "@tryvital/vital-core-react-native": "file:../lib/tryvital-vital-core-react-native-5b417dc1-6.0.1.tgz",
+    "@tryvital/vital-devices-react-native": "file:../lib/tryvital-vital-devices-react-native-5b417dc1-6.0.1.tgz",
+    "@tryvital/vital-health-react-native": "file:../lib/tryvital-vital-health-react-native-5b417dc1-6.0.1.tgz",
     "@tryvital/vital-node": "^3.1.544",
     "events": "^1.1.1",
     "expo": "^54.0.0",
@@ -78,6 +78,6 @@
     "node": ">=20.19.4"
   },
   "resolutions": {
-    "@tryvital/vital-core-react-native": "file:../lib/tryvital-vital-core-react-native-c4412fbb-6.0.1.tgz"
+    "@tryvital/vital-core-react-native": "file:../lib/tryvital-vital-core-react-native-5b417dc1-6.0.1.tgz"
   }
 }
