@@ -34,7 +34,7 @@ export class IOSHealthConfig {
    *
    * - `undefined` (default): use the SDK's built-in default allow list of known sleep providers.
    * - `'all'`: accept sleep data from every source.
-   * - `string[]`: accept only the listed source app bundle identifiers. Use {@link SleepDataApp}
+   * - `string[]`: accept only the listed source app bundle identifiers. Use {@link iOSAppIdentifier}
    *   for the known providers, or pass any raw bundle identifier string.
    *
    * Manually-entered sleep data is always allowed, regardless of this setting.
@@ -46,7 +46,7 @@ export class IOSHealthConfig {
  * Known sleep data source apps and their bundle identifiers, mirroring the iOS SDK's
  * `AppIdentifier` constants. Use these with {@link IOSHealthConfig.sleepDataAllowlist}.
  */
-export const SleepDataApp = {
+export const iOSAppIdentifier = {
   appleHealthKit: 'com.apple.health',
   oura: 'com.ouraring.oura',
   withings: 'com.withings.wiScaleNG',

@@ -2610,40 +2610,40 @@
   dependencies:
     tslib "^2.8.0"
 
-"@tryvital/vital-core-react-native@6.0.1", "@tryvital/vital-core-react-native@file:../lib/tryvital-vital-core-react-native-025cc433-6.0.1.tgz":
+"@tryvital/vital-core-react-native@6.0.1", "@tryvital/vital-core-react-native@file:../lib/tryvital-vital-core-react-native-da5729ab-6.0.1.tgz":
   version "6.0.1"
   uid "91f981de20e9f60719610f9ac9f73f8e658e03b3"
-  resolved "file:../lib/tryvital-vital-core-react-native-025cc433-6.0.1.tgz#91f981de20e9f60719610f9ac9f73f8e658e03b3"
+  resolved "file:../lib/tryvital-vital-core-react-native-da5729ab-6.0.1.tgz#91f981de20e9f60719610f9ac9f73f8e658e03b3"
 
-"@tryvital/vital-core-react-native@file:../lib/tryvital-vital-core-react-native-68e90dff-6.0.1.tgz":
+"@tryvital/vital-core-react-native@file:../lib/tryvital-vital-core-react-native-0dcbe684-6.0.1.tgz":
   version "6.0.1"
   uid "91f981de20e9f60719610f9ac9f73f8e658e03b3"
-  resolved "file:../lib/tryvital-vital-core-react-native-68e90dff-6.0.1.tgz#91f981de20e9f60719610f9ac9f73f8e658e03b3"
+  resolved "file:../lib/tryvital-vital-core-react-native-0dcbe684-6.0.1.tgz#91f981de20e9f60719610f9ac9f73f8e658e03b3"
 
-"@tryvital/vital-devices-react-native@file:../lib/tryvital-vital-devices-react-native-025cc433-6.0.1.tgz":
+"@tryvital/vital-devices-react-native@file:../lib/tryvital-vital-devices-react-native-0dcbe684-6.0.1.tgz":
+  version "6.0.1"
+  resolved "file:../lib/tryvital-vital-devices-react-native-0dcbe684-6.0.1.tgz#ed67eeedae5919591059a496282892fcd9ae789f"
+  dependencies:
+    "@tryvital/vital-core-react-native" "6.0.1"
+    react-native-permissions "^3.6.1"
+
+"@tryvital/vital-devices-react-native@file:../lib/tryvital-vital-devices-react-native-da5729ab-6.0.1.tgz":
   version "6.0.1"
   uid ed67eeedae5919591059a496282892fcd9ae789f
-  resolved "file:../lib/tryvital-vital-devices-react-native-025cc433-6.0.1.tgz#ed67eeedae5919591059a496282892fcd9ae789f"
+  resolved "file:../lib/tryvital-vital-devices-react-native-da5729ab-6.0.1.tgz#ed67eeedae5919591059a496282892fcd9ae789f"
   dependencies:
     "@tryvital/vital-core-react-native" "6.0.1"
     react-native-permissions "^3.6.1"
 
-"@tryvital/vital-devices-react-native@file:../lib/tryvital-vital-devices-react-native-68e90dff-6.0.1.tgz":
+"@tryvital/vital-health-react-native@file:../lib/tryvital-vital-health-react-native-0dcbe684-6.0.1.tgz":
   version "6.0.1"
-  resolved "file:../lib/tryvital-vital-devices-react-native-68e90dff-6.0.1.tgz#ed67eeedae5919591059a496282892fcd9ae789f"
-  dependencies:
-    "@tryvital/vital-core-react-native" "6.0.1"
-    react-native-permissions "^3.6.1"
-
-"@tryvital/vital-health-react-native@file:../lib/tryvital-vital-health-react-native-025cc433-6.0.1.tgz":
-  version "6.0.1"
-  resolved "file:../lib/tryvital-vital-health-react-native-025cc433-6.0.1.tgz#df1126ca8bfa8aa957939a9fa52d0d5e2bc0ead4"
+  resolved "file:../lib/tryvital-vital-health-react-native-0dcbe684-6.0.1.tgz#494d42ac3c15959e3eaef96e425da11cde4d1c9b"
   dependencies:
     "@tryvital/vital-core-react-native" "6.0.1"
 
-"@tryvital/vital-health-react-native@file:../lib/tryvital-vital-health-react-native-68e90dff-6.0.1.tgz":
+"@tryvital/vital-health-react-native@file:../lib/tryvital-vital-health-react-native-da5729ab-6.0.1.tgz":
   version "6.0.1"
-  resolved "file:../lib/tryvital-vital-health-react-native-68e90dff-6.0.1.tgz#37a00bdf0f9dafb6ac09ddd48bb94659f0d136b4"
+  resolved "file:../lib/tryvital-vital-health-react-native-da5729ab-6.0.1.tgz#0113d285acb007f6e4e21b5a5253546b5c84851e"
   dependencies:
     "@tryvital/vital-core-react-native" "6.0.1"
 
