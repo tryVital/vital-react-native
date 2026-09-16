@@ -217,6 +217,18 @@ if (args[0] === '--cwd' && args.includes('add')) {
   packageJson.dependencies = packageJson.dependencies || {};
 
   for (const packageName of managedPackages) {
+    const spec = packageJson.dependencies[packageName];
+
+    if (
+      spec?.startsWith('file:') &&
+      !fs.existsSync(path.resolve(exampleDir, spec.slice(5)))
+    ) {
+      process.stderr.write(\`Missing dependency tarball for \${packageName}: \${spec}\n\`);
+      process.exit(1);
+    }
+  }
+
+  for (const packageName of managedPackages) {
     const managedPackageJson = readPackageJson(rootDir, packageName);
 
     for (const dependencyName of Object.keys(managedPackageJson.dependencies || {})) {
@@ -278,6 +290,32 @@ test('syncpkg recovers from a prior failed remove state and stays repeatable', (
   assert.deepStrictEqual(Object.keys(secondDependencies).sort(), managedPackages.slice().sort());
   assert.strictEqual(secondArchives.length, managedPackages.length);
   assert.notDeepStrictEqual(secondDependencies, firstDependencies);
+});
+
+test('syncpkg replaces stale file dependencies whose tarballs are missing', (t) => {
+  const staleManagedDependencies = Object.fromEntries(
+    managedPackages.map((packageName) => [
+      packageName,
+      `file:../lib/${archiveFilename(packageName, '5.5.0', 'missing')}`,
+    ])
+  );
+  const rootDir = createFixture({
+    examplePackageJson: createExamplePackageJson(staleManagedDependencies),
+  });
+
+  t.after(() => {
+    fs.rmSync(rootDir, { recursive: true, force: true });
+  });
+
+  runSyncpkg(rootDir);
+
+  const finalDependencies = readManagedDependencies(rootDir);
+
+  assert.ok(
+    Object.values(finalDependencies).every(
+      (spec) => spec.startsWith('file:../lib/') && spec.includes(packageVersion)
+    )
+  );
 });
 
 test('syncpkg restores example manifests after a failed add and succeeds on retry', (t) => {
