@@ -142,13 +142,17 @@ function managedDependencyPackageNames() {
   return dependencyNames;
 }
 
-function syncExampleResolutions(specByPackageName) {
+function syncExamplePackageJson(specByPackageName) {
   const examplePackageJson = readJson(examplePackageJsonPath);
+  const nextDependencies = { ...(examplePackageJson.dependencies ?? {}) };
   const nextResolutions = { ...(examplePackageJson.resolutions ?? {}) };
 
   for (const packageName of managedPackageNames()) {
+    nextDependencies[packageName] = specByPackageName[packageName];
     delete nextResolutions[packageName];
   }
+
+  examplePackageJson.dependencies = nextDependencies;
 
   for (const packageName of managedDependencyPackageNames()) {
     nextResolutions[packageName] = specByPackageName[packageName];
@@ -211,7 +215,7 @@ function main() {
   );
 
   try {
-    syncExampleResolutions(specByPackageName);
+    syncExamplePackageJson(specByPackageName);
     run('yarn', [
       '--cwd',
       exampleDir,
