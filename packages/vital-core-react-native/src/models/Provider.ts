@@ -21,6 +21,7 @@ export enum ProviderSlug {
     
     iHealth = "ihealth",
     Oura = "oura",
+    Ultrahuman = "ultrahuman",
     Garmin = "garmin",
     Fitbit = "fitbit",
     Libre = "freestyle_libre",
@@ -34,6 +35,7 @@ export enum ProviderSlug {
     EightSleep = "eight_sleep",
     Withings = "withings",
     GoogleFit = "google_fit",
+    GoogleHealth = "google_health",
     Hammerhead = "hammerhead",
     Dexcom = "dexcom",
     DexcomV3 = "dexcom_v3",
