@@ -7,7 +7,7 @@ export { VitalCoreStatus } from './models/VitalCoreStatus';
 export { default as QuantitySample } from './models/QuantitySample';
 export { default as BloodPressureSample } from './models/BloodPressureSample';
 export * from './models/TimeSeriesData';
-export { ManualProviderSlug } from './models/Provider';
+export { ManualProviderSlug, ProviderSlug } from './models/Provider';
 
 const LINKING_ERROR =
   `The package 'vital-core-react-native' doesn't seem to be linked. Make sure: \n\n` +
