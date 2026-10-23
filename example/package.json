@@ -78,6 +78,7 @@
     "node": ">=20.19.4"
   },
   "resolutions": {
-    "@tryvital/vital-core-react-native": "file:../lib/tryvital-vital-core-react-native-ee611c93-6.0.4.tgz"
+    "@tryvital/vital-core-react-native": "file:../lib/tryvital-vital-core-react-native-ee611c93-6.0.4.tgz",
+    "postcss": "^8.5.18"
   }
 }
