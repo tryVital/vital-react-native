@@ -79,6 +79,7 @@
   },
   "resolutions": {
     "@tryvital/vital-core-react-native": "file:../lib/tryvital-vital-core-react-native-ee611c93-6.0.4.tgz",
-    "postcss": "^8.5.18"
+    "postcss": "^8.5.18",
+    "**/xcode/uuid": "^11.1.1"
   }
 }
