@@ -31,7 +31,6 @@
     "postbuild-copy-declarations": "copyfiles -u 1 src/**/*.d.ts lib/typescript",
     "clean": "del lib && del android/build && del android/.gradle",
     "prepack": "yarn run clean && yarn run build",
-    "np": "np --no-publish",
     "test": "jest",
     "lint": "eslint \"**/*.{js,ts,tsx}\"",
     "postbuild-copy-expo-plugin": "cp app.plugin.js lib/commonjs"
@@ -61,7 +60,6 @@
     "eslint-config-prettier": "^8.5.0",
     "eslint-plugin-prettier": "^4.0.0",
     "jest": "^28.1.1",
-    "np": "^7.6.2",
     "pod-install": "^0.1.0",
     "prettier": "^2.0.5",
     "react": "18.1.0",
