@@ -80,6 +80,14 @@
   "resolutions": {
     "@tryvital/vital-core-react-native": "file:../lib/tryvital-vital-core-react-native-ee611c93-6.0.4.tgz",
     "postcss": "^8.5.18",
-    "**/xcode/uuid": "^11.1.1"
+    "**/xcode/uuid": "^11.1.1",
+    "**/@expo/cli/glob": "^14.0.2",
+    "**/@expo/config/glob": "^14.0.2",
+    "**/@expo/config-plugins/glob": "^14.0.2",
+    "**/@expo/fingerprint/glob": "^14.0.2",
+    "**/@expo/metro-config/glob": "^14.0.2",
+    "**/@expo/cli/minimatch": "^11.0.1",
+    "**/@expo/fingerprint/minimatch": "^11.0.1",
+    "**/@expo/metro-config/minimatch": "^11.0.1"
   }
 }
