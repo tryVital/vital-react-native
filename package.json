@@ -21,6 +21,6 @@
     "resolutions": {
         "**/external-editor/tmp": "^0.2.6",
         "**/editorconfig/minimatch": "^9.0.7",
-        "**/@react-native-community/cli-platform-ios/fast-xml-parser": "^5.7.0"
+        "**/@react-native-community/cli-platform-ios/fast-xml-parser": "^5.12.0"
     }
 }
